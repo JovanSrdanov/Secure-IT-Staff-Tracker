@@ -35,7 +35,8 @@ public class KeyStoreReader {
             PrivateKey privateKey = (PrivateKey) keyStore.getKey(alias, keyPass);
 
             X500Name issuerName = new JcaX509CertificateHolder((X509Certificate) cert).getSubject();
-            return new Account(privateKey, cert.getPublicKey(), issuerName);
+            //return new Account(privateKey, cert.getPublicKey(), issuerName);
+            return new Account();
 
     } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException
                  | UnrecoverableKeyException | IOException e) {
