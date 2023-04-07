@@ -25,7 +25,7 @@ public class CertificateGenerator {
     }
 
     public static X509Certificate generateCertificate(Account subject, Account issuer,
-                                                      Date startDate, Date endDate, UUID serialNumber) {
+                                                      Date startDate, Date endDate, BigInteger serialNumber) {
         try {
             //Posto klasa za generisanje sertifiakta ne moze da primi direktno privatni kljuc pravi se builder za objekat
             //Ovaj objekat sadrzi privatni kljuc izdavaoca sertifikata i koristiti se za potpisivanje sertifikata
@@ -40,7 +40,7 @@ public class CertificateGenerator {
             //Postavljaju se podaci za generisanje sertifiakta
             X509v3CertificateBuilder certGen = new JcaX509v3CertificateBuilder(
                     issuer.getX500Name(),
-                    new BigInteger(String.valueOf(serialNumber)),       // TODO Stefan: nisam siguran jel ovo dobro
+                    serialNumber,       // TODO Stefan: nisam siguran jel ovo dobro
                     startDate,
                     endDate,
                     subject.getX500Name(),

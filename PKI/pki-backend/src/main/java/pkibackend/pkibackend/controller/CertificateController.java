@@ -27,12 +27,13 @@ public class CertificateController {
         _certificateService = certificateService;
     }
 
-    @PostMapping("")
+    @PostMapping()
     public ResponseEntity<?> createCertificate(@RequestBody CreateCertificateInfo info) {
         try {
             Certificate createdCertificate = _certificateService.generateCertificate(info);
             return new ResponseEntity<>(createdCertificate, HttpStatus.CREATED);
         } catch (RuntimeException e) {
+            e.printStackTrace();
             return new ResponseEntity<>("Error while creating certificate", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

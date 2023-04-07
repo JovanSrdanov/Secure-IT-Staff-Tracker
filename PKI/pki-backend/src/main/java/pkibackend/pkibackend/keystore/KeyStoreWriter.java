@@ -37,9 +37,11 @@ public class KeyStoreWriter {
         try {
             FileInputStream fis = new FileInputStream(fileName);
             keyStore.load(fis, password);
+            System.out.println("Uspeo da napravi");
         } catch (FileNotFoundException e) {
             try {
                 keyStore.load(null, password);
+                System.out.println("Nije nasao pa napravio");
             } catch (IOException | NoSuchAlgorithmException | CertificateException ex) {
                 throw new RuntimeException(ex);
             }

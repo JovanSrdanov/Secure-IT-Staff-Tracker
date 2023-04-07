@@ -17,7 +17,9 @@ import pkibackend.pkibackend.repository.AccountRepository;
 import pkibackend.pkibackend.repository.CertificateRepository;
 import pkibackend.pkibackend.service.interfaces.ICertificateService;
 
+import java.math.BigInteger;
 import java.security.KeyPair;
+import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -63,13 +65,19 @@ public class CertificateService implements ICertificateService {
         Account subject = buildEntity(info.getSubjectInfo());
         Account issuer = buildEntity(info.getIssuerInfo());
 
-        UUID serialNumber = UUID.randomUUID();
+        BigInteger serialNumber = new BigInteger(32, new SecureRandom());
 
         X509Certificate certificate = CertificateGenerator.generateCertificate(subject,
                 issuer, info.getStartDate(), info.getEndDate(), serialNumber);
 
         Certificate newCertificate = new Certificate(issuer, serialNumber,
                 info.getStartDate(), info.getEndDate(), certificate);
+
+        subject.getCertificateSerialNumbers().add(newCertificate.getSerialNumber());
+        _accountRepository.save(subject);
+        if (!subject.getEmail().equals(issuer.getEmail())) {
+            _accountRepository.save(issuer);
+        }
 
         _certificateRepository.SaveCertificate(
                 newCertificate,
@@ -80,8 +88,6 @@ public class CertificateService implements ICertificateService {
     }
 
     private Account buildEntity(EntityInfo info) {
-        UUID accountId = UUID.randomUUID();
-
         KeyPair kp = Keys.generateKeyPair();
         X500NameBuilder builder = new X500NameBuilder(BCStyle.INSTANCE);
         builder.addRDN(BCStyle.CN, info.getCommonName());
@@ -91,13 +97,23 @@ public class CertificateService implements ICertificateService {
         builder.addRDN(BCStyle.OU, info.getOrganizationUnitName());
         builder.addRDN(BCStyle.C, info.getCountryCode());
         builder.addRDN(BCStyle.E, info.getEmail());
+
+        if (_accountRepository.findByEmail(info.getEmail()).isPresent()) {
+            Account account = _accountRepository.findByEmail(info.getEmail()).get();
+            account.setPublicKey(kp.getPublic());
+            account.setPrivateKey(kp.getPrivate());
+            builder.addRDN(BCStyle.UID, account.getId().toString());
+            account.setX500Name(builder.build());
+
+            return account;
+        }
+
+        UUID accountId = UUID.randomUUID();
         //UID (USER ID) je ID korisnika
         builder.addRDN(BCStyle.UID, accountId.toString());
 
-        Account newAccount = new Account(accountId, info.getEmail(), info.getPassword(),
+        return new Account(accountId, info.getEmail(), info.getPassword(),
                 kp.getPrivate(), kp.getPublic(), builder.build(),
                 new ArrayList<>());
-
-        return _accountRepository.save(newAccount);
     }
 }

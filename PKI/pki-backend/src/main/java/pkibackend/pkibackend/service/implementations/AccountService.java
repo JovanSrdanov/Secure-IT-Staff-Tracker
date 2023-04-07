@@ -36,6 +36,9 @@ public class AccountService implements IAccountService {
 
     @Override
     public Account save(Account entity) throws BadRequestException {
+        if (entity.getId() == null) {
+            entity.setId(UUID.randomUUID());
+        }
         return _accountRepository.save(entity);
     }
 
