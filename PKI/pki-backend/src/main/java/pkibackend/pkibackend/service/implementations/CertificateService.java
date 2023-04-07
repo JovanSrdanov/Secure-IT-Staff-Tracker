@@ -68,7 +68,8 @@ public class CertificateService implements ICertificateService {
         BigInteger serialNumber = new BigInteger(32, new SecureRandom());
 
         X509Certificate certificate = CertificateGenerator.generateCertificate(subject,
-                issuer, info.getStartDate(), info.getEndDate(), serialNumber);
+                issuer, info.getStartDate(), info.getEndDate(), serialNumber, info.getExtensions(),
+                info.getIssuingCertificateSerialNumber());
 
         Certificate newCertificate = new Certificate(issuer, serialNumber,
                 info.getStartDate(), info.getEndDate(), certificate);
