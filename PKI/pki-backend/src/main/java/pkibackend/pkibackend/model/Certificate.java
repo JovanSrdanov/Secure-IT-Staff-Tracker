@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.security.cert.X509Certificate;
 import java.util.Date;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -15,11 +16,9 @@ import java.util.Date;
 public class Certificate {
     Account account;
 
-    private String serialNumber;
+    private UUID serialNumber;
     private Date startDate;
     private Date endDate;
-
-    private Boolean isRevoked;
 
     private X509Certificate x509Certificate;
 }

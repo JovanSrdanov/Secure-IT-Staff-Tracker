@@ -8,7 +8,7 @@ import org.bouncycastle.asn1.x500.X500Name;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.util.Set;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -24,5 +24,5 @@ public class Account {
     private PublicKey publicKey;
     private X500Name x500Name;
 
-    private Set<String> certificates;
+    private List<UUID> certificateSerialNumbers;
 }

@@ -1,11 +1,11 @@
 package pkibackend.pkibackend.service.interfaces;
 
-import org.springframework.http.ResponseEntity;
-import pkibackend.pkibackend.model.Account;
+import pkibackend.pkibackend.dto.CreateCertificateInfo;
 import pkibackend.pkibackend.model.Certificate;
 
+import java.text.ParseException;
 import java.util.Date;
 
 public interface ICertificateService extends ICrudService<Certificate>{
-    void generateCertificate(Certificate certificate);
+    Certificate generateCertificate(CreateCertificateInfo info) throws RuntimeException;
 }

@@ -3,7 +3,7 @@ package pkibackend.pkibackend.Utilities;
 import java.security.*;
 
 public class Keys {
-    public KeyPair generateKeyPair() {
+    public static KeyPair generateKeyPair() {
         try {
             KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
 

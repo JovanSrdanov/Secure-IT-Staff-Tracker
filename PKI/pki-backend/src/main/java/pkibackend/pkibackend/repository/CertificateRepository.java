@@ -20,10 +20,10 @@ public class CertificateRepository {
         _writer = writer;
     }
 
-    public void SaveCertificate(Certificate certificate, String storePassword) {
+    public void SaveCertificate(Certificate certificate, String storePassword, String alias, String keyPassword) {
         _writer.loadKeyStore("src/main/resources/static/example.jks",  storePassword.toCharArray());
         PrivateKey pk = certificate.getAccount().getPrivateKey();
-        _writer.write("cert1", pk, "password".toCharArray(), certificate.getX509Certificate());
+        _writer.write(alias, pk, keyPassword.toCharArray(), certificate.getX509Certificate());
         _writer.saveKeyStore("src/main/resources/static/example.jks",  storePassword.toCharArray());
     }
 

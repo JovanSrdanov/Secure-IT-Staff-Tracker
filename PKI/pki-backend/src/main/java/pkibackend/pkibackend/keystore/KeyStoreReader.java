@@ -15,7 +15,7 @@ import java.security.cert.X509Certificate;
 
 @Component
 public class KeyStoreReader {
-    private KeyStore keyStore;
+    private final KeyStore keyStore;
 
     public KeyStoreReader() {
         try {
@@ -38,44 +38,46 @@ public class KeyStoreReader {
             //return new Account(privateKey, cert.getPublicKey(), issuerName);
             return new Account();
 
-    } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException
+        }
+        catch (KeyStoreException | NoSuchAlgorithmException | CertificateException
                  | UnrecoverableKeyException | IOException e) {
-        e.printStackTrace();
-    }
-        return null;
+            throw new RuntimeException(e);
+        }
     }
 
     public Certificate readCertificate(String keyStoreFile, String keyStorePass, String alias) {
         try {
-            KeyStore ks = KeyStore.getInstance("JKS", "SUN");
-
+            //KeyStore ks = KeyStore.getInstance("JKS", "SUN");
             BufferedInputStream in = new BufferedInputStream(new FileInputStream(keyStoreFile));
-            ks.load(in, keyStorePass.toCharArray());
+            keyStore.load(in, keyStorePass.toCharArray());
 
-            if(ks.isKeyEntry(alias)) {
-                return ks.getCertificate(alias);
+            if(keyStore.isKeyEntry(alias)) {
+                return keyStore.getCertificate(alias);
             }
-        } catch (KeyStoreException | NoSuchProviderException | NoSuchAlgorithmException
+
+            return null;
+
+        } catch (KeyStoreException | NoSuchAlgorithmException
                  | CertificateException | IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
-        return null;
     }
 
     public PrivateKey readPrivateKey(String keyStoreFile, String keyStorePass, String alias, String pass) {
         try {
-            KeyStore ks = KeyStore.getInstance("JKS", "SUN");
-
+            //KeyStore ks = KeyStore.getInstance("JKS", "SUN");
             BufferedInputStream in = new BufferedInputStream(new FileInputStream(keyStoreFile));
-            ks.load(in, keyStorePass.toCharArray());
+            keyStore.load(in, keyStorePass.toCharArray());
 
-            if(ks.isKeyEntry(alias)) {
-                return (PrivateKey) ks.getKey(alias, pass.toCharArray());
+            if(keyStore.isKeyEntry(alias)) {
+                return (PrivateKey) keyStore.getKey(alias, pass.toCharArray());
             }
-        } catch (KeyStoreException | NoSuchProviderException | NoSuchAlgorithmException | CertificateException |
+
+            return null;
+
+        } catch (KeyStoreException  | NoSuchAlgorithmException | CertificateException |
                  IOException | UnrecoverableKeyException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
-        return null;
     }
 }

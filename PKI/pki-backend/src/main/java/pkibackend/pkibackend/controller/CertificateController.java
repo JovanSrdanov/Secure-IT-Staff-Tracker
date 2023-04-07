@@ -6,14 +6,17 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import pkibackend.pkibackend.certificates.CertificateGenerator;
 import pkibackend.pkibackend.dto.CreateCertificateInfo;
 import pkibackend.pkibackend.model.Account;
 import pkibackend.pkibackend.model.Certificate;
 import pkibackend.pkibackend.service.interfaces.ICertificateService;
 
+import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("certificate")
@@ -25,22 +28,12 @@ public class CertificateController {
     }
 
     @PostMapping("")
-    public ResponseEntity<String> createCertificate(@RequestBody CreateCertificateInfo info) {
-        Account issuer = new Account();
-        Account subject = new Account();
-
-        SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
+    public ResponseEntity<?> createCertificate(@RequestBody CreateCertificateInfo info) {
         try {
-            Date startDate = format.parse("2023-03-25");
-            Date endDate = format.parse("2028-03-25");
-
-            //new Certificate(issuer, subject, startDate, endDate, "1")
-            _certificateService.generateCertificate(new Certificate());
-            return new ResponseEntity<>("Created", HttpStatus.CREATED);
-        } catch (ParseException e) {
-            e.printStackTrace();
+            Certificate createdCertificate = _certificateService.generateCertificate(info);
+            return new ResponseEntity<>(createdCertificate, HttpStatus.CREATED);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>("Error while creating certificate", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        return null;
     }
 }
