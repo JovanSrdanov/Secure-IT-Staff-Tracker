@@ -12,6 +12,7 @@ import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.springframework.stereotype.Component;
 import pkibackend.pkibackend.model.Account;
+import pkibackend.pkibackend.model.Certificate;
 
 import java.math.BigInteger;
 import java.security.Security;
@@ -26,7 +27,7 @@ public class CertificateGenerator {
         Security.addProvider(new BouncyCastleProvider());
     }
 
-    public static X509Certificate generateCertificate(Account subject, Account issuer,
+    public static X509Certificate generateCertificate(Certificate newCertificate,
                                                       Date startDate, Date endDate,
                                                       BigInteger serialNumber, Map<String, String> extensions,
                                                       BigInteger issuingCertificateSerialNumber) {
@@ -39,18 +40,18 @@ public class CertificateGenerator {
             builder = builder.setProvider("BC");
 
             //Formira se objekat koji ce sadrzati privatni kljuc i koji ce se koristiti za potpisivanje sertifikata
-            ContentSigner contentSigner = builder.build(issuer.getPrivateKey());
+            ContentSigner contentSigner = builder.build(newCertificate.getIssuerPrivateKey());
 
             //Postavljaju se podaci za generisanje sertifiakta
             X509v3CertificateBuilder certGen = new JcaX509v3CertificateBuilder(
-                    issuer.getX500Name(),
+                    newCertificate.getIssuerInfo(),
                     serialNumber,
                     startDate,
                     endDate,
-                    subject.getX500Name(),
-                    subject.getPublicKey());
+                    newCertificate.getSubjectInfo(),
+                    newCertificate.getSubjectPublicKey());
             
-            addExtensions(certGen, extensions, subject, issuingCertificateSerialNumber);
+            addExtensions(certGen, extensions, newCertificate, issuingCertificateSerialNumber);
             
             //Generise se sertifikat
             X509CertificateHolder certHolder = certGen.build(contentSigner);
@@ -71,7 +72,7 @@ public class CertificateGenerator {
     }
 
     private static void addExtensions(X509v3CertificateBuilder certGen, Map<String, String> extensions,
-                                      Account subject, BigInteger issuingCertificateSerialNumber)
+                                      Certificate newCertificate, BigInteger issuingCertificateSerialNumber)
             throws CertIOException {
         if (extensions.containsKey("keyUsage")) {
             KeyUsage usage;
@@ -91,7 +92,7 @@ public class CertificateGenerator {
             }
         }
         if (extensions.containsKey("subjectKeyIdentifier")) {
-            SubjectKeyIdentifier identifier = new SubjectKeyIdentifier(subject.getPublicKey().getEncoded());
+            SubjectKeyIdentifier identifier = new SubjectKeyIdentifier(newCertificate.getSubjectPublicKey().getEncoded());
             certGen.addExtension(Extension.subjectKeyIdentifier, false, identifier);
         }
         // odredjuje dal je CA il nije

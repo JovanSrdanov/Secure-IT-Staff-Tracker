@@ -7,7 +7,6 @@ import pkibackend.pkibackend.model.Account;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.*;
@@ -83,7 +82,7 @@ public class KeyStoreReader {
         }
     }
 
-    public Certificate readCertificateBySerialNumber(String keyStoreFile, String keyStorePass, BigInteger serialNumber) {
+    public String readCertificateAliasBySerialNumber(String keyStoreFile, String keyStorePass, BigInteger serialNumber) {
         try {
             BufferedInputStream in = new BufferedInputStream(new FileInputStream(keyStoreFile));
             keyStore.load(in, keyStorePass.toCharArray());
@@ -99,7 +98,7 @@ public class KeyStoreReader {
                     System.out.println("Alias: " + alias);
                     System.out.println("Certificate: " + x509Cert);
                     // You can use x509Cert for further operations as needed
-                    return x509Cert;
+                    return alias;
                 }
             }
         } catch (IOException | NoSuchAlgorithmException | CertificateException | KeyStoreException e) {

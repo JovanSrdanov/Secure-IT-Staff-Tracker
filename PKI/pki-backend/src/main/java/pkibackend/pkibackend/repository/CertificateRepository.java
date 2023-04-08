@@ -23,7 +23,7 @@ public class CertificateRepository {
 
     public void SaveCertificate(Certificate certificate, String storePassword, String alias, String keyPassword) {
         _writer.loadKeyStore("src/main/resources/static/example.jks",  storePassword.toCharArray());
-        PrivateKey pk = certificate.getAccount().getPrivateKey();
+        PrivateKey pk = certificate.getSubjectPrivateKey();
         _writer.write(alias, pk, keyPassword.toCharArray(), certificate.getX509Certificate());
         _writer.saveKeyStore("src/main/resources/static/example.jks",  storePassword.toCharArray());
     }
@@ -40,8 +40,8 @@ public class CertificateRepository {
                 alias, pass);
     }
 
-    public java.security.cert.Certificate GetCertificateBySerialNumber(String keyStorePass, BigInteger serialNumber) {
-        return _reader.readCertificateBySerialNumber("src/main/resources/static/example.jks",
+    public String GetCertificateBySerialNumber(String keyStorePass, BigInteger serialNumber) {
+        return _reader.readCertificateAliasBySerialNumber("src/main/resources/static/example.jks",
                 keyStorePass, serialNumber);
     }
 }
