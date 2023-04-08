@@ -7,11 +7,14 @@ import pkibackend.pkibackend.model.Account;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Enumeration;
 
 @Component
 public class KeyStoreReader {
@@ -38,8 +41,7 @@ public class KeyStoreReader {
             //return new Account(privateKey, cert.getPublicKey(), issuerName);
             return new Account();
 
-        }
-        catch (KeyStoreException | NoSuchAlgorithmException | CertificateException
+        } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException
                  | UnrecoverableKeyException | IOException e) {
             throw new RuntimeException(e);
         }
@@ -51,7 +53,7 @@ public class KeyStoreReader {
             BufferedInputStream in = new BufferedInputStream(new FileInputStream(keyStoreFile));
             keyStore.load(in, keyStorePass.toCharArray());
 
-            if(keyStore.isKeyEntry(alias)) {
+            if (keyStore.isKeyEntry(alias)) {
                 return keyStore.getCertificate(alias);
             }
 
@@ -69,15 +71,40 @@ public class KeyStoreReader {
             BufferedInputStream in = new BufferedInputStream(new FileInputStream(keyStoreFile));
             keyStore.load(in, keyStorePass.toCharArray());
 
-            if(keyStore.isKeyEntry(alias)) {
+            if (keyStore.isKeyEntry(alias)) {
                 return (PrivateKey) keyStore.getKey(alias, pass.toCharArray());
             }
 
             return null;
 
-        } catch (KeyStoreException  | NoSuchAlgorithmException | CertificateException |
+        } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException |
                  IOException | UnrecoverableKeyException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public Certificate readCertificateBySerialNumber(String keyStoreFile, String keyStorePass, BigInteger serialNumber) {
+        try {
+            BufferedInputStream in = new BufferedInputStream(new FileInputStream(keyStoreFile));
+            keyStore.load(in, keyStorePass.toCharArray());
+
+            Enumeration<String> aliasEnum = keyStore.aliases();
+
+            while (aliasEnum.hasMoreElements()) {
+                String alias = aliasEnum.nextElement();
+                Certificate cert = keyStore.getCertificate(alias);
+                // ako je sertifikat odgovarajuceg tipa i poklapaju se serijski brojevi
+                if (cert instanceof X509Certificate x509Cert && x509Cert.getSerialNumber().toString().equals(serialNumber.toString())) {
+                    // Certificate with the specified serial number found
+                    System.out.println("Alias: " + alias);
+                    System.out.println("Certificate: " + x509Cert);
+                    // You can use x509Cert for further operations as needed
+                    return x509Cert;
+                }
+            }
+        } catch (IOException | NoSuchAlgorithmException | CertificateException | KeyStoreException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
     }
 }

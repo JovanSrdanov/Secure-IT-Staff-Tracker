@@ -44,7 +44,7 @@ public class CertificateGenerator {
             //Postavljaju se podaci za generisanje sertifiakta
             X509v3CertificateBuilder certGen = new JcaX509v3CertificateBuilder(
                     issuer.getX500Name(),
-                    serialNumber,       // TODO Stefan: nisam siguran jel ovo dobro
+                    serialNumber,
                     startDate,
                     endDate,
                     subject.getX500Name(),
@@ -76,7 +76,7 @@ public class CertificateGenerator {
         if (extensions.containsKey("keyUsage")) {
             KeyUsage usage;
             switch (extensions.get("keyUsage")) {
-                case "keyEncipherment " -> {
+                case "keyEncipherment" -> {
                     usage = new KeyUsage(KeyUsage.keyEncipherment);
                     certGen.addExtension(Extension.keyUsage, false, usage);
                 }
@@ -90,20 +90,21 @@ public class CertificateGenerator {
                 }
             }
         }
-        else if (extensions.containsKey("subjectKeyIdentifier")) {
+        if (extensions.containsKey("subjectKeyIdentifier")) {
             SubjectKeyIdentifier identifier = new SubjectKeyIdentifier(subject.getPublicKey().getEncoded());
             certGen.addExtension(Extension.subjectKeyIdentifier, false, identifier);
         }
         // odredjuje dal je CA il nije
-        else if (extensions.containsKey("basicConstraints")) {
+        if (extensions.containsKey("basicConstraints")) {
             boolean isCA = extensions.get("basicConstraints").equals("CA");
             certGen.addExtension(Extension.basicConstraints, true, new BasicConstraints(isCA));
         }
-        // opciono cuva identifikator za javni kljuc issuer-a i serijski broj sertifikata koji je iskoriscen za potpis
-        else if (extensions.containsKey("authorityKeyIdentifier")) {
+        // opciono cuva identifikator za javni kljuc issuer-a i/ili serijski broj sertifikata koji je
+        // iskoriscen za potpis
+        if (extensions.containsKey("authorityKeyIdentifier") && issuingCertificateSerialNumber != null) {
             AuthorityKeyIdentifier identifier = new AuthorityKeyIdentifier(
                     issuingCertificateSerialNumber.toByteArray());
-            certGen.addExtension(Extension.authorityKeyIdentifier, true, identifier);
+            certGen.addExtension(Extension.authorityKeyIdentifier, false, identifier);
         }
     }
 }

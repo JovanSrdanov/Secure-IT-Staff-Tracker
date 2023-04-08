@@ -8,7 +8,6 @@ import lombok.Setter;
 import org.bouncycastle.asn1.x500.X500Name;
 
 import javax.persistence.*;
-import java.math.BigInteger;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.List;
@@ -40,5 +39,5 @@ public class Account {
 
     @ElementCollection  // TODO Stefan: promeni
     @Column(nullable = false)
-    private List<BigInteger> certificateSerialNumbers;
+    private List<String> certificateAliases;
 }

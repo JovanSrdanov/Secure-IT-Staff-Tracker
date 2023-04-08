@@ -6,6 +6,7 @@ import pkibackend.pkibackend.keystore.KeyStoreReader;
 import pkibackend.pkibackend.keystore.KeyStoreWriter;
 import pkibackend.pkibackend.model.Certificate;
 
+import java.math.BigInteger;
 import java.security.PrivateKey;
 
 // TODO Stefan: nisam siguran dal treba component il nesto drugo
@@ -31,5 +32,16 @@ public class CertificateRepository {
          return _reader.readCertificate
                 ("src/main/resources/static/example.jks", storePassword, alias);
 
+    }
+
+    public PrivateKey GetCertificatePrivateKey(
+            String keyStorePass, String alias, String pass) {
+        return _reader.readPrivateKey("src/main/resources/static/example.jks", keyStorePass,
+                alias, pass);
+    }
+
+    public java.security.cert.Certificate GetCertificateBySerialNumber(String keyStorePass, BigInteger serialNumber) {
+        return _reader.readCertificateBySerialNumber("src/main/resources/static/example.jks",
+                keyStorePass, serialNumber);
     }
 }

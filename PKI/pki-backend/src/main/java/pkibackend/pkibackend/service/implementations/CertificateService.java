@@ -19,6 +19,8 @@ import pkibackend.pkibackend.service.interfaces.ICertificateService;
 
 import java.math.BigInteger;
 import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -62,8 +64,19 @@ public class CertificateService implements ICertificateService {
     // TODO Stefan: treba namestiti transakciju ovde
     @Override
     public Certificate generateCertificate(CreateCertificateInfo info) throws RuntimeException {
-        Account subject = buildEntity(info.getSubjectInfo());
-        Account issuer = buildEntity(info.getIssuerInfo());
+        Account issuer = new Account();
+        Account subject = new Account();
+
+        // provera dal je self-signed, ako jeste serijski broj sertifikata iznad u lancu je null recimo
+        // u suprotnom serijski broj se moze dobiti iz ekstenzije sertifikata
+        if (info.getIssuingCertificateSerialNumber() == null) {
+            issuer = buildSubject(info.getIssuerInfo());
+            subject = issuer;
+        }
+        else {
+            issuer = buildIssuer(info.getIssuerInfo(), info.getIssuingCertificateSerialNumber());
+            subject = buildSubject(info.getSubjectInfo());
+        }
 
         BigInteger serialNumber = new BigInteger(32, new SecureRandom());
 
@@ -74,7 +87,7 @@ public class CertificateService implements ICertificateService {
         Certificate newCertificate = new Certificate(issuer, serialNumber,
                 info.getStartDate(), info.getEndDate(), certificate);
 
-        subject.getCertificateSerialNumbers().add(newCertificate.getSerialNumber());
+        subject.getCertificateAliases().add(info.getAlias());
         _accountRepository.save(subject);
         if (!subject.getEmail().equals(issuer.getEmail())) {
             _accountRepository.save(issuer);
@@ -88,16 +101,9 @@ public class CertificateService implements ICertificateService {
         return newCertificate;
     }
 
-    private Account buildEntity(EntityInfo info) {
+    private Account buildSubject(EntityInfo info) {
         KeyPair kp = Keys.generateKeyPair();
-        X500NameBuilder builder = new X500NameBuilder(BCStyle.INSTANCE);
-        builder.addRDN(BCStyle.CN, info.getCommonName());
-        builder.addRDN(BCStyle.SURNAME, info.getSurname());
-        builder.addRDN(BCStyle.GIVENNAME, info.getGivenName());
-        builder.addRDN(BCStyle.O, info.getOrganization());
-        builder.addRDN(BCStyle.OU, info.getOrganizationUnitName());
-        builder.addRDN(BCStyle.C, info.getCountryCode());
-        builder.addRDN(BCStyle.E, info.getEmail());
+        X500NameBuilder builder = setupBasicCertificateInfo(info);
 
         if (_accountRepository.findByEmail(info.getEmail()).isPresent()) {
             Account account = _accountRepository.findByEmail(info.getEmail()).get();
@@ -116,5 +122,32 @@ public class CertificateService implements ICertificateService {
         return new Account(accountId, info.getEmail(), info.getPassword(),
                 kp.getPrivate(), kp.getPublic(), builder.build(),
                 new ArrayList<>());
+    }
+
+    private Account buildIssuer(EntityInfo info, BigInteger serialNumber) {
+        //TODO ovo nije dobro, namesti da se cuva private key negde
+        PrivateKey issuerPrivateKey = Keys.generateKeyPair().getPrivate();
+        PublicKey issuerPublicKey = _certificateRepository.GetCertificateBySerialNumber
+                (keyStorePassword, serialNumber).getPublicKey();
+
+        X500NameBuilder builder = setupBasicCertificateInfo(info);
+        Account account = _accountRepository.findByEmail(info.getEmail()).get();
+        account.setPrivateKey(issuerPrivateKey);
+        account.setPublicKey(issuerPublicKey);
+        builder.addRDN(BCStyle.UID, account.getId().toString());
+        account.setX500Name(builder.build());
+        return account;
+    }
+
+    private static X500NameBuilder setupBasicCertificateInfo(EntityInfo info) {
+        X500NameBuilder builder = new X500NameBuilder(BCStyle.INSTANCE);
+        builder.addRDN(BCStyle.CN, info.getCommonName());
+        builder.addRDN(BCStyle.SURNAME, info.getSurname());
+        builder.addRDN(BCStyle.GIVENNAME, info.getGivenName());
+        builder.addRDN(BCStyle.O, info.getOrganization());
+        builder.addRDN(BCStyle.OU, info.getOrganizationUnitName());
+        builder.addRDN(BCStyle.C, info.getCountryCode());
+        builder.addRDN(BCStyle.E, info.getEmail());
+        return builder;
     }
 }
