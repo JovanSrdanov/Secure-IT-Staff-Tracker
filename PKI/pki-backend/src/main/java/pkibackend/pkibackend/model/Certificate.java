@@ -5,7 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
+import org.bouncycastle.asn1.x509.Extension;
+import pkibackend.pkibackend.Utilities.CertificateUtilities;
 
 import javax.persistence.Transient;
 import java.math.BigInteger;
@@ -24,6 +29,14 @@ public class Certificate {
     private BigInteger serialNumber;
     private Date startDate;
     private Date endDate;
+
+    @JsonIgnore
+    @Transient
+    private BigInteger issuerSerialNumber;
+
+    @JsonIgnore
+    @Transient
+    private boolean isCa;
 
     @JsonIgnore
     @Transient
@@ -47,4 +60,18 @@ public class Certificate {
     @JsonIgnore
     @Transient
     private X509Certificate x509Certificate;
+
+    //Initializes only things available from certificate
+    public Certificate(java.security.cert.Certificate rawCertificate){
+        this.x509Certificate = (X509Certificate) rawCertificate;
+
+        this.serialNumber = this.x509Certificate.getSerialNumber();
+        this.startDate = this.x509Certificate.getNotBefore();
+        this.endDate = this.x509Certificate.getNotAfter();
+        this.subjectPublicKey = this.x509Certificate.getPublicKey();
+        // Ovo baca neki exception (totalno srbija)
+        // this.subjectInfo = X500Name.getInstance(this.x509Certificate.getSubjectX500Principal());
+        this.issuerSerialNumber = CertificateUtilities.GetIssuerSerialNumber(this.x509Certificate);
+        this.isCa = CertificateUtilities.CheckCA(this.x509Certificate);
+    }
 }

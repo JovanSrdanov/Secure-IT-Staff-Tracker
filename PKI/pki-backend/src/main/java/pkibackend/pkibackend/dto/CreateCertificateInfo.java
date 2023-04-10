@@ -13,6 +13,7 @@ import java.util.Map;
 @Setter
 public class CreateCertificateInfo {
     private EntityInfo subjectInfo;
+    //TODO dovoljno je samo poslati issuerid
     private EntityInfo issuerInfo;
     private Date startDate;
     private Date endDate;
