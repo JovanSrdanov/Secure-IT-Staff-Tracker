@@ -227,7 +227,18 @@ public class CertificateService implements ICertificateService {
         }
     }
 
+    public boolean isRevoked(BigInteger certSerialNum){
+        java.security.cert.Certificate rawCertificate = _certificateRepository.GetCertificateBySerialNumber(keyStorePassword, certSerialNum);
+        Certificate certificate = new Certificate(rawCertificate);
 
+        java.security.cert.Certificate issuerRawCertificate = _certificateRepository.GetCertificateBySerialNumber(keyStorePassword, certificate.getIssuerSerialNumber());
+        Certificate issuerCertificate = new Certificate(issuerRawCertificate);
 
+        Optional<OcspTable> result = _ocspTableRepository.findByCaSerialNumber(issuerCertificate.getSerialNumber());
+        if(result.isEmpty()){
+            return  false;
+        }
 
+        return result.get().getRevokedCertificateSerialNums().contains(certificate.getSerialNumber());
+    }
 }

@@ -141,14 +141,17 @@ public class KeyStoreReader {
         }
     }
 
-    public Iterable<pkibackend.pkibackend.model.Certificate> GetChildren(String keyStoreFile, String keyStorePass, BigInteger issuerSerialNumber) {
+    public Iterable<pkibackend.pkibackend.model.Certificate> GetChildren(String keyStoreFile, String keyStorePass,
+                                                                         BigInteger issuerSerialNumber) {
         Iterable<java.security.cert.Certificate> certificates = GetAllCertificates(keyStoreFile, keyStorePass);
 
         List<pkibackend.pkibackend.model.Certificate> children = new ArrayList<pkibackend.pkibackend.model.Certificate>();
 
         for (Certificate certificate : certificates) {
             pkibackend.pkibackend.model.Certificate x509Cert = new pkibackend.pkibackend.model.Certificate(certificate);
-            if (x509Cert.getIssuerSerialNumber().equals(issuerSerialNumber) && !x509Cert.getIssuerSerialNumber().equals(x509Cert.getSerialNumber()) ) {
+            if (x509Cert.getIssuerSerialNumber().equals(issuerSerialNumber) &&
+                    !x509Cert.getIssuerSerialNumber().equals(x509Cert.getSerialNumber()) )
+            {
                 children.add(x509Cert);
             }
         }
