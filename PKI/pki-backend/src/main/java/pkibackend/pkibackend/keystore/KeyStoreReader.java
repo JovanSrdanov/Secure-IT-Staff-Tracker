@@ -7,13 +7,16 @@ import pkibackend.pkibackend.model.Account;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 
 @Component
 public class KeyStoreReader {
@@ -95,15 +98,62 @@ public class KeyStoreReader {
                 // ako je sertifikat odgovarajuceg tipa i poklapaju se serijski brojevi
                 if (cert instanceof X509Certificate x509Cert && x509Cert.getSerialNumber().toString().equals(serialNumber.toString())) {
                     // Certificate with the specified serial number found
-                    System.out.println("Alias: " + alias);
-                    System.out.println("Certificate: " + x509Cert);
+                    //Debugger: "am I joke to you :O"
+//                    System.out.println("Alias: " + alias);
+//                    System.out.println("Certificate: " + x509Cert);
                     // You can use x509Cert for further operations as needed
                     return alias;
                 }
             }
-        } catch (IOException | NoSuchAlgorithmException | CertificateException | KeyStoreException e) {
+        } catch (NoSuchAlgorithmException | CertificateException | KeyStoreException e) {
             throw new RuntimeException(e);
+        } catch (IOException e) {
+            return null;
         }
         return null;
     }
+
+    public Iterable<Certificate> GetAllCertificates(String keyStoreFile, String keyStorePass) {
+        BufferedInputStream in = null;
+        try {
+            in = new BufferedInputStream(new FileInputStream(keyStoreFile));
+            keyStore.load(in, keyStorePass.toCharArray());
+
+            List<Certificate> certificates = new ArrayList<>();
+
+            Enumeration<String> aliases = keyStore.aliases();
+            while (aliases.hasMoreElements()) {
+                String alias = aliases.nextElement();
+                certificates.add(keyStore.getCertificate(alias));
+            }
+
+            return certificates;
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (CertificateException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        } catch (KeyStoreException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Iterable<pkibackend.pkibackend.model.Certificate> GetChildren(String keyStoreFile, String keyStorePass, BigInteger issuerSerialNumber) {
+        Iterable<java.security.cert.Certificate> certificates = GetAllCertificates(keyStoreFile, keyStorePass);
+
+        List<pkibackend.pkibackend.model.Certificate> children = new ArrayList<pkibackend.pkibackend.model.Certificate>();
+
+        for (Certificate certificate : certificates) {
+            pkibackend.pkibackend.model.Certificate x509Cert = new pkibackend.pkibackend.model.Certificate(certificate);
+            if (x509Cert.getIssuerSerialNumber().equals(issuerSerialNumber) && !x509Cert.getIssuerSerialNumber().equals(x509Cert.getSerialNumber()) ) {
+                children.add(x509Cert);
+            }
+        }
+
+        return children;
+    }
+
 }

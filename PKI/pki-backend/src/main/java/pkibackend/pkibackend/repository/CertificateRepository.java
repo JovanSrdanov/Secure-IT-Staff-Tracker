@@ -40,8 +40,18 @@ public class CertificateRepository {
                 alias, pass);
     }
 
-    public String GetCertificateBySerialNumber(String keyStorePass, BigInteger serialNumber) {
+    public String GetCertificateAliasBySerialNumber(String keyStorePass, BigInteger serialNumber) {
         return _reader.readCertificateAliasBySerialNumber("src/main/resources/static/example.jks",
                 keyStorePass, serialNumber);
+    }
+
+    public java.security.cert.Certificate GetCertificateBySerialNumber(String keyStorePass, BigInteger serialNumber){
+        String alias =  _reader.readCertificateAliasBySerialNumber("src/main/resources/static/example.jks",
+                keyStorePass, serialNumber);
+        return  GetCertificate(alias, keyStorePass);
+    }
+
+    public Iterable<Certificate> GetChildren(String keyStoreFile, String keyStorePass, BigInteger issuerSerialNumber) {
+        return _reader.GetChildren(keyStoreFile, keyStorePass, issuerSerialNumber);
     }
 }
