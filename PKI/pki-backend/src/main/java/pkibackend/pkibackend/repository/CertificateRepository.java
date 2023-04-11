@@ -48,6 +48,9 @@ public class CertificateRepository {
     public java.security.cert.Certificate GetCertificateBySerialNumber(String keyStorePass, BigInteger serialNumber){
         String alias =  _reader.readCertificateAliasBySerialNumber("src/main/resources/static/example.jks",
                 keyStorePass, serialNumber);
+        if (alias == null) {
+            return null;
+        }
         return  GetCertificate(alias, keyStorePass);
     }
 
