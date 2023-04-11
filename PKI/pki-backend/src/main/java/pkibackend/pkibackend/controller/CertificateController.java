@@ -1,6 +1,7 @@
 package pkibackend.pkibackend.controller;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.webjars.NotFoundException;
@@ -9,11 +10,16 @@ import pkibackend.pkibackend.dto.BooleanResponse;
 import pkibackend.pkibackend.dto.CertificateSerialNum;
 import pkibackend.pkibackend.dto.CreateCertificateInfo;
 import pkibackend.pkibackend.exceptions.BadRequestException;
+import pkibackend.pkibackend.exceptions.InternalServerErrorException;
 import pkibackend.pkibackend.model.Account;
+import org.springframework.http.HttpHeaders;
 import pkibackend.pkibackend.model.Certificate;
 import pkibackend.pkibackend.service.interfaces.ICertificateService;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -33,7 +39,7 @@ public class CertificateController {
     public ResponseEntity<?> createCertificate(@RequestBody CreateCertificateInfo info) {
         // TODO Jovan: iz jwt-a da se izvuku ifno o issuer-u
         // TODO Strahinja: provera dal moze da izda sertifikat nekom drugom (dal je CA il nije,
-        // da li je zaista issuer-ov sertifikat
+        // da li je zaista issuer-ov sertifikat)
 
         try {
             Certificate createdCertificate = _certificateService.generateCertificate(info);
@@ -45,6 +51,8 @@ public class CertificateController {
         catch (BadRequestException e)
         {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (CertificateEncodingException | InternalServerErrorException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -66,5 +74,29 @@ public class CertificateController {
     public ResponseEntity<BooleanResponse> checkIfRevoked(@PathVariable("serialNumber") BigInteger certificateSerialNum){
         boolean revoked = _certificateService.isRevoked(certificateSerialNum);
         return new ResponseEntity<BooleanResponse>(new BooleanResponse(revoked), HttpStatus.OK);
+    }
+
+    @GetMapping("valid/{serialNumber}")
+    public ResponseEntity<BooleanResponse> checkIfValid(@PathVariable("serialNumber") BigInteger certificateSerialNum){
+        boolean isValid = _certificateService.isChainValid(certificateSerialNum);
+        return new ResponseEntity<>(new BooleanResponse(isValid), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "download/{serialNumber}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public ResponseEntity<byte[]> downloadCertificate(@PathVariable("serialNumber") BigInteger certificateSerialNum) throws IOException {
+        X509Certificate x509Certificate = _certificateService.GetCertificateBySerialNumber(certificateSerialNum);
+        try {
+            byte[] certificateBytes = x509Certificate.getEncoded();
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentDispositionFormData("attachment", "certificate.crt");
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(certificateBytes);
+        } catch (CertificateEncodingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

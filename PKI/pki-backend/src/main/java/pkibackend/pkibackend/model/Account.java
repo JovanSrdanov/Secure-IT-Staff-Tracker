@@ -75,4 +75,9 @@ public class Account implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+    public void update(Account updatedAccount) {
+        this.email = updatedAccount.getEmail();
+        this.password = updatedAccount.getPassword();
+        this.keyStoreRowsInfo = updatedAccount.getKeyStoreRowsInfo();
+    }
 }

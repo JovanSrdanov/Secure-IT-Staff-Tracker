@@ -44,11 +44,29 @@ public class AccountService implements IAccountService {
     }
 
     @Override
+    public Account findByEmail(String email) {
+        if (_accountRepository.findByEmail(email).isPresent()) {
+            return _accountRepository.findByEmail(email).get();
+        }
+
+        throw new NotFoundException("Account with given email not found");
+    }
+
+    @Override
     public Account save(Account entity) throws BadRequestException {
         if (entity.getId() == null) {
             entity.setId(UUID.randomUUID());
         }
         return _accountRepository.save(entity);
+    }
+
+    @Override
+    public Account updateAccount(Account updatedAccount, UUID accountId) throws BadRequestException {
+        Account oldAccount = this.findById(accountId);
+
+        oldAccount.update(updatedAccount);
+
+        return save(oldAccount);
     }
 
     @Override
