@@ -70,6 +70,11 @@ public class CertificateService implements ICertificateService {
     }
 
     @Override
+    public X509Certificate GetCertificateBySerialNumber(BigInteger serialNumber) {
+        return (X509Certificate) _certificateRepository.GetCertificateBySerialNumber(keyStorePassword, serialNumber);
+    }
+
+    @Override
     public Certificate save(Certificate entity) throws BadRequestException {
         return null;
     }
