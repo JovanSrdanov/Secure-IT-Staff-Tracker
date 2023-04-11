@@ -34,4 +34,10 @@ public class Account {
         }
         return "";
     }
+
+    public void update(Account updatedAccount) {
+        this.email = updatedAccount.getEmail();
+        this.password = updatedAccount.getPassword();
+        this.keyStoreRowsInfo = updatedAccount.getKeyStoreRowsInfo();
+    }
 }

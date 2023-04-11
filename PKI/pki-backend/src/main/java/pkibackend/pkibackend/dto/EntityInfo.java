@@ -14,6 +14,9 @@ public class EntityInfo {
     private String organization;
     private String organizationUnitName;
     private String countryCode;
+
     private String email;
     private String password;
+
+    private Boolean isAccountNew;
 }
