@@ -31,6 +31,10 @@ public class CertificateController {
 
     @PostMapping()
     public ResponseEntity<?> createCertificate(@RequestBody CreateCertificateInfo info) {
+        // TODO Jovan: iz jwt-a da se izvuku ifno o issuer-u
+        // TODO Strahinja: provera dal moze da izda sertifikat nekom drugom (dal je CA il nije,
+        // da li je zaista issuer-ov sertifikat
+
         try {
             Certificate createdCertificate = _certificateService.generateCertificate(info);
             return new ResponseEntity<>(createdCertificate, HttpStatus.CREATED);

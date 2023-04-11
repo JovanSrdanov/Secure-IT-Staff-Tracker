@@ -5,12 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.Extension;
-import pkibackend.pkibackend.Utilities.CertificateUtilities;
 
 import javax.persistence.Transient;
 import java.math.BigInteger;
@@ -71,7 +69,25 @@ public class Certificate {
         this.subjectPublicKey = this.x509Certificate.getPublicKey();
         // Ovo baca neki exception (totalno srbija)
         // this.subjectInfo = X500Name.getInstance(this.x509Certificate.getSubjectX500Principal());
-        this.issuerSerialNumber = CertificateUtilities.GetIssuerSerialNumber(this.x509Certificate);
-        this.isCa = CertificateUtilities.CheckCA(this.x509Certificate);
+        this.issuerSerialNumber = GetIssuerSerialNumber(this.x509Certificate);
+        this.isCa = CheckCA(this.x509Certificate);
+    }
+
+    //Objasnjenje: https://stackoverflow.com/questions/16197253/retrieve-full-extension-value-from-certificate
+    public static BigInteger GetIssuerSerialNumber(X509Certificate certificate){
+        String oid = Extension.authorityKeyIdentifier.getId();
+        byte[] extensionValue =  certificate.getExtensionValue(oid);
+
+        ASN1OctetString akiOc = ASN1OctetString.getInstance(extensionValue);
+        AuthorityKeyIdentifier aki = AuthorityKeyIdentifier.getInstance(akiOc.getOctets());
+
+        byte[] serialNumberB = aki.getKeyIdentifier();
+        return new BigInteger(serialNumberB);
+    }
+
+    // Source: https://stackoverflow.com/questions/12092457/how-to-check-if-x509certificate-is-ca-certificate
+    // 2nd answer
+    public static boolean CheckCA(X509Certificate certificate){
+        return  certificate.getBasicConstraints() != -1;
     }
 }
