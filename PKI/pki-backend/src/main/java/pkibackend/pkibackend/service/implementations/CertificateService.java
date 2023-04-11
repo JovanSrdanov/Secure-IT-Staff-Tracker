@@ -25,10 +25,8 @@ import pkibackend.pkibackend.repository.OcspTableRepository;
 import pkibackend.pkibackend.service.interfaces.ICertificateService;
 
 import java.math.BigInteger;
-import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
+import java.security.*;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
@@ -240,5 +238,56 @@ public class CertificateService implements ICertificateService {
         }
 
         return result.get().getRevokedCertificateSerialNums().contains(certificate.getSerialNumber());
+    }
+
+    public boolean isChainValid(BigInteger certSerialNum) {
+        java.security.cert.Certificate rawCertificate = _certificateRepository.GetCertificateBySerialNumber(keyStorePassword, certSerialNum);
+        Certificate certificate = new Certificate(rawCertificate);
+
+        if(isExired(certificate)) return false;
+
+        if (!isSignatureValid(certificate)) return false;
+
+        if(isRevoked(certSerialNum)) return false;
+
+        if(Objects.equals(certificate.getSerialNumber(), certificate.getIssuerSerialNumber())) {
+            return true;
+        }
+        else {
+            return isChainValid(certificate.getIssuerSerialNumber());
+        }
+    }
+
+    private boolean isSignatureValid(Certificate certificate) {
+        PublicKey issuerPublicKey = null;
+
+        if(Objects.equals(certificate.getSerialNumber(), certificate.getIssuerSerialNumber())) {
+            issuerPublicKey = certificate.getSubjectPublicKey();
+        }
+        else  {
+            java.security.cert.Certificate issuerRawCertificate = _certificateRepository.GetCertificateBySerialNumber(keyStorePassword, certificate.getIssuerSerialNumber());
+            Certificate issuerCertificate = new Certificate(issuerRawCertificate);
+            issuerPublicKey = issuerCertificate.getSubjectPublicKey();
+        }
+
+        try {
+            certificate.getX509Certificate().verify(issuerPublicKey);
+        } catch (CertificateException |
+                 NoSuchAlgorithmException |
+                 InvalidKeyException |
+                 NoSuchProviderException |
+                 SignatureException e) {
+            //throw new RuntimeException(e);
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isExired(Certificate certificate) {
+        Date today = new Date();
+        if (certificate.getEndDate().after(today) || certificate.getStartDate().before(today)) {
+            return false;
+        }
+        return true;
     }
 }

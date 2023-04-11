@@ -67,4 +67,10 @@ public class CertificateController {
         boolean revoked = _certificateService.isRevoked(certificateSerialNum);
         return new ResponseEntity<BooleanResponse>(new BooleanResponse(revoked), HttpStatus.OK);
     }
+
+    @GetMapping("valid/{serialNumber}")
+    public ResponseEntity<BooleanResponse> checkIfValid(@PathVariable("serialNumber") BigInteger certificateSerialNum){
+        boolean isValid = _certificateService.isChainValid(certificateSerialNum);
+        return new ResponseEntity<>(new BooleanResponse(isValid), HttpStatus.OK);
+    }
 }
