@@ -76,6 +76,12 @@ public class CertificateController {
         return new ResponseEntity<BooleanResponse>(new BooleanResponse(revoked), HttpStatus.OK);
     }
 
+    @GetMapping("valid/{serialNumber}")
+    public ResponseEntity<BooleanResponse> checkIfValid(@PathVariable("serialNumber") BigInteger certificateSerialNum){
+        boolean isValid = _certificateService.isChainValid(certificateSerialNum);
+        return new ResponseEntity<>(new BooleanResponse(isValid), HttpStatus.OK);
+    }
+
     @GetMapping(value = "download/{serialNumber}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public ResponseEntity<byte[]> downloadCertificate(@PathVariable("serialNumber") BigInteger certificateSerialNum) throws IOException {
         X509Certificate x509Certificate = _certificateService.GetCertificateBySerialNumber(certificateSerialNum);

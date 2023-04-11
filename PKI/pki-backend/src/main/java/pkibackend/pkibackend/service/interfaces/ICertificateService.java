@@ -15,6 +15,6 @@ public interface ICertificateService extends ICrudService<Certificate>{
     Certificate generateCertificate(CreateCertificateInfo info) throws RuntimeException, BadRequestException, CertificateEncodingException, InternalServerErrorException;
     public void revoke(BigInteger certSerialNum);
     public boolean isRevoked(BigInteger certSerialNum);
-
     X509Certificate GetCertificateBySerialNumber(BigInteger serialNumber);
+    boolean isChainValid(BigInteger certSerialNum);
 }
