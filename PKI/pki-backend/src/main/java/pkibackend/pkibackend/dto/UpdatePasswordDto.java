@@ -1,4 +1,4 @@
-package pkibackend.pkibackend.dto.Auth;
+package pkibackend.pkibackend.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,10 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class JwtAuthenticationRequest {
-
-    private String email;
-    private String password;
-
-   
+public class UpdatePasswordDto {
+    private String oldPassword;
+    private String newPassword;
 }

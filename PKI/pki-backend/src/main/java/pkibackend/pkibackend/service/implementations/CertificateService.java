@@ -28,30 +28,44 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Primary
 public class CertificateService implements ICertificateService {
+    private static final Logger logger = LogManager.getLogger(CertificateService.class);
     private final CertificateRepository _certificateRepository;
     private final AccountRepository _accountRepository;
     private final KeystoreRowInfoRepository _keystoreRowInfoRepository;
     private final OcspTableRepository _ocspTableRepository;
-    private IRoleService _roleService;
-    private static final Logger logger = LogManager.getLogger(CertificateService.class);
-
+    private final IRoleService _roleService;
     @Value("${keystorePassword}")
     private String keyStorePassword;
 
     @Autowired
     public CertificateService(CertificateRepository certificateRepository, AccountRepository accountRepository,
                               KeystoreRowInfoRepository keystoreRowInfoRepository,
-                              OcspTableRepository ocspTableRepository,IRoleService roleService) {
+                              OcspTableRepository ocspTableRepository, IRoleService roleService) {
         _certificateRepository = certificateRepository;
         _accountRepository = accountRepository;
         _keystoreRowInfoRepository = keystoreRowInfoRepository;
         _ocspTableRepository = ocspTableRepository;
         _roleService = roleService;
+    }
+
+    private static X500NameBuilder setupBasicCertificateInfo(EntityInfo info) {
+        X500NameBuilder builder = new X500NameBuilder(BCStyle.INSTANCE);
+        builder.addRDN(BCStyle.CN, info.getCommonName());
+        builder.addRDN(BCStyle.SURNAME, info.getSurname());
+        builder.addRDN(BCStyle.GIVENNAME, info.getGivenName());
+        builder.addRDN(BCStyle.O, info.getOrganization());
+        builder.addRDN(BCStyle.OU, info.getOrganizationUnitName());
+        builder.addRDN(BCStyle.C, info.getCountryCode());
+        builder.addRDN(BCStyle.E, info.getEmail());
+        return builder;
     }
 
     @Override
@@ -92,8 +106,7 @@ public class CertificateService implements ICertificateService {
             newCertificate.setIssuerPublicKey(newCertificate.getSubjectPublicKey());
             newCertificate.setIssuerPrivateKey(newCertificate.getSubjectPrivateKey());
             newCertificate.setIssuerInfo(newCertificate.getSubjectInfo());
-        }
-        else {
+        } else {
             issuer = buildIssuer(info.getIssuerInfo(), info.getIssuingCertificateSerialNumber(), newCertificate);
             subject = buildSubject(info.getSubjectInfo(), newCertificate);
         }
@@ -145,21 +158,19 @@ public class CertificateService implements ICertificateService {
         //UID (USER ID) je ID korisnika
         builder.addRDN(BCStyle.UID, accountId.toString());
         newCertificate.setSubjectInfo(builder.build());
-        List<Role> roles = _roleService.findByName("ROLE_CERTIFICATE_USER");
+        List<Role> roles = _roleService.findByName("ROLE_CERTIFICATE_USER_CHANGE_PASSWORD");
         // Todo JOVAN ovde dodati lepo generisanje passworda i salta i mail
-        return new Account(accountId, info.getEmail(), "password","salt",roles, new HashSet<>());
+        return new Account(accountId, info.getEmail(), "password", "salt", roles, new HashSet<>());
     }
 
     private Account buildIssuer(EntityInfo info, BigInteger serialNumber, Certificate newCertificate) throws BadRequestException {
-        String issuerCertificateAlias = _certificateRepository.GetCertificateAliasBySerialNumber (keyStorePassword, serialNumber);
+        String issuerCertificateAlias = _certificateRepository.GetCertificateAliasBySerialNumber(keyStorePassword, serialNumber);
 
-        Optional<KeystoreRowInfo> result =  _keystoreRowInfoRepository.findByAlias(issuerCertificateAlias);
+        Optional<KeystoreRowInfo> result = _keystoreRowInfoRepository.findByAlias(issuerCertificateAlias);
         KeystoreRowInfo rowInfo = null;
-        if(result.isPresent()){
+        if (result.isPresent()) {
             rowInfo = result.get();
-        }
-        else
-        {
+        } else {
             throw new BadRequestException("Unexisting issuer");
         }
 
@@ -179,19 +190,7 @@ public class CertificateService implements ICertificateService {
         return account;
     }
 
-    private static X500NameBuilder setupBasicCertificateInfo(EntityInfo info) {
-        X500NameBuilder builder = new X500NameBuilder(BCStyle.INSTANCE);
-        builder.addRDN(BCStyle.CN, info.getCommonName());
-        builder.addRDN(BCStyle.SURNAME, info.getSurname());
-        builder.addRDN(BCStyle.GIVENNAME, info.getGivenName());
-        builder.addRDN(BCStyle.O, info.getOrganization());
-        builder.addRDN(BCStyle.OU, info.getOrganizationUnitName());
-        builder.addRDN(BCStyle.C, info.getCountryCode());
-        builder.addRDN(BCStyle.E, info.getEmail());
-        return builder;
-    }
-
-    public void revoke(BigInteger certSerialNum){
+    public void revoke(BigInteger certSerialNum) {
         //Retrieve certificate
         java.security.cert.Certificate rawCertificate = _certificateRepository.GetCertificateBySerialNumber(keyStorePassword, certSerialNum);
         Certificate certificate = new Certificate(rawCertificate);
@@ -200,14 +199,12 @@ public class CertificateService implements ICertificateService {
         Optional<OcspTable> queryResult = _ocspTableRepository.findByCaSerialNumber(certificate.getIssuerSerialNumber());
         OcspTable issuerOcsp;
         //Add certificate serial number to issuers ocsp
-        if(queryResult.isEmpty()){
+        if (queryResult.isEmpty()) {
             issuerOcsp = new OcspTable(UUID.randomUUID(), certificate.getIssuerSerialNumber(), new HashSet<>());
             issuerOcsp.getRevokedCertificateSerialNums().add(certificate.getSerialNumber());
-        }
-        else
-        {
+        } else {
             issuerOcsp = queryResult.get();
-            if(issuerOcsp.getRevokedCertificateSerialNums().contains(certificate.getSerialNumber())){
+            if (issuerOcsp.getRevokedCertificateSerialNums().contains(certificate.getSerialNumber())) {
                 //Also it means all of its children are also already revoked
                 return;
             }
@@ -217,19 +214,17 @@ public class CertificateService implements ICertificateService {
         _ocspTableRepository.save(issuerOcsp);
         logger.info("Revoked certificate: {}", certSerialNum);
 
-        if(certificate.isCa())
-        {
+        if (certificate.isCa()) {
             Iterable<Certificate> children = _certificateRepository.
-                    GetChildren("src/main/resources/static/example.jks",keyStorePassword, certificate.getSerialNumber() );
+                    GetChildren("src/main/resources/static/example.jks", keyStorePassword, certificate.getSerialNumber());
 
-            for(Certificate child : children)
-            {
+            for (Certificate child : children) {
                 revoke(child.getSerialNumber());
             }
         }
     }
 
-    public boolean isRevoked(BigInteger certSerialNum){
+    public boolean isRevoked(BigInteger certSerialNum) {
         java.security.cert.Certificate rawCertificate = _certificateRepository.GetCertificateBySerialNumber(keyStorePassword, certSerialNum);
         Certificate certificate = new Certificate(rawCertificate);
 
@@ -237,8 +232,8 @@ public class CertificateService implements ICertificateService {
         Certificate issuerCertificate = new Certificate(issuerRawCertificate);
 
         Optional<OcspTable> result = _ocspTableRepository.findByCaSerialNumber(issuerCertificate.getSerialNumber());
-        if(result.isEmpty()){
-            return  false;
+        if (result.isEmpty()) {
+            return false;
         }
 
         return result.get().getRevokedCertificateSerialNums().contains(certificate.getSerialNumber());

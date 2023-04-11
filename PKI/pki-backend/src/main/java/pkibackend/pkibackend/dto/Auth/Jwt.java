@@ -1,28 +1,16 @@
 package pkibackend.pkibackend.dto.Auth;
 
-// DTO koji enkapsulira generisani JWT i njegovo trajanje koji se vracaju klijentu
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@NoArgsConstructor
+@Getter
+@Setter
+@AllArgsConstructor
 public class Jwt {
 
     private String jwt;
-
-
-    public Jwt() {
-        this.jwt = null;
-
-    }
-
-    public Jwt(String accessToken) {
-        this.jwt = accessToken;
-
-    }
-
-    public String getJwt() {
-        return jwt;
-    }
-
-    public void setJwt(String jwt) {
-        this.jwt = jwt;
-    }
-
 
 }

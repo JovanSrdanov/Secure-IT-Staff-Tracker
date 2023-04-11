@@ -15,7 +15,7 @@ import java.util.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Account  implements UserDetails {
+public class Account implements UserDetails {
     @Id
     private UUID id;
     @Column(nullable = false, unique = true)
@@ -48,7 +48,7 @@ public class Account  implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        return this.roles;
     }
 
     @Override
