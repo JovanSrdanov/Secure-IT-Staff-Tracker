@@ -22,6 +22,7 @@ public class PkiBackendApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(PkiBackendApplication.class, args);
+		System.out.println("AAAJJJJJJMMMMOOOOOUUUUUUU");
 	}
 	@Bean
 	public Validator validator() {
