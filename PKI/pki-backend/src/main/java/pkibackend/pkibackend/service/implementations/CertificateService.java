@@ -14,15 +14,13 @@ import pkibackend.pkibackend.certificates.CertificateGenerator;
 import pkibackend.pkibackend.dto.CreateCertificateInfo;
 import pkibackend.pkibackend.dto.EntityInfo;
 import pkibackend.pkibackend.exceptions.BadRequestException;
-import pkibackend.pkibackend.model.Account;
-import pkibackend.pkibackend.model.Certificate;
-import pkibackend.pkibackend.model.KeystoreRowInfo;
-import pkibackend.pkibackend.model.OcspTable;
+import pkibackend.pkibackend.model.*;
 import pkibackend.pkibackend.repository.AccountRepository;
 import pkibackend.pkibackend.repository.CertificateRepository;
 import pkibackend.pkibackend.repository.KeystoreRowInfoRepository;
 import pkibackend.pkibackend.repository.OcspTableRepository;
 import pkibackend.pkibackend.service.interfaces.ICertificateService;
+import pkibackend.pkibackend.service.interfaces.IRoleService;
 
 import java.math.BigInteger;
 import java.security.KeyPair;
@@ -39,6 +37,7 @@ public class CertificateService implements ICertificateService {
     private final AccountRepository _accountRepository;
     private final KeystoreRowInfoRepository _keystoreRowInfoRepository;
     private final OcspTableRepository _ocspTableRepository;
+    private IRoleService _roleService;
     private static final Logger logger = LogManager.getLogger(CertificateService.class);
 
     @Value("${keystorePassword}")
@@ -47,11 +46,12 @@ public class CertificateService implements ICertificateService {
     @Autowired
     public CertificateService(CertificateRepository certificateRepository, AccountRepository accountRepository,
                               KeystoreRowInfoRepository keystoreRowInfoRepository,
-                              OcspTableRepository ocspTableRepository) {
+                              OcspTableRepository ocspTableRepository,IRoleService roleService) {
         _certificateRepository = certificateRepository;
         _accountRepository = accountRepository;
         _keystoreRowInfoRepository = keystoreRowInfoRepository;
         _ocspTableRepository = ocspTableRepository;
+        _roleService = roleService;
     }
 
     @Override
@@ -145,7 +145,9 @@ public class CertificateService implements ICertificateService {
         //UID (USER ID) je ID korisnika
         builder.addRDN(BCStyle.UID, accountId.toString());
         newCertificate.setSubjectInfo(builder.build());
-        return new Account(accountId, info.getEmail(), info.getPassword(), new HashSet<>());
+        List<Role> roles = _roleService.findByName("ROLE_CERTIFICATE_USER");
+        // Todo JOVAN ovde dodati lepo generisanje passworda i salta i mail
+        return new Account(accountId, info.getEmail(), "password","salt",roles, new HashSet<>());
     }
 
     private Account buildIssuer(EntityInfo info, BigInteger serialNumber, Certificate newCertificate) throws BadRequestException {

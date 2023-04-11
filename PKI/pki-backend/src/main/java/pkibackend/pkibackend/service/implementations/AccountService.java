@@ -46,4 +46,13 @@ public class AccountService implements IAccountService {
     public void deleteById(UUID id) {
         _accountRepository.deleteById(id);
     }
+
+    @Override
+    public Account findAccountByEmail(String email) {
+        if(_accountRepository.findByEmail(email).isPresent()) {
+
+            return _accountRepository.findByEmail(email).get();
+        }
+        throw new NotFoundException("Account not found");
+    }
 }

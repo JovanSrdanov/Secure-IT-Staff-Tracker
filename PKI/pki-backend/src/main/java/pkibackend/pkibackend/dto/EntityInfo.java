@@ -15,5 +15,4 @@ public class EntityInfo {
     private String organizationUnitName;
     private String countryCode;
     private String email;
-    private String password;
 }
