@@ -42,6 +42,9 @@ public class CertificateController {
         // TODO Jovan: iz jwt-a da se izvuku ifno o issuer-u
         // TODO Strahinja: provera dal moze da izda sertifikat nekom drugom (dal je CA il nije,
         // da li je zaista issuer-ov sertifikat)
+        if(!_certificateService.isChainValid(info.getIssuingCertificateSerialNumber())) {
+            return new ResponseEntity<>("Issuing certificate is not valid!", HttpStatus.CONFLICT);
+        }
 
         try {
             Certificate createdCertificate = _certificateService.generateCertificate(info);

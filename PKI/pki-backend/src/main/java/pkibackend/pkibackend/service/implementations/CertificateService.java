@@ -105,7 +105,7 @@ public class CertificateService implements ICertificateService {
             if(shouldBeCa && !certificate.isCa()) {
                 continue;
             }
-            if(sholudBeNotRevokedAndExpired && (isExired(certificate) || isRevoked(certificate.getSerialNumber()))) {
+            if(sholudBeNotRevokedAndExpired && !isChainValid(certificate.getSerialNumber())) {
                 continue;
             }
 
@@ -436,6 +436,7 @@ public class CertificateService implements ICertificateService {
         return result.get().getRevokedCertificateSerialNums().contains(certificate.getSerialNumber());
     }
 
+    @Override
     public boolean isChainValid(BigInteger certSerialNum) {
         java.security.cert.Certificate rawCertificate = _certificateRepository.GetCertificateBySerialNumber(keyStorePassword, certSerialNum);
         Certificate certificate = new Certificate(rawCertificate);
