@@ -57,4 +57,8 @@ public class CertificateRepository {
     public Iterable<Certificate> GetChildren(String keyStoreFile, String keyStorePass, BigInteger issuerSerialNumber) {
         return _reader.GetChildren(keyStoreFile, keyStorePass, issuerSerialNumber);
     }
+
+    public Boolean findAliasInKeystore(String alias, String keyStorePass) {
+        return _reader.findAliasInKeystore("src/main/resources/static/example.jks", alias, keyStorePass);
+    }
 }
