@@ -29,7 +29,7 @@ public class AccountController {
     public ResponseEntity<?> changePassword(@Valid @RequestBody UpdatePasswordDto updatePasswordDto, Principal principal) {
         try {
             _accountService.changePassword(principal.getName(), updatePasswordDto);
-            return new ResponseEntity<>(true, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(true, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
