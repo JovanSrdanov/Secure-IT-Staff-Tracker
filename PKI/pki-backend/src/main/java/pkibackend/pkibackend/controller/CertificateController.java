@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import org.webjars.NotFoundException;
 import pkibackend.pkibackend.certificates.CertificateGenerator;
 import pkibackend.pkibackend.dto.BooleanResponse;
+import pkibackend.pkibackend.dto.CertificateInfoDto;
 import pkibackend.pkibackend.dto.CertificateSerialNum;
 import pkibackend.pkibackend.dto.CreateCertificateInfo;
 import pkibackend.pkibackend.exceptions.BadRequestException;
@@ -24,6 +25,7 @@ import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -98,5 +100,10 @@ public class CertificateController {
         } catch (CertificateEncodingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @GetMapping("admin")
+    public ResponseEntity<Iterable<CertificateInfoDto>> findAllAdmin(){
+        return new ResponseEntity<>(_certificateService.findAllAdmin(), HttpStatus.OK);
     }
 }

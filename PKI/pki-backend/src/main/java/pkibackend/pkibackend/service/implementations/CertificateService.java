@@ -11,8 +11,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import pkibackend.pkibackend.Utilities.Keys;
+import pkibackend.pkibackend.Utilities.ObjectMapperUtils;
 import pkibackend.pkibackend.Utilities.PasswordGenerator;
 import pkibackend.pkibackend.certificates.CertificateGenerator;
+import pkibackend.pkibackend.dto.CertificateEntityInfoDto;
+import pkibackend.pkibackend.dto.CertificateInfoDto;
 import pkibackend.pkibackend.dto.CreateCertificateInfo;
 import pkibackend.pkibackend.dto.EntityInfo;
 import pkibackend.pkibackend.exceptions.BadRequestException;
@@ -59,7 +62,34 @@ public class CertificateService implements ICertificateService {
 
     @Override
     public Iterable<Certificate> findAll() {
-        return null;
+        List<KeystoreRowInfo> keystoreRowInfos = _keystoreRowInfoRepository.findAll();
+        List<Certificate> certificates = new ArrayList<>();
+        for (KeystoreRowInfo row : keystoreRowInfos) {
+            Certificate certificate = new Certificate(_certificateRepository.GetCertificate(row.getAlias(), keyStorePassword));
+            certificates.add(certificate);
+        }
+        return certificates;
+    }
+
+    @Override
+    public Iterable<CertificateInfoDto> findAllAdmin(){
+        List<KeystoreRowInfo> keystoreRowInfos = _keystoreRowInfoRepository.findAll();
+        List<CertificateInfoDto> certificateDtos = new ArrayList<>();
+        for (KeystoreRowInfo row : keystoreRowInfos) {
+            Certificate certificate = new Certificate(_certificateRepository.GetCertificate(row.getAlias(), keyStorePassword));
+            CertificateInfoDto dto = ObjectMapperUtils.map(certificate, CertificateInfoDto.class);
+
+            X500Name subjectInfo = new X500Name(certificate.getX509Certificate().getSubjectX500Principal().getName());
+            X500Name issuerInfo = new X500Name(certificate.getX509Certificate().getIssuerX500Principal().getName());
+
+            dto.setSubjectInfo(new CertificateEntityInfoDto(subjectInfo));
+            dto.setIssuerInfo(new CertificateEntityInfoDto(issuerInfo));
+            dto.setRevoked(isRevoked(certificate.getSerialNumber()));
+            dto.setAlias(row.getAlias());
+
+            certificateDtos.add(dto);
+        }
+        return certificateDtos;
     }
 
     @Override
