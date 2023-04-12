@@ -40,9 +40,8 @@ public class CertificateController {
     public ResponseEntity<?> createCertificate(@RequestBody CreateCertificateInfo info, Principal principal) {
 
         Account a = _accountService.findAccountByEmail(principal.getName());
-        if (!a.getRoles().get(0).equals("ROLE_PKI_ADMIN")) {
-            // Todo Strahinja proveri jel issuerov
-            // Todo accoutn all da ne vraca admina i onaj drugi isto iz onog drugog kontrolera
+        if(!_accountService.isAccountAdmin(a) && !_certificateService.isInKeystore(a.getKeyStoreRowsInfo(), info.getIssuingCertificateSerialNumber())) {
+            return new ResponseEntity<>("You do not own issuing certificate!", HttpStatus.FORBIDDEN);
         }
 
         if (info.getIssuingCertificateSerialNumber() != null) {
