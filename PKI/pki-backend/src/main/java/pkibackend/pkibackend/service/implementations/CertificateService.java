@@ -161,12 +161,13 @@ public class CertificateService implements ICertificateService {
     @Override
     public Certificate generateCertificate(CreateCertificateInfo info)
             throws RuntimeException, BadRequestException, CertificateEncodingException, InternalServerErrorException {
-        if (_certificateRepository.findAliasInKeystore(info.getAlias(), keyStorePassword)) {
-            throw new BadRequestException("Given alias already exists in the keystore");
-        }
+//        if (_certificateRepository.findAliasInKeystore(info.getAlias(), keyStorePassword)) {
+//            throw new BadRequestException("Given alias already exists in the keystore");
+//        }
 
         Account issuer = new Account();
         Account subject = new Account();
+        String newCertificateAlias = UUID.randomUUID().toString();
         Certificate newCertificate = new Certificate();
         BigInteger serialNumber = new BigInteger(32, new SecureRandom());
 
@@ -216,7 +217,7 @@ public class CertificateService implements ICertificateService {
         newCertificate.setX509Certificate(certificate);
 
         KeystoreRowInfo rowInfo = new KeystoreRowInfo
-                (UUID.randomUUID(), info.getAlias(), PasswordGenerator.generatePassword(15));
+                (UUID.randomUUID(), newCertificateAlias, PasswordGenerator.generatePassword(15));
 
        subject.getKeyStoreRowsInfo().add(rowInfo);
 
@@ -231,7 +232,7 @@ public class CertificateService implements ICertificateService {
 
         _certificateRepository.SaveCertificate(
                 newCertificate,
-                keyStorePassword, info.getAlias(),
+                keyStorePassword, newCertificateAlias,
                 rowInfo.getPassword());
 
         return newCertificate;

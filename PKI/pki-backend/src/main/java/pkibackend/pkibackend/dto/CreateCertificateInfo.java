@@ -26,5 +26,5 @@ public class CreateCertificateInfo {
     private Map<String, String> extensions;
 
     // alias novog sertifikata
-    String alias;
+    //String alias;
 }
