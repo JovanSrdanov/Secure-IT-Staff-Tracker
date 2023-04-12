@@ -43,7 +43,7 @@ public class CertificateController {
 
         try {
             Certificate createdCertificate = _certificateService.generateCertificate(info);
-            return new ResponseEntity<>(createdCertificate, HttpStatus.CREATED);
+            return new ResponseEntity<>(createdCertificate.getSerialNumber(), HttpStatus.CREATED);
         } catch (RuntimeException e) {
             e.printStackTrace();
             return new ResponseEntity<>("Error while creating certificate", HttpStatus.INTERNAL_SERVER_ERROR);

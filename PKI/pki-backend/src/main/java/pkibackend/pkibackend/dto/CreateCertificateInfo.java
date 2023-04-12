@@ -7,14 +7,15 @@ import lombok.Setter;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 
 @NoArgsConstructor
 @Getter
 @Setter
 public class CreateCertificateInfo {
     private EntityInfo subjectInfo;
-    //TODO dovoljno je samo poslati issuerid
-    private EntityInfo issuerInfo;
+
+    private UUID issuerId;
     private Date startDate;
     private Date endDate;
 

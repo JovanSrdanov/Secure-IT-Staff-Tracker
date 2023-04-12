@@ -128,15 +128,7 @@ public class KeyStoreReader {
             }
 
             return certificates;
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (CertificateException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        } catch (KeyStoreException e) {
+        } catch (CertificateException | IOException | NoSuchAlgorithmException | KeyStoreException e) {
             throw new RuntimeException(e);
         }
     }
@@ -159,4 +151,25 @@ public class KeyStoreReader {
         return children;
     }
 
+    public Boolean findAliasInKeystore(String keyStoreFile, String alias, String keyStorePassword) {
+        BufferedInputStream in = null;
+        try {
+            in = new BufferedInputStream(new FileInputStream(keyStoreFile));
+            keyStore.load(in, keyStorePassword.toCharArray());
+
+            Enumeration<String> aliases = keyStore.aliases();
+            while (aliases.hasMoreElements()) {
+                if (alias.equals(aliases.nextElement())) {
+                    System.out.println("Found alias: " + alias);
+                    return true;
+                }
+            }
+        } catch (FileNotFoundException e) {
+            // kad je self-signed sertifikat keystore ne postoji jos pa nije nasao alias
+            return false;
+        } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException e) {
+            throw new RuntimeException(e);
+        }
+        return false;
+    }
 }
