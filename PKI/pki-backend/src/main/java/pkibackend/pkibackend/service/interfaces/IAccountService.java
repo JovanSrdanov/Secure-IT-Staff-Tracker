@@ -21,4 +21,6 @@ public interface IAccountService extends ICrudService<Account> {
     void changePassword(String name, UpdatePasswordDto updatePasswordDto) throws Exception;
 
     Account findAccountByEmail(String email);
+
+    boolean isAccountAdmin(Account account);
 }

@@ -5,12 +5,15 @@ import pkibackend.pkibackend.dto.CreateCertificateInfo;
 import pkibackend.pkibackend.exceptions.BadRequestException;
 import pkibackend.pkibackend.exceptions.InternalServerErrorException;
 import pkibackend.pkibackend.model.Certificate;
+import pkibackend.pkibackend.model.KeystoreRowInfo;
 
 import java.math.BigInteger;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public interface ICertificateService extends ICrudService<Certificate>{
@@ -23,4 +26,5 @@ public interface ICertificateService extends ICrudService<Certificate>{
     public boolean isRevoked(BigInteger certSerialNum) throws BadRequestException;
     X509Certificate GetCertificateBySerialNumber(BigInteger serialNumber) throws BadRequestException;
     boolean isChainValid(BigInteger certSerialNum) throws BadRequestException;
+    boolean isInKeystore(Set<KeystoreRowInfo> rows, BigInteger certSerialNum);
 }

@@ -13,6 +13,7 @@ import pkibackend.pkibackend.repository.AccountRepository;
 import pkibackend.pkibackend.service.interfaces.IAccountService;
 import pkibackend.pkibackend.service.interfaces.IRoleService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,12 +38,26 @@ public class AccountService implements IAccountService {
 
     @Override
     public List<Account> findAllNotAdmin() {
-        return _accountRepository.findAll();
+        List<Account> accounts = _accountRepository.findAll();
+        List<Account> nonAdminAccounts = new ArrayList<>();
+        for(Account account : accounts) {
+            if(!isAccountAdmin(account)) {
+                nonAdminAccounts.add(account);
+            }
+        }
+        return nonAdminAccounts;
     }
 
     @Override
     public List<Account> findAllByIdIsNot(UUID accountId) {
-        return _accountRepository.findAllByIdIsNot(accountId);
+        List<Account> accounts = _accountRepository.findAllByIdIsNot(accountId);
+        List<Account> nonAdminAccounts = new ArrayList<>();
+        for(Account account : accounts) {
+            if(!isAccountAdmin(account)) {
+                nonAdminAccounts.add(account);
+            }
+        }
+        return nonAdminAccounts;
     }
 
     @Override
@@ -96,6 +111,16 @@ public class AccountService implements IAccountService {
             return _accountRepository.findByEmail(email).get();
         }
         throw new NotFoundException("Account not found");
+    }
+
+    @Override
+    public boolean isAccountAdmin(Account account) {
+        for(Role role : account.getRoles()) {
+            if(role.getName().equals("ROLE_PKI_ADMIN")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

@@ -508,6 +508,16 @@ public class CertificateService implements ICertificateService {
     }
 
     @Override
+    public boolean isInKeystore(Set<KeystoreRowInfo> rows, BigInteger certSerialNum) {
+        for(KeystoreRowInfo row : rows) {
+            if(row.getCertificateSerialNumber().equals(certSerialNum)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
     public boolean isChainValid(BigInteger certSerialNum) throws BadRequestException {
         Optional<KeystoreRowInfo> issuerKeystoreInfo = _keystoreRowInfoRepository.findByCertificateSerialNumber(certSerialNum);
         if (issuerKeystoreInfo.isEmpty()) {
