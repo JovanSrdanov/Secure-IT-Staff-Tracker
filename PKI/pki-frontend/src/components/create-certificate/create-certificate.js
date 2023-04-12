@@ -33,6 +33,9 @@ function CreateCertificate() {
     const [selectedSubjectEmail, setSelectedSubjectEmail] = useState(null);
     const [uniqueEmailForNewSubject, setUniqueEmailForNewSubject] = useState(false);
     const [uniqueEmailForNewIssuer, setUniqueEmailForNewIssuer] = useState(false);
+    const [certificates, setCertificates] = useState(null);
+    const [existingAccounts, setExistingAccounts] = useState(null);
+
 
     const [subjectInfo, setSubjectInfo] = useState({
         commonName: '',
@@ -150,15 +153,32 @@ function CreateCertificate() {
             endDate: endDate,
             issuingCertificateSerialNumber: selectedCertificate.issuingCertificateSerialNumber,
             extensions: extensions
-
         }
-        console.log(dto)
-        setDialogOpen(true)
+
+
         /*
         interceptor.post("/certificate", dto).then(res => {
+           setDialogOpen(true)
         }).catch(err => {
+        alert("Unexpected error")
         })*/
     };
+
+
+    /*
+     interceptor.get("certificate/all-certificates").then(res => {
+       setCertificates(res.data)
+     }).catch(err => {
+     alert("Unexpected error")
+     })*/
+
+    /*
+   interceptor.get("accountss").then(res => {
+     setExistingAccounts(res.data)
+   }).catch(err => {
+   alert("Unexpected error")
+   })*/
+
 
     function dialogClose() {
         setDialogOpen(false)
@@ -254,6 +274,10 @@ function CreateCertificate() {
                                         value={issuer.email}
                                         onChange={handelIssuerInputChange}
                                     />
+                                    <p>
+                                        {uniqueEmailForNewIssuer && (<span>Email is unique</span>)}
+                                        {!uniqueEmailForNewIssuer && (<span>Email is not unique</span>)}
+                                    </p>
                                 </>
                             )
                         }
@@ -347,7 +371,10 @@ function CreateCertificate() {
                                                     value={subjectInfo.email}
                                                     onChange={handleSubjectInputChange}
                                                 />
-                                                <p>TODO DODAJ VERIFY PORUKU, NA VERIFY RADI NEXT</p>
+                                                <p>
+                                                    {uniqueEmailForNewSubject && (<span>Email is unique</span>)}
+                                                    {!uniqueEmailForNewSubject && (<span>Email is not unique</span>)}
+                                                </p>
 
                                             </>
                                         )
@@ -506,10 +533,12 @@ function CreateCertificate() {
                     {activeStep !== steps.length - 1 ? (
                         <Button
                             onClick={handleNext}
-                            disabled={(activeStep === -1 && typeOfCertificate === "caissued" && selectedCertificate.issuerSerialNumber == null) ||
-                                (activeStep === -1 && typeOfCertificate === "selfsigned" && uniqueEmailForNewIssuer === false) ||
-                                (activeStep === -2 && typeOfCertificate === "caissued" && subjectTypeSelected === "new" && uniqueEmailForNewSubject === false) ||
-                                (activeStep === -2 && typeOfCertificate === "caissued" && subjectTypeSelected === "existing" && selectedSubjectEmail == null) ||
+                            disabled={
+                                // TODO popravi ovo true u false
+                                (activeStep === 1 && typeOfCertificate === "caissued" && selectedCertificate.issuerSerialNumber != null) ||
+                                (activeStep === 1 && typeOfCertificate === "selfsigned" && uniqueEmailForNewIssuer === true) ||
+                                (activeStep === 2 && typeOfCertificate === "caissued" && subjectTypeSelected === "new" && uniqueEmailForNewSubject === true) ||
+                                (activeStep === 2 && typeOfCertificate === "caissued" && subjectTypeSelected === "existing" && selectedSubjectEmail == null) ||
                                 (activeStep === 3 && startDate == null) ||
                                 (activeStep === 4 && endDate == null)}
                         >
