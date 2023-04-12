@@ -20,7 +20,6 @@ public class CreateCertificateInfo {
     private Date endDate;
 
     // serijski broj sertifikata koji je koriscen za potpisivanje
-    // TODO Stefan: staviti da je critical
     private BigInteger issuingCertificateSerialNumber;
 
     // pogledaj addExtensions metodu u CertificateGenerator-u

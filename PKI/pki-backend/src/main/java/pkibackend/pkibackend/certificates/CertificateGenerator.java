@@ -104,10 +104,8 @@ public class CertificateGenerator {
         // opciono cuva identifikator za javni kljuc issuer-a i/ili serijski broj sertifikata koji je
         // iskoriscen za potpis
         //TODO msm da sam (aleksanar) stavio da je obavezno tako sto sam switchovao 2. param na true
-        if (extensions.containsKey("authorityKeyIdentifier") && issuingCertificateSerialNumber != null) {
-            AuthorityKeyIdentifier identifier = new AuthorityKeyIdentifier(
-                    issuingCertificateSerialNumber.toByteArray());
-            certGen.addExtension(Extension.authorityKeyIdentifier, true, identifier);
-        }
+        AuthorityKeyIdentifier identifier = new AuthorityKeyIdentifier(
+                issuingCertificateSerialNumber.toByteArray());
+        certGen.addExtension(Extension.authorityKeyIdentifier, true, identifier);
     }
 }

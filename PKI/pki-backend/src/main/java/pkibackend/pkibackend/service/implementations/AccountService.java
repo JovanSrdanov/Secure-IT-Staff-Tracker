@@ -55,6 +55,11 @@ public class AccountService implements IAccountService {
     }
 
     @Override
+    public Boolean existsByEmail(String email) {
+        return _accountRepository.findByEmail(email).isPresent();
+    }
+
+    @Override
     public Account save(Account entity) throws BadRequestException {
         if (entity.getId() == null) {
             entity.setId(UUID.randomUUID());
