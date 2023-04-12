@@ -40,7 +40,7 @@ public class Account implements UserDetails {
     public String getRowPasswordByAlias(String alias) {
         for (KeystoreRowInfo rowInfo : keyStoreRowsInfo) {
             if (rowInfo.getAlias().equals(alias)) {
-                return rowInfo.getPassword();
+                return rowInfo.getRowPassword();
             }
         }
         return "";

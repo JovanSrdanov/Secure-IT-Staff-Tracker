@@ -36,6 +36,16 @@ public class AccountService implements IAccountService {
     }
 
     @Override
+    public List<Account> findAllNotAdmin() {
+        return _accountRepository.findAll();
+    }
+
+    @Override
+    public List<Account> findAllByIdIsNot(UUID accountId) {
+        return _accountRepository.findAllByIdIsNot(accountId);
+    }
+
+    @Override
     public Account findById(UUID id) {
         if (_accountRepository.findById(id).isPresent()) {
             return _accountRepository.findById(id).get();
@@ -50,6 +60,11 @@ public class AccountService implements IAccountService {
         }
 
         throw new NotFoundException("Account with given email not found");
+    }
+
+    @Override
+    public Boolean existsByEmail(String email) {
+        return _accountRepository.findByEmail(email).isPresent();
     }
 
     @Override
