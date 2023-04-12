@@ -58,46 +58,47 @@ public class CertificateService implements ICertificateService {
 
     @Override
     public Iterable<Certificate> findAll() {
-        List<KeystoreRowInfo> keystoreRowInfos = _keystoreRowInfoRepository.findAll();
-        List<Certificate> certificates = new ArrayList<>();
-        for (KeystoreRowInfo row : keystoreRowInfos) {
-            Certificate certificate = new Certificate(_certificateRepository.GetCertificate(row.getAlias(), keyStorePassword));
-            certificates.add(certificate);
-        }
-        return certificates;
+//        List<KeystoreRowInfo> keystoreRowInfos = _keystoreRowInfoRepository.findAll();
+//        List<Certificate> certificates = new ArrayList<>();
+//        for (KeystoreRowInfo row : keystoreRowInfos) {
+//            Certificate certificate = new Certificate(_certificateRepository.GetCertificate(row.getAlias(), keyStorePassword));
+//            certificates.add(certificate);
+//        }
+        //TODO obrisati
+        return null;
     }
 
     @Override
-    public Iterable<CertificateInfoDto> findAllAdmin(){
+    public Iterable<CertificateInfoDto> findAllAdmin() throws BadRequestException {
         List<KeystoreRowInfo> keystoreRowInfos = _keystoreRowInfoRepository.findAll();
         return findAllFromRowsWithCondition(keystoreRowInfos, false, false);
     }
 
     @Override
-    public Iterable<CertificateInfoDto> findAllCaAdmin(){
+    public Iterable<CertificateInfoDto> findAllCaAdmin() throws BadRequestException {
         List<KeystoreRowInfo> keystoreRowInfos = _keystoreRowInfoRepository.findAll();
         return findAllFromRowsWithCondition(keystoreRowInfos, true, true);
     }
 
     @Override
-    public Iterable<CertificateInfoDto> findAllForLoggedIn(UUID accountId){
+    public Iterable<CertificateInfoDto> findAllForLoggedIn(UUID accountId) throws BadRequestException {
         Account account = _accountService.findById(accountId);
         List<KeystoreRowInfo> keystoreRowInfos = new ArrayList<>(account.getKeyStoreRowsInfo());
         return findAllFromRowsWithCondition(keystoreRowInfos, false, false);
     }
 
     @Override
-    public Iterable<CertificateInfoDto> findAllValidCaForLoggedIn(UUID accountId) {
+    public Iterable<CertificateInfoDto> findAllValidCaForLoggedIn(UUID accountId) throws BadRequestException {
         Account account = _accountService.findById(accountId);
         List<KeystoreRowInfo> keystoreRowInfos = new ArrayList<>(account.getKeyStoreRowsInfo());
         return findAllFromRowsWithCondition(keystoreRowInfos, true, true);
     }
 
     private Iterable<CertificateInfoDto> findAllFromRowsWithCondition(List<KeystoreRowInfo> keystoreRowInfos,
-                                                                      boolean shouldBeCa, boolean sholudBeNotRevokedAndExpired) {
+                                                                      boolean shouldBeCa, boolean sholudBeNotRevokedAndExpired) throws BadRequestException {
         List<CertificateInfoDto> certificateDtos = new ArrayList<>();
         for (KeystoreRowInfo row : keystoreRowInfos) {
-            Certificate certificate = new Certificate(_certificateRepository.GetCertificate(row.getAlias(), keyStorePassword));
+            Certificate certificate = new Certificate(_certificateRepository.GetCertificate(row.getAlias(), row.getKeystoreName(), row.getPassword()));
             if(shouldBeCa && !certificate.isCa()) {
                 continue;
             }
@@ -111,7 +112,7 @@ public class CertificateService implements ICertificateService {
         
     }
 
-    private void makeCertificateDto(List<CertificateInfoDto> certificateDtos, KeystoreRowInfo row, Certificate certificate) {
+    private void makeCertificateDto(List<CertificateInfoDto> certificateDtos, KeystoreRowInfo row, Certificate certificate) throws BadRequestException {
         CertificateInfoDto dto = ObjectMapperUtils.map(certificate, CertificateInfoDto.class);
 
         X500Name subjectInfo = new X500Name(certificate.getX509Certificate().getSubjectX500Principal().getName());
