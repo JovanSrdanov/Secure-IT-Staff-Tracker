@@ -11,8 +11,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import pkibackend.pkibackend.Utilities.Keys;
+import pkibackend.pkibackend.Utilities.ObjectMapperUtils;
 import pkibackend.pkibackend.Utilities.PasswordGenerator;
 import pkibackend.pkibackend.certificates.CertificateGenerator;
+import pkibackend.pkibackend.dto.CertificateEntityInfoDto;
+import pkibackend.pkibackend.dto.CertificateInfoDto;
 import pkibackend.pkibackend.dto.CreateCertificateInfo;
 import pkibackend.pkibackend.dto.EntityInfo;
 import pkibackend.pkibackend.exceptions.BadRequestException;
@@ -59,7 +62,77 @@ public class CertificateService implements ICertificateService {
 
     @Override
     public Iterable<Certificate> findAll() {
-        return null;
+        List<KeystoreRowInfo> keystoreRowInfos = _keystoreRowInfoRepository.findAll();
+        List<Certificate> certificates = new ArrayList<>();
+        for (KeystoreRowInfo row : keystoreRowInfos) {
+            Certificate certificate = new Certificate(_certificateRepository.GetCertificate(row.getAlias(), keyStorePassword));
+            certificates.add(certificate);
+        }
+        return certificates;
+    }
+
+    @Override
+    public Iterable<CertificateInfoDto> findAllAdmin(){
+        List<KeystoreRowInfo> keystoreRowInfos = _keystoreRowInfoRepository.findAll();
+        return findAllFromRowsWithCondition(keystoreRowInfos, false, false);
+    }
+
+    @Override
+    public Iterable<CertificateInfoDto> findAllCaAdmin(){
+        List<KeystoreRowInfo> keystoreRowInfos = _keystoreRowInfoRepository.findAll();
+        return findAllFromRowsWithCondition(keystoreRowInfos, true, true);
+    }
+
+    @Override
+    public Iterable<CertificateInfoDto> findAllForLoggedIn(UUID accountId){
+        Account account = _accountService.findById(accountId);
+        List<KeystoreRowInfo> keystoreRowInfos = new ArrayList<>(account.getKeyStoreRowsInfo());
+        return findAllFromRowsWithCondition(keystoreRowInfos, false, false);
+    }
+
+    @Override
+    public Iterable<CertificateInfoDto> findAllValidCaForLoggedIn(UUID accountId) {
+        Account account = _accountService.findById(accountId);
+        List<KeystoreRowInfo> keystoreRowInfos = new ArrayList<>(account.getKeyStoreRowsInfo());
+        return findAllFromRowsWithCondition(keystoreRowInfos, true, true);
+    }
+
+    private Iterable<CertificateInfoDto> findAllFromRowsWithCondition(List<KeystoreRowInfo> keystoreRowInfos,
+                                                                      boolean shouldBeCa, boolean sholudBeNotRevokedAndExpired) {
+        List<CertificateInfoDto> certificateDtos = new ArrayList<>();
+        for (KeystoreRowInfo row : keystoreRowInfos) {
+            Certificate certificate = new Certificate(_certificateRepository.GetCertificate(row.getAlias(), keyStorePassword));
+            if(shouldBeCa && !certificate.isCa()) {
+                continue;
+            }
+            if(sholudBeNotRevokedAndExpired && !isChainValid(certificate.getSerialNumber())) {
+                continue;
+            }
+
+            makeCertificateDto(certificateDtos, row, certificate);
+        }
+        return certificateDtos;
+        
+    }
+
+    private void makeCertificateDto(List<CertificateInfoDto> certificateDtos, KeystoreRowInfo row, Certificate certificate) {
+        CertificateInfoDto dto = ObjectMapperUtils.map(certificate, CertificateInfoDto.class);
+
+        X500Name subjectInfo = new X500Name(certificate.getX509Certificate().getSubjectX500Principal().getName());
+        X500Name issuerInfo = new X500Name(certificate.getX509Certificate().getIssuerX500Principal().getName());
+
+        List<String> criticalExtensions = new ArrayList<>(certificate.getX509Certificate().getCriticalExtensionOIDs());
+        List<String> nonCriticalExtensions = new ArrayList<>(certificate.getX509Certificate().getNonCriticalExtensionOIDs());
+        List<String> extensions = new ArrayList<>();
+        extensions.addAll(criticalExtensions);
+        extensions.addAll(nonCriticalExtensions);
+
+        dto.setSubjectInfo(new CertificateEntityInfoDto(subjectInfo, extensions));
+        dto.setIssuerInfo(new CertificateEntityInfoDto(issuerInfo, extensions));
+        dto.setRevoked(isRevoked(certificate.getSerialNumber()));
+        dto.setAlias(row.getAlias());
+
+        certificateDtos.add(dto);
     }
 
     @Override
@@ -363,6 +436,7 @@ public class CertificateService implements ICertificateService {
         return result.get().getRevokedCertificateSerialNums().contains(certificate.getSerialNumber());
     }
 
+    @Override
     public boolean isChainValid(BigInteger certSerialNum) {
         java.security.cert.Certificate rawCertificate = _certificateRepository.GetCertificateBySerialNumber(keyStorePassword, certSerialNum);
         Certificate certificate = new Certificate(rawCertificate);
