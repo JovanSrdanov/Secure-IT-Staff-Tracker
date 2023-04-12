@@ -1,0 +1,27 @@
+:root {
+    --background: #2e4450;
+    --text-background: rgb(227, 226, 212);
+    --outlines: #192830;
+    --text: #89dee2;
+    --text-hover: #16c2d5;
+    --backs: #527c88;
+    --border-radius: 10px;
+}
+
+
+* {
+    color-scheme: dark;
+}
+
+
+body {
+    font-family: monospace;
+    overflow-y: scroll;
+}
+
+h1 {
+    width: fit-content;
+    margin: 10px auto;
+    text-transform: uppercase;
+    caret-color: transparent;
+}

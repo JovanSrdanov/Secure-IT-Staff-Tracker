@@ -23,17 +23,7 @@ public class KeyStoreWriter {
     }
 
     public void loadKeyStore(String fileName, char[] password) {
-//        try {
-//            if(fileName != null) {
-//                keyStore.load(new FileInputStream(fileName), password);
-//            } else {
-//                //Ako je cilj kreirati novi KeyStore poziva se i dalje load, pri cemu je prvi parametar null
-//                keyStore.load(null, password);
-//            }
-//        } catch (NoSuchAlgorithmException | CertificateException | IOException e) {
-//            throw new RuntimeException(e);
-//        }
-        // TODO Stefan: promeni
+
         try {
             FileInputStream fis = new FileInputStream(fileName);
             keyStore.load(fis, password);
@@ -60,7 +50,7 @@ public class KeyStoreWriter {
 
     public void write(String alias, PrivateKey privateKey, char[] password, java.security.cert.Certificate certificate) {
         try {
-            keyStore.setKeyEntry(alias, privateKey, password, new Certificate[] {certificate});
+            keyStore.setKeyEntry(alias, privateKey, password, new Certificate[]{certificate});
         } catch (KeyStoreException e) {
             throw new RuntimeException(e);
         }
