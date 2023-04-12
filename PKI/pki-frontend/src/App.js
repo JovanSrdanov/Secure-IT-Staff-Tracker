@@ -8,7 +8,11 @@ import LoginPage from "./pages/login-page/login-page";
 import {useEffect, useState} from "react";
 import ParticlesBg from 'particles-bg'
 import ChangePasswordPage from "./pages/certificate-user-change-password-page/change-password-page";
-import HackerHeaders from "./components/hackerHeaders/hackerHeaders";
+import HackerHeaders from "./components/hacker-headers/hackerHeaders";
+import AllCertificatesPage from "./pages/admin-pages/all-certificates-page";
+import CreateCertificatePage from "./pages/admin-pages/create-certificate-page";
+import MyCertificatesPage from "./pages/certificate-user-pages/my-certificates-page";
+import IssueCertificatePage from "./pages/certificate-user-pages/issue-certificate-page";
 
 const darkTheme = createTheme({
     palette: {
@@ -78,6 +82,7 @@ function App() {
                                 variant="h6"
                                 noWrap
                                 sx={{
+                                    caretColor: "transparent",
                                     mr: 2,
                                     display: {xs: 'none', md: 'flex'},
                                     fontFamily: 'monospace',
@@ -125,15 +130,15 @@ function App() {
                         <Route path="/login" element={<LoginPage/>}/>
                         {IS_ROLE_PKI_ADMIN && (
                             <>
-                                <Route path="/all-certificates" element={<LoginPage/>}/>
-                                <Route path="/create-certificate" element={<LoginPage/>}/>
+                                <Route path="/all-certificates" element={<AllCertificatesPage/>}/>
+                                <Route path="/create-certificate" element={<CreateCertificatePage/>}/>
                                 <Route path="*" element={<Navigate to="/all-certificates"/>}/>
                             </>
                         )}
                         {IS_ROLE_CERTIFICATE_USER && (
                             <>
-                                <Route path="/my-certificates" element={<LoginPage/>}/>
-                                <Route path="/issue-certificate" element={<LoginPage/>}/>
+                                <Route path="/my-certificates" element={<MyCertificatesPage/>}/>
+                                <Route path="/issue-certificate" element={<IssueCertificatePage/>}/>
                                 <Route path="*" element={<Navigate to="/my-certificates"/>}/>
                             </>
                         )}
