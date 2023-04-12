@@ -82,7 +82,6 @@ public class CertificateService implements ICertificateService {
 
     }
 
-    // TODO Stefan: treba namestiti transakciju ovde
     @Override
     public Certificate generateCertificate(CreateCertificateInfo info)
             throws RuntimeException, BadRequestException, CertificateEncodingException, InternalServerErrorException {
@@ -97,29 +96,25 @@ public class CertificateService implements ICertificateService {
 
         // provera dal je self-signed, ako jeste serijski broj sertifikata iznad u lancu je null recimo
         // u suprotnom serijski broj se moze dobiti iz ekstenzije sertifikata
-        //TODO staviti da je obavezno da se ima issuer serial number kao extenzija
         if (info.getIssuingCertificateSerialNumber() == null) {
+            if (_accountService.existsByEmail(info.getSubjectInfo().getEmail())) {
+                throw new BadRequestException("Cannot issue a self-signed certificate, the subject " +
+                        "already exists");
+            }
+
             info.setIssuingCertificateSerialNumber(serialNumber);
             issuer = buildSelfSignedIssuer(info.getSubjectInfo(), newCertificate);
             subject = issuer;
         }
         else {
-//            if (info.getIssuerId() == null) {
-//                throw new BadRequestException("No issuer provided");
-//            }
             String issuerId = getIssuerIdFromCertificate(info);
             if (issuerId == null) {
                 throw new BadRequestException("Invalid issuer certificate serial number");
             }
 
-            if (isSelfSignedCertificate(info, issuerId)) {
+            if (isIssuerSameAsSubject(info, issuerId)) {
                 throw new BadRequestException("Non-root users cannot create self-signed certificates");
             }
-
-//            if (!getIssuerIdFromCertificate(info)) {
-//                throw new BadRequestException("The provided issuer serial number does" +
-//                        "not match the issuer");
-//            }
 
             if (!isNewCertificateDateValid(info.getStartDate(), info.getEndDate(), info.getIssuingCertificateSerialNumber())) {
                 throw new BadRequestException("Invalid date: new certificate must have an expiration date that" +
@@ -142,9 +137,8 @@ public class CertificateService implements ICertificateService {
 
         KeystoreRowInfo rowInfo = new KeystoreRowInfo
                 (UUID.randomUUID(), info.getAlias(), PasswordGenerator.generatePassword(15));
-        _keystoreRowInfoRepository.save(rowInfo);
 
-        subject.getKeyStoreRowsInfo().add(rowInfo);
+       subject.getKeyStoreRowsInfo().add(rowInfo);
 
         if (info.getSubjectInfo().getIsAccountNew()) {
             _accountService.save(subject);
@@ -153,9 +147,7 @@ public class CertificateService implements ICertificateService {
             _accountService.updateAccount(subject, subject.getId());
         }
 
-        if (!subject.getEmail().equals(issuer.getEmail())) {
-            _accountService.save(issuer);
-        }
+        _keystoreRowInfoRepository.save(rowInfo);
 
         _certificateRepository.SaveCertificate(
                 newCertificate,
@@ -165,7 +157,7 @@ public class CertificateService implements ICertificateService {
         return newCertificate;
     }
 
-    private boolean isSelfSignedCertificate(CreateCertificateInfo info, String issuerId) {
+    private boolean isIssuerSameAsSubject(CreateCertificateInfo info, String issuerId) {
         Account issuer = _accountService.findById(UUID.fromString(issuerId));
         return info.getSubjectInfo().getEmail().equals(issuer.getEmail());
     }
@@ -173,21 +165,20 @@ public class CertificateService implements ICertificateService {
     private String getIssuerIdFromCertificate(CreateCertificateInfo info) throws InternalServerErrorException {
         X509Certificate certificate =
                 (X509Certificate) _certificateRepository.GetCertificateBySerialNumber(keyStorePassword, info.getIssuingCertificateSerialNumber());
-        // uopste nije pronadjen sertifikat sa trazenim serijskim brojem
+        // ako uopste nije pronadjen sertifikat sa trazenim serijskim brojem
         if (certificate == null) {
             return null;
         }
 
         X500Principal issuerInfo = certificate.getSubjectX500Principal();
 
-        //Account issuer = _accountService.findById(info.getIssuerId());
         String issuerUID = getUIDValueFromX500Principal(issuerInfo);
 
         if (issuerUID == null) {
             throw new InternalServerErrorException("Error while trying to get issuer information" +
                     "from the certificate");
         }
-        System.out.println("Issuer UID from certificate: " + issuerUID);
+        logger.info("Issuer UID from certificate: {}", issuerUID);
 
         return issuerUID;
     }
@@ -230,7 +221,8 @@ public class CertificateService implements ICertificateService {
 
         Boolean isAccountNew = info.getIsAccountNew();
         if (isAccountNew == null || !isAccountNew) {
-            System.out.println("Account not new");
+            logger.info("Building existing subject...");
+
             Account account = _accountService.findByEmail(info.getEmail());
             Set<KeystoreRowInfo> accountKeystoreInfo = account.getKeyStoreRowsInfo();
             if (accountKeystoreInfo.isEmpty()) {
@@ -241,12 +233,12 @@ public class CertificateService implements ICertificateService {
             String alias = accountKeystoreInfo.stream().findAny().get().getAlias();
             java.security.cert.Certificate certificate = _certificateRepository.GetCertificate(alias, keyStorePassword);
             X500Name subjectName = new JcaX509CertificateHolder((X509Certificate) certificate).getSubject();
-            System.out.println("X500Name: " + subjectName);
+            logger.info("Existing subject info: {}", subjectName);
             newCertificate.setSubjectInfo(subjectName);
 
             return account;
         }
-        System.out.println("Account is new");
+        logger.info("Building a new subject...");
         return createNewCertificateEntity(info, newCertificate);
     }
 
@@ -282,13 +274,11 @@ public class CertificateService implements ICertificateService {
         PublicKey issuerPublicKey =
                 _certificateRepository.GetCertificate(issuerCertificateAlias, keyStorePassword).getPublicKey();
 
-        //X500NameBuilder builder = setupBasicCertificateInfo(info);
         Account account = _accountService.findById(issuerId);
-        //builder.addRDN(BCStyle.UID, account.getId().toString());
 
         java.security.cert.Certificate certificate = _certificateRepository.GetCertificate(issuerCertificateAlias, keyStorePassword);
         X500Name issuerName = new JcaX509CertificateHolder((X509Certificate) certificate).getSubject();
-        System.out.println("X500Name: " + issuerName);
+        logger.info("Issuer info: {}", issuerName);
 
         newCertificate.setIssuerPublicKey(issuerPublicKey);
         newCertificate.setIssuerPrivateKey(issuerPrivateKey);
