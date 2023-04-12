@@ -112,13 +112,14 @@ public class CertificateController {
         return new ResponseEntity<>(_certificateService.findAllCaAdmin(), HttpStatus.OK);
     }
 
-    @GetMapping("loggedIn")
-    public ResponseEntity<Iterable<CertificateInfoDto>> findAllForLoggedIn(){
-        return new ResponseEntity<>(_certificateService.findAllForLoggedIn(UUID.randomUUID()), HttpStatus.OK);
+    //TODO Strahinja: Ovde treba iz jwt-a a ne iz uri-a
+    @GetMapping("loggedIn/{accId}")
+    public ResponseEntity<Iterable<CertificateInfoDto>> findAllForLoggedIn(@PathVariable("accId") UUID accId){
+        return new ResponseEntity<>(_certificateService.findAllForLoggedIn(accId), HttpStatus.OK);
     }
 
-    @GetMapping("loggedIn/invalid")
-    public ResponseEntity<Iterable<CertificateInfoDto>> findAllInvalidForLoggedIn(){
-        return new ResponseEntity<>(_certificateService.findAllInvalidForLoggedIn(UUID.randomUUID()), HttpStatus.OK);
+    @GetMapping("loggedIn/validCa/{accId}")
+    public ResponseEntity<Iterable<CertificateInfoDto>> findAllInvalidForLoggedIn(@PathVariable("accId") UUID accId){
+        return new ResponseEntity<>(_certificateService.findAllValidCaForLoggedIn(accId), HttpStatus.OK);
     }
 }

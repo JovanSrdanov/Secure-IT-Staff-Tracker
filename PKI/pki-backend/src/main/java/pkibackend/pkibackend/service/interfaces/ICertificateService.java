@@ -22,5 +22,5 @@ public interface ICertificateService extends ICrudService<Certificate>{
     Iterable<CertificateInfoDto> findAllAdmin();
     Iterable<CertificateInfoDto> findAllCaAdmin();
     Iterable<CertificateInfoDto> findAllForLoggedIn(UUID accountId);
-    Iterable<CertificateInfoDto> findAllInvalidForLoggedIn(UUID accountId);
+    Iterable<CertificateInfoDto> findAllValidCaForLoggedIn(UUID accountId);
 }
