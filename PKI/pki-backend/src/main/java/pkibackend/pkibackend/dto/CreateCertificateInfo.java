@@ -15,7 +15,7 @@ import java.util.UUID;
 public class CreateCertificateInfo {
     private EntityInfo subjectInfo;
 
-    private UUID issuerId;
+    //private UUID issuerId;
     private Date startDate;
     private Date endDate;
 

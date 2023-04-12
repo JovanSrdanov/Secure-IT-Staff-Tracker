@@ -104,25 +104,29 @@ public class CertificateService implements ICertificateService {
             subject = issuer;
         }
         else {
-            if (info.getIssuerId() == null) {
-                throw new BadRequestException("No issuer provided");
+//            if (info.getIssuerId() == null) {
+//                throw new BadRequestException("No issuer provided");
+//            }
+            String issuerId = getIssuerIdFromCertificate(info);
+            if (issuerId == null) {
+                throw new BadRequestException("Invalid issuer certificate serial number");
             }
 
-            if (isSelfSignedCertificate(info)) {
+            if (isSelfSignedCertificate(info, issuerId)) {
                 throw new BadRequestException("Non-root users cannot create self-signed certificates");
             }
 
-            if (!isIssuerSerialNumberValid(info)) {
-                throw new BadRequestException("The provided issuer serial number does" +
-                        "not match the issuer");
-            }
+//            if (!getIssuerIdFromCertificate(info)) {
+//                throw new BadRequestException("The provided issuer serial number does" +
+//                        "not match the issuer");
+//            }
 
             if (!isNewCertificateDateValid(info.getStartDate(), info.getEndDate(), info.getIssuingCertificateSerialNumber())) {
                 throw new BadRequestException("Invalid date: new certificate must have an expiration date that" +
                         "is before the issuing certificates expiration date");
             }
 
-            issuer = buildIssuer(info.getIssuerId(), info.getIssuingCertificateSerialNumber(), newCertificate);
+            issuer = buildIssuer(UUID.fromString(issuerId), info.getIssuingCertificateSerialNumber(), newCertificate);
             subject = buildSubject(info.getSubjectInfo(), newCertificate);
         }
 
@@ -161,22 +165,22 @@ public class CertificateService implements ICertificateService {
         return newCertificate;
     }
 
-    private boolean isSelfSignedCertificate(CreateCertificateInfo info) {
-        Account issuer = _accountService.findById(info.getIssuerId());
+    private boolean isSelfSignedCertificate(CreateCertificateInfo info, String issuerId) {
+        Account issuer = _accountService.findById(UUID.fromString(issuerId));
         return info.getSubjectInfo().getEmail().equals(issuer.getEmail());
     }
 
-    private boolean isIssuerSerialNumberValid(CreateCertificateInfo info) throws InternalServerErrorException {
+    private String getIssuerIdFromCertificate(CreateCertificateInfo info) throws InternalServerErrorException {
         X509Certificate certificate =
                 (X509Certificate) _certificateRepository.GetCertificateBySerialNumber(keyStorePassword, info.getIssuingCertificateSerialNumber());
         // uopste nije pronadjen sertifikat sa trazenim serijskim brojem
         if (certificate == null) {
-            return false;
+            return null;
         }
 
         X500Principal issuerInfo = certificate.getSubjectX500Principal();
 
-        Account issuer = _accountService.findById(info.getIssuerId());
+        //Account issuer = _accountService.findById(info.getIssuerId());
         String issuerUID = getUIDValueFromX500Principal(issuerInfo);
 
         if (issuerUID == null) {
@@ -185,7 +189,7 @@ public class CertificateService implements ICertificateService {
         }
         System.out.println("Issuer UID from certificate: " + issuerUID);
 
-        return issuer.getId().equals(UUID.fromString(issuerUID));
+        return issuerUID;
     }
 
     private String getUIDValueFromX500Principal(X500Principal issuerInfo) {
