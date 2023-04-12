@@ -1,6 +1,7 @@
 package pkibackend.pkibackend.repository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import pkibackend.pkibackend.keystore.KeyStoreReader;
 import pkibackend.pkibackend.keystore.KeyStoreWriter;
@@ -14,6 +15,8 @@ import java.security.PrivateKey;
 public class CertificateRepository {
     private final KeyStoreReader _reader;
     private final KeyStoreWriter _writer;
+    @Value("${keystoresPath}")
+    private String keystoresPath;
 
     @Autowired
     public CertificateRepository(KeyStoreReader reader, KeyStoreWriter writer) {
@@ -21,43 +24,43 @@ public class CertificateRepository {
         _writer = writer;
     }
 
-    public void SaveCertificate(Certificate certificate, String storePassword, String alias, String keyPassword) {
-        _writer.loadKeyStore("src/main/resources/static/example.jks",  storePassword.toCharArray());
+    public void SaveCertificate(String keyStoreName, String keyStorePassword, Certificate certificate, String alias, String keyPassword) {
+        _writer.loadKeyStore(this.keystoresPath + keyStoreName,  keyStorePassword.toCharArray());
         PrivateKey pk = certificate.getSubjectPrivateKey();
         _writer.write(alias, pk, keyPassword.toCharArray(), certificate.getX509Certificate());
-        _writer.saveKeyStore("src/main/resources/static/example.jks",  storePassword.toCharArray());
+        _writer.saveKeyStore(this.keystoresPath + keyStoreName,  keyStorePassword.toCharArray());
     }
 
-    public java.security.cert.Certificate GetCertificate(String alias, String storePassword) {
+    public java.security.cert.Certificate GetCertificate(String alias, String keyStoreName,  String storePassword) {
          return _reader.readCertificate
-                ("src/main/resources/static/example.jks", storePassword, alias);
+                (this.keystoresPath + keyStoreName, storePassword, alias);
     }
 
-    public PrivateKey GetCertificatePrivateKey(
+    public PrivateKey GetCertificatePrivateKey(String keyStoreName,
             String keyStorePass, String alias, String pass) {
-        return _reader.readPrivateKey("src/main/resources/static/example.jks", keyStorePass,
+        return _reader.readPrivateKey(this.keystoresPath + keyStoreName, keyStorePass,
                 alias, pass);
     }
 
-    public String GetCertificateAliasBySerialNumber(String keyStorePass, BigInteger serialNumber) {
-        return _reader.readCertificateAliasBySerialNumber("src/main/resources/static/example.jks",
+    public String GetCertificateAliasBySerialNumber(String keyStoreName, String keyStorePass, BigInteger serialNumber) {
+        return _reader.readCertificateAliasBySerialNumber(this.keystoresPath + keyStoreName,
                 keyStorePass, serialNumber);
     }
 
-    public java.security.cert.Certificate GetCertificateBySerialNumber(String keyStorePass, BigInteger serialNumber){
-        String alias =  _reader.readCertificateAliasBySerialNumber("src/main/resources/static/example.jks",
+    public java.security.cert.Certificate GetCertificateBySerialNumber(String keyStoreName, String  keyStorePass,BigInteger serialNumber){
+        String alias =  _reader.readCertificateAliasBySerialNumber(this.keystoresPath + keyStoreName,
                 keyStorePass, serialNumber);
         if (alias == null) {
             return null;
         }
-        return  GetCertificate(alias, keyStorePass);
+        return  GetCertificate(alias, keyStoreName, keyStorePass);
     }
 
     public Iterable<Certificate> GetChildren(String keyStoreFile, String keyStorePass, BigInteger issuerSerialNumber) {
         return _reader.GetChildren(keyStoreFile, keyStorePass, issuerSerialNumber);
     }
 
-    public Boolean findAliasInKeystore(String alias, String keyStorePass) {
-        return _reader.findAliasInKeystore("src/main/resources/static/example.jks", alias, keyStorePass);
+    public Boolean aliasPresentInKeystore(String keyStoreName, String alias, String keyStorePass) {
+        return _reader.findAliasInKeystore(this.keystoresPath + keyStoreName, alias, keyStorePass);
     }
 }

@@ -15,12 +15,12 @@ import java.util.UUID;
 
 public interface ICertificateService extends ICrudService<Certificate>{
     Certificate generateCertificate(CreateCertificateInfo info) throws RuntimeException, BadRequestException, CertificateEncodingException, InternalServerErrorException;
-    public void revoke(BigInteger certSerialNum);
-    public boolean isRevoked(BigInteger certSerialNum);
-    X509Certificate GetCertificateBySerialNumber(BigInteger serialNumber);
-    boolean isChainValid(BigInteger certSerialNum);
     Iterable<CertificateInfoDto> findAllAdmin();
     Iterable<CertificateInfoDto> findAllCaAdmin();
     Iterable<CertificateInfoDto> findAllForLoggedIn(UUID accountId);
     Iterable<CertificateInfoDto> findAllValidCaForLoggedIn(UUID accountId);
+    public void revoke(BigInteger certSerialNum) throws BadRequestException;
+    public boolean isRevoked(BigInteger certSerialNum) throws BadRequestException;
+    X509Certificate GetCertificateBySerialNumber(BigInteger serialNumber) throws BadRequestException;
+    boolean isChainValid(BigInteger certSerialNum) throws BadRequestException;
 }

@@ -65,7 +65,11 @@ public class CertificateController {
     public ResponseEntity revokeCertificate(@RequestBody CertificateSerialNum certificateSerialNum){
 
         try{
-            _certificateService.revoke(certificateSerialNum.getSerialNumber());
+            try {
+                _certificateService.revoke(certificateSerialNum.getSerialNumber());
+            } catch (BadRequestException e) {
+                return new ResponseEntity(e.getMessage(), HttpStatus.BAD_REQUEST);
+            }
             return new ResponseEntity<>("Certificate revoked", HttpStatus.NO_CONTENT);
         }
         catch (NotFoundException e)
@@ -75,21 +79,36 @@ public class CertificateController {
     }
 
     //Cisto napravljeno za testiranje (ko zna mozda i zatreba)
-    @GetMapping("revoke/{serialNumber}")
-    public ResponseEntity<BooleanResponse> checkIfRevoked(@PathVariable("serialNumber") BigInteger certificateSerialNum){
-        boolean revoked = _certificateService.isRevoked(certificateSerialNum);
+
+    public ResponseEntity checkIfRevoked(@PathVariable("serialNumber") BigInteger certificateSerialNum){
+        boolean revoked = false;
+        try {
+            revoked = _certificateService.isRevoked(certificateSerialNum);
+        } catch (BadRequestException e) {
+            return new ResponseEntity(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
         return new ResponseEntity<BooleanResponse>(new BooleanResponse(revoked), HttpStatus.OK);
     }
 
     @GetMapping("valid/{serialNumber}")
-    public ResponseEntity<BooleanResponse> checkIfValid(@PathVariable("serialNumber") BigInteger certificateSerialNum){
-        boolean isValid = _certificateService.isChainValid(certificateSerialNum);
+    public ResponseEntity checkIfValid(@PathVariable("serialNumber") BigInteger certificateSerialNum){
+        boolean isValid = false;
+        try {
+            isValid = _certificateService.isChainValid(certificateSerialNum);
+        } catch (BadRequestException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
         return new ResponseEntity<>(new BooleanResponse(isValid), HttpStatus.OK);
     }
 
     @GetMapping(value = "download/{serialNumber}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public ResponseEntity<byte[]> downloadCertificate(@PathVariable("serialNumber") BigInteger certificateSerialNum) throws IOException {
-        X509Certificate x509Certificate = _certificateService.GetCertificateBySerialNumber(certificateSerialNum);
+    public ResponseEntity downloadCertificate(@PathVariable("serialNumber") BigInteger certificateSerialNum) throws IOException {
+        X509Certificate x509Certificate = null;
+        try {
+            x509Certificate = _certificateService.GetCertificateBySerialNumber(certificateSerialNum);
+        } catch (BadRequestException e) {
+            return new ResponseEntity(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
         try {
             byte[] certificateBytes = x509Certificate.getEncoded();
 
