@@ -9,6 +9,7 @@ import pkibackend.pkibackend.model.Account;
 import pkibackend.pkibackend.repository.AccountRepository;
 import pkibackend.pkibackend.service.interfaces.IAccountService;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -24,6 +25,16 @@ public class AccountService implements IAccountService {
     @Override
     public Iterable<Account> findAll() {
         return _accountRepository.findAll();
+    }
+
+    @Override
+    public List<Account> findAllNotAdmin() {
+        return _accountRepository.findAll();
+    }
+
+    @Override
+    public List<Account> findAllByIdIsNot(UUID accountId) {
+        return _accountRepository.findAllByIdIsNot(accountId);
     }
 
     @Override

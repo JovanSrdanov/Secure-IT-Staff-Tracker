@@ -30,7 +30,6 @@ public class CertificateRepository {
     public java.security.cert.Certificate GetCertificate(String alias, String storePassword) {
          return _reader.readCertificate
                 ("src/main/resources/static/example.jks", storePassword, alias);
-
     }
 
     public PrivateKey GetCertificatePrivateKey(

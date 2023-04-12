@@ -2,6 +2,7 @@ package pkibackend.pkibackend.service.interfaces;
 
 import pkibackend.pkibackend.exceptions.BadRequestException;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface ICrudService<T> {

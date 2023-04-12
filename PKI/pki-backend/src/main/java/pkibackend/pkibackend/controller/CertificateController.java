@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import org.webjars.NotFoundException;
 import pkibackend.pkibackend.certificates.CertificateGenerator;
 import pkibackend.pkibackend.dto.BooleanResponse;
+import pkibackend.pkibackend.dto.CertificateInfoDto;
 import pkibackend.pkibackend.dto.CertificateSerialNum;
 import pkibackend.pkibackend.dto.CreateCertificateInfo;
 import pkibackend.pkibackend.exceptions.BadRequestException;
@@ -24,6 +25,7 @@ import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -40,6 +42,9 @@ public class CertificateController {
         // TODO Jovan: iz jwt-a da se izvuku ifno o issuer-u
         // TODO Strahinja: provera dal moze da izda sertifikat nekom drugom (dal je CA il nije,
         // da li je zaista issuer-ov sertifikat)
+        if(!_certificateService.isChainValid(info.getIssuingCertificateSerialNumber())) {
+            return new ResponseEntity<>("Issuing certificate is not valid!", HttpStatus.CONFLICT);
+        }
 
         try {
             Certificate createdCertificate = _certificateService.generateCertificate(info);
@@ -98,5 +103,26 @@ public class CertificateController {
         } catch (CertificateEncodingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @GetMapping("all")
+    public ResponseEntity<Iterable<CertificateInfoDto>> findAllAdmin(){
+        return new ResponseEntity<>(_certificateService.findAllAdmin(), HttpStatus.OK);
+    }
+
+    @GetMapping("allCa")
+    public ResponseEntity<Iterable<CertificateInfoDto>> findAllCaAdmin(){
+        return new ResponseEntity<>(_certificateService.findAllCaAdmin(), HttpStatus.OK);
+    }
+
+    //TODO Strahinja: Ovde treba iz jwt-a a ne iz uri-a
+    @GetMapping("loggedIn/{accId}")
+    public ResponseEntity<Iterable<CertificateInfoDto>> findAllForLoggedIn(@PathVariable("accId") UUID accId){
+        return new ResponseEntity<>(_certificateService.findAllForLoggedIn(accId), HttpStatus.OK);
+    }
+
+    @GetMapping("loggedIn/validCa/{accId}")
+    public ResponseEntity<Iterable<CertificateInfoDto>> findAllInvalidForLoggedIn(@PathVariable("accId") UUID accId){
+        return new ResponseEntity<>(_certificateService.findAllValidCaForLoggedIn(accId), HttpStatus.OK);
     }
 }

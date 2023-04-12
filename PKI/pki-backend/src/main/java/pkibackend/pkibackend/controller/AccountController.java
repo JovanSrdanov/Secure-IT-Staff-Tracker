@@ -11,6 +11,12 @@ import pkibackend.pkibackend.dto.BooleanResponse;
 import pkibackend.pkibackend.service.interfaces.IAccountService;
 
 import java.math.BigInteger;
+import pkibackend.pkibackend.Utilities.ObjectMapperUtils;
+import pkibackend.pkibackend.dto.AccountInfoDto;
+import pkibackend.pkibackend.dto.CertificateInfoDto;
+import pkibackend.pkibackend.service.interfaces.IAccountService;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("account")
@@ -26,5 +32,14 @@ public class AccountController {
     public ResponseEntity<BooleanResponse> existsByEmail(@PathVariable("email") String email){
         boolean exists = _accountService.existsByEmail(email);
         return new ResponseEntity<>(new BooleanResponse(exists), HttpStatus.OK);
+    }
+    @GetMapping("allExceptLoggindIn/{accId}")
+    public ResponseEntity<Iterable<AccountInfoDto>> findAllAdmin(@PathVariable UUID accId){
+        return new ResponseEntity<>(ObjectMapperUtils.mapAll(_accountService.findAllByIdIsNot(accId), AccountInfoDto.class), HttpStatus.OK);
+    }
+
+    @GetMapping("all")
+    public ResponseEntity<Iterable<AccountInfoDto>> findAllAdmin(){
+        return new ResponseEntity<>(ObjectMapperUtils.mapAll(_accountService.findAllNotAdmin(), AccountInfoDto.class), HttpStatus.OK);
     }
 }
