@@ -56,8 +56,8 @@ public class CertificateRepository {
         return  GetCertificate(alias, keyStoreName, keyStorePass);
     }
 
-    public Iterable<Certificate> GetChildren(String keyStoreFile, String keyStorePass, BigInteger issuerSerialNumber) {
-        return _reader.GetChildren(keyStoreFile, keyStorePass, issuerSerialNumber);
+    public Iterable<Certificate> GetChildren(String keyStoreName, String keyStorePass, BigInteger issuerSerialNumber) {
+        return _reader.GetChildren(keystoresPath + keyStoreName, keyStorePass, issuerSerialNumber);
     }
 
     public Boolean aliasPresentInKeystore(String keyStoreName, String alias, String keyStorePass) {

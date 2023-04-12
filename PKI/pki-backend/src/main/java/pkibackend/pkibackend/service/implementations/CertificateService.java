@@ -144,7 +144,7 @@ public class CertificateService implements ICertificateService {
         }
         String keystoreName = issuerKeystoreInfo.get().getKeystoreName();
         //TODO aleksandar treba ga dekriptovati
-        String keyStorePassword = issuerKeystoreInfo.get().getEncryptedKeystorePassword();
+        String keyStorePassword = issuerKeystoreInfo.get().getPassword();
 
         return (X509Certificate) _certificateRepository.GetCertificateBySerialNumber(keystoreName, keyStorePassword, serialNumber);
     }
@@ -183,7 +183,7 @@ public class CertificateService implements ICertificateService {
         if (info.getIssuingCertificateSerialNumber() == null) {
             info.setIssuingCertificateSerialNumber(serialNumber);
             keystoreName = info.getAlias() + "_keystore.jks";
-            //TODO aleksandar treba ga enkriptovati
+            //It is being encrypted inside constructor
             keyStorePassword = PasswordGenerator.generatePassword(15);
 
             issuer = buildSelfSignedIssuer(info.getSubjectInfo(), newCertificate);
@@ -219,7 +219,7 @@ public class CertificateService implements ICertificateService {
             }
             keystoreName = issuerKeystoreInfo.get().getKeystoreName();
             //TODO aleksandar treba ga dekriptovati
-            keyStorePassword = issuerKeystoreInfo.get().getEncryptedKeystorePassword();
+            keyStorePassword = issuerKeystoreInfo.get().getPassword();
 
             issuer = buildIssuer(UUID.fromString(issuerId), info.getIssuingCertificateSerialNumber(), newCertificate, keystoreName, keyStorePassword);
             subject = buildSubject(info.getSubjectInfo(), newCertificate, keystoreName, keyStorePassword);
@@ -273,7 +273,7 @@ public class CertificateService implements ICertificateService {
         }
         String keystoreName = issuerKeystoreInfo.get().getKeystoreName();
         //TODO aleksandar treba ga dekriptovati
-        String keyStorePassword = issuerKeystoreInfo.get().getEncryptedKeystorePassword();
+        String keyStorePassword = issuerKeystoreInfo.get().getPassword();
 
 
         X509Certificate certificate =
@@ -315,7 +315,7 @@ public class CertificateService implements ICertificateService {
         }
         String keystoreName = issuerKeystoreInfo.get().getKeystoreName();
         //TODO aleksandar treba ga dekriptovati
-        String keyStorePassword = issuerKeystoreInfo.get().getEncryptedKeystorePassword();
+        String keyStorePassword = issuerKeystoreInfo.get().getPassword();
 
 
         X509Certificate issuingCertificate = (X509Certificate) _certificateRepository.GetCertificateBySerialNumber(keystoreName, keyStorePassword, issuingCertificateSerialNumber);
@@ -431,7 +431,7 @@ public class CertificateService implements ICertificateService {
         }
         String keystoreName = issuerKeystoreInfo.get().getKeystoreName();
         //TODO aleksandar treba ga dekriptovati
-        String keyStorePassword = issuerKeystoreInfo.get().getEncryptedKeystorePassword();
+        String keyStorePassword = issuerKeystoreInfo.get().getPassword();
 
 
         //Retrieve certificate
@@ -461,8 +461,7 @@ public class CertificateService implements ICertificateService {
 
         if(certificate.isCa())
         {
-            Iterable<Certificate> children = _certificateRepository.
-                    GetChildren(keystoreName,keyStorePassword, certificate.getSerialNumber() );
+            Iterable<Certificate> children = _certificateRepository.GetChildren(keystoreName,keyStorePassword, certificate.getSerialNumber() );
 
             for(Certificate child : children)
             {
@@ -478,7 +477,7 @@ public class CertificateService implements ICertificateService {
         }
         String keystoreName = issuerKeystoreInfo.get().getKeystoreName();
         //TODO aleksandar treba ga dekriptovati
-        String keyStorePassword = issuerKeystoreInfo.get().getEncryptedKeystorePassword();
+        String keyStorePassword = issuerKeystoreInfo.get().getPassword();
 
 
         java.security.cert.Certificate rawCertificate = _certificateRepository.GetCertificateBySerialNumber(keystoreName, keyStorePassword, certSerialNum);
@@ -503,7 +502,7 @@ public class CertificateService implements ICertificateService {
         }
         String keystoreName = issuerKeystoreInfo.get().getKeystoreName();
         //TODO aleksandar treba ga dekriptovati
-        String keyStorePassword = issuerKeystoreInfo.get().getEncryptedKeystorePassword();
+        String keyStorePassword = issuerKeystoreInfo.get().getPassword();
 
         java.security.cert.Certificate rawCertificate = _certificateRepository.GetCertificateBySerialNumber(keystoreName, keyStorePassword, certSerialNum);
         Certificate certificate = new Certificate(rawCertificate);

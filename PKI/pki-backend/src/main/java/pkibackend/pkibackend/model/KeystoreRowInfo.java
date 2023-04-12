@@ -1,9 +1,8 @@
 package pkibackend.pkibackend.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import pkibackend.pkibackend.Utilities.AESUtilities;
+import pkibackend.pkibackend.dto.AESPasswordDto;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,20 +13,48 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
 public class KeystoreRowInfo {
     @Id
     private UUID id;
     @Column(nullable = false)
     private String keystoreName;
-    //TODO aleksandar Uradi AES
+
+
     @Column(nullable = false)
-    private String encryptedKeystorePassword;
+    // Omitting get and set for this field
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    private byte[] password;
+
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    //Initialization vector for AES block cipher
+    private byte[] aesInitVector;
     @Column(nullable = false)
     private BigInteger certificateSerialNumber;
     @Column(nullable = false)
     private String alias;
     @Column(nullable = false)
     private String rowPassword;
+
+
+    public KeystoreRowInfo(UUID id, String keystoreName, String clearTextPassword, BigInteger certificateSerialNumber, String alias, String rowPassword) {
+        this.id = id;
+        this.keystoreName = keystoreName;
+        this.certificateSerialNumber = certificateSerialNumber;
+        this.alias = alias;
+        this.rowPassword = rowPassword;
+
+        AESUtilities aes = new AESUtilities();
+        AESPasswordDto aesPasswordDto = aes.encrypt(clearTextPassword);
+
+        this.password = aesPasswordDto.getPassword();
+        this.aesInitVector = aesPasswordDto.getIv();
+    }
+
+    public String getPassword(){
+        AESUtilities aes = new AESUtilities();
+       return aes.decrypt(new AESPasswordDto(password, this.aesInitVector));
+    }
 }
