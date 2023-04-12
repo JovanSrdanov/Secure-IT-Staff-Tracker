@@ -10,7 +10,6 @@ import pkibackend.pkibackend.model.Certificate;
 import java.math.BigInteger;
 import java.security.PrivateKey;
 
-// TODO Stefan: nisam siguran dal treba component il nesto drugo
 @Component
 public class CertificateRepository {
     private final KeyStoreReader _reader;
