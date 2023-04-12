@@ -5,6 +5,9 @@ import org.apache.logging.log4j.Logger;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.X500NameBuilder;
 import org.bouncycastle.asn1.x500.style.BCStyle;
+import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -121,6 +124,10 @@ public class CertificateService implements ICertificateService {
                         "is before the issuing certificates expiration date");
             }
 
+            if (isEndEntity(info.getIssuingCertificateSerialNumber())) {
+                throw new BadRequestException("End entities cannot issue new certificates");
+            }
+
             issuer = buildIssuer(UUID.fromString(issuerId), info.getIssuingCertificateSerialNumber(), newCertificate);
             subject = buildSubject(info.getSubjectInfo(), newCertificate);
         }
@@ -155,6 +162,16 @@ public class CertificateService implements ICertificateService {
                 rowInfo.getPassword());
 
         return newCertificate;
+    }
+
+    private boolean isEndEntity(BigInteger issuingCertificateSerialNumber) throws CertificateEncodingException {
+        X509Certificate certificate =
+                (X509Certificate) _certificateRepository.GetCertificateBySerialNumber(keyStorePassword, issuingCertificateSerialNumber);
+        X509CertificateHolder certificateHolder = new JcaX509CertificateHolder(certificate);
+
+        Extension basicConstraintsExtension = certificateHolder.getExtension(Extension.basicConstraints);
+        BasicConstraints basicConstraints = BasicConstraints.getInstance(basicConstraintsExtension.getParsedValue());
+        return !basicConstraints.isCA();
     }
 
     private boolean isIssuerSameAsSubject(CreateCertificateInfo info, String issuerId) {
