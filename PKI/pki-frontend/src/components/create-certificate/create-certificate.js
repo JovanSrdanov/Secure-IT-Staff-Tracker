@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
     Button,
     Checkbox,
@@ -21,6 +21,7 @@ import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import {useNavigate} from "react-router-dom";
+import interceptor from "../../interceptor/interceptor";
 
 
 function CreateCertificate() {
@@ -156,28 +157,28 @@ function CreateCertificate() {
         }
 
 
-        /*
         interceptor.post("/certificate", dto).then(res => {
-           setDialogOpen(true)
+            setDialogOpen(true)
         }).catch(err => {
-        alert("Unexpected error")
-        })*/
+            alert("Unexpected error")
+        })
     };
 
 
-    /*
-     interceptor.get("certificate/all-certificates").then(res => {
-       setCertificates(res.data)
-     }).catch(err => {
-     alert("Unexpected error")
-     })*/
+    useEffect(() => {
+        interceptor.get("certificate/allCa").then(res => {
+            setCertificates(res.data)
+        }).catch(err => {
+            alert("Unexpected error")
+        })
 
-    /*
-   interceptor.get("accountss").then(res => {
-     setExistingAccounts(res.data)
-   }).catch(err => {
-   alert("Unexpected error")
-   })*/
+        interceptor.get("account/all").then(res => {
+            setExistingAccounts(res.data)
+        }).catch(err => {
+            alert("Unexpected error")
+        })
+
+    }, []);
 
 
     function dialogClose() {

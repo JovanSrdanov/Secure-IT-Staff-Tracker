@@ -74,7 +74,10 @@ public class WebSecurityConfig {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring().antMatchers(HttpMethod.POST, "/auth/login");
+        return (web) -> web.ignoring().antMatchers(HttpMethod.POST, "/auth/login")
+                .antMatchers(HttpMethod.GET, "/", "/address", "/webjars/**", "/*.html", "favicon.ico",
+                        "/**/*.html", "/**/*.css", "/**/*.js", "/blood-center/sort", "/blood-center/all-basic-info",
+                        "/swagger-ui/**", "/v3/**", "/socket/**", "/no-auth-test");
     }
 
 }
