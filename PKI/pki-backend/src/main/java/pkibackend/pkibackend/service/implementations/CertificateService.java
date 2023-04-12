@@ -121,8 +121,14 @@ public class CertificateService implements ICertificateService {
         X500Name subjectInfo = new X500Name(certificate.getX509Certificate().getSubjectX500Principal().getName());
         X500Name issuerInfo = new X500Name(certificate.getX509Certificate().getIssuerX500Principal().getName());
 
-        dto.setSubjectInfo(new CertificateEntityInfoDto(subjectInfo));
-        dto.setIssuerInfo(new CertificateEntityInfoDto(issuerInfo));
+        List<String> criticalExtensions = new ArrayList<>(certificate.getX509Certificate().getCriticalExtensionOIDs());
+        List<String> nonCriticalExtensions = new ArrayList<>(certificate.getX509Certificate().getNonCriticalExtensionOIDs());
+        List<String> extensions = new ArrayList<>();
+        extensions.addAll(criticalExtensions);
+        extensions.addAll(nonCriticalExtensions);
+
+        dto.setSubjectInfo(new CertificateEntityInfoDto(subjectInfo, extensions));
+        dto.setIssuerInfo(new CertificateEntityInfoDto(issuerInfo, extensions));
         dto.setRevoked(isRevoked(certificate.getSerialNumber()));
         dto.setAlias(row.getAlias());
 
