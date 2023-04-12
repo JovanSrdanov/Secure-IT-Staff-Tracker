@@ -191,7 +191,7 @@ public class CertificateService implements ICertificateService {
             }
 
             info.setIssuingCertificateSerialNumber(serialNumber);
-            keystoreName = info.getAlias() + "_keystore.jks";
+            keystoreName = newCertificateAlias + "_keystore.jks";
             //It is being encrypted inside constructor
             keyStorePassword = PasswordGenerator.generatePassword(15);
 
@@ -265,9 +265,17 @@ public class CertificateService implements ICertificateService {
         return newCertificate;
     }
 
-    private boolean isEndEntity(BigInteger issuingCertificateSerialNumber) throws CertificateEncodingException {
+    private boolean isEndEntity(BigInteger issuingCertificateSerialNumber) throws CertificateEncodingException, BadRequestException {
+        Optional<KeystoreRowInfo> issuerKeystoreInfo = _keystoreRowInfoRepository.findByCertificateSerialNumber(issuingCertificateSerialNumber);
+        if(issuerKeystoreInfo.isEmpty()){
+            throw new BadRequestException("Certificate not found");
+        }
+        String keystoreName = issuerKeystoreInfo.get().getKeystoreName();
+        //TODO aleksandar treba ga dekriptovati
+        String keyStorePassword = issuerKeystoreInfo.get().getPassword();
+
         X509Certificate certificate =
-                (X509Certificate) _certificateRepository.GetCertificateBySerialNumber(keyStorePassword, issuingCertificateSerialNumber);
+                (X509Certificate) _certificateRepository.GetCertificateBySerialNumber(keystoreName, keyStorePassword, issuingCertificateSerialNumber);
         X509CertificateHolder certificateHolder = new JcaX509CertificateHolder(certificate);
 
         Extension basicConstraintsExtension = certificateHolder.getExtension(Extension.basicConstraints);
