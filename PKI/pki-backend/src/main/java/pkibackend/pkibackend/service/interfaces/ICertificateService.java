@@ -11,6 +11,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.UUID;
 
 public interface ICertificateService extends ICrudService<Certificate>{
     Certificate generateCertificate(CreateCertificateInfo info) throws RuntimeException, BadRequestException, CertificateEncodingException, InternalServerErrorException;
@@ -19,4 +20,7 @@ public interface ICertificateService extends ICrudService<Certificate>{
     X509Certificate GetCertificateBySerialNumber(BigInteger serialNumber);
     boolean isChainValid(BigInteger certSerialNum);
     Iterable<CertificateInfoDto> findAllAdmin();
+    Iterable<CertificateInfoDto> findAllCaAdmin();
+    Iterable<CertificateInfoDto> findAllForLoggedIn(UUID accountId);
+    Iterable<CertificateInfoDto> findAllInvalidForLoggedIn(UUID accountId);
 }

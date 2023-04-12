@@ -19,5 +19,6 @@ public class CertificateInfoDto {
     private String alias;
     private boolean isRevoked;
     private BigInteger issuerSerialNumber;
+    private BigInteger serialNumber;
     private boolean isCa;
 }

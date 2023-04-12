@@ -102,8 +102,23 @@ public class CertificateController {
         }
     }
 
-    @GetMapping("admin")
+    @GetMapping("all")
     public ResponseEntity<Iterable<CertificateInfoDto>> findAllAdmin(){
         return new ResponseEntity<>(_certificateService.findAllAdmin(), HttpStatus.OK);
+    }
+
+    @GetMapping("allCa")
+    public ResponseEntity<Iterable<CertificateInfoDto>> findAllCaAdmin(){
+        return new ResponseEntity<>(_certificateService.findAllCaAdmin(), HttpStatus.OK);
+    }
+
+    @GetMapping("loggedIn")
+    public ResponseEntity<Iterable<CertificateInfoDto>> findAllForLoggedIn(){
+        return new ResponseEntity<>(_certificateService.findAllForLoggedIn(UUID.randomUUID()), HttpStatus.OK);
+    }
+
+    @GetMapping("loggedIn/invalid")
+    public ResponseEntity<Iterable<CertificateInfoDto>> findAllInvalidForLoggedIn(){
+        return new ResponseEntity<>(_certificateService.findAllInvalidForLoggedIn(UUID.randomUUID()), HttpStatus.OK);
     }
 }

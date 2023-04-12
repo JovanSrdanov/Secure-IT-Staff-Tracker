@@ -93,6 +93,83 @@ public class CertificateService implements ICertificateService {
     }
 
     @Override
+    public Iterable<CertificateInfoDto> findAllCaAdmin(){
+        List<KeystoreRowInfo> keystoreRowInfos = _keystoreRowInfoRepository.findAll();
+        List<CertificateInfoDto> certificateDtos = new ArrayList<>();
+        for (KeystoreRowInfo row : keystoreRowInfos) {
+            Certificate certificate = new Certificate(_certificateRepository.GetCertificate(row.getAlias(), keyStorePassword));
+            if(!certificate.isCa() || isExired(certificate) || isRevoked(certificate.getSerialNumber())) {
+                continue;
+            }
+
+            CertificateInfoDto dto = ObjectMapperUtils.map(certificate, CertificateInfoDto.class);
+
+            X500Name subjectInfo = new X500Name(certificate.getX509Certificate().getSubjectX500Principal().getName());
+            X500Name issuerInfo = new X500Name(certificate.getX509Certificate().getIssuerX500Principal().getName());
+
+            dto.setSubjectInfo(new CertificateEntityInfoDto(subjectInfo));
+            dto.setIssuerInfo(new CertificateEntityInfoDto(issuerInfo));
+            dto.setRevoked(isRevoked(certificate.getSerialNumber()));
+            dto.setAlias(row.getAlias());
+
+            certificateDtos.add(dto);
+        }
+        return certificateDtos;
+    }
+
+    @Override
+    public Iterable<CertificateInfoDto> findAllForLoggedIn(UUID accountId){
+        Account account = _accountService.findById(accountId);
+        List<KeystoreRowInfo> keystoreRowInfos = new ArrayList<>(account.getKeyStoreRowsInfo());
+        List<CertificateInfoDto> certificateDtos = new ArrayList<>();
+        for (KeystoreRowInfo row : keystoreRowInfos) {
+            Certificate certificate = new Certificate(_certificateRepository.GetCertificate(row.getAlias(), keyStorePassword));
+            if(isExired(certificate) || isRevoked(certificate.getSerialNumber())) {
+                continue;
+            }
+
+            CertificateInfoDto dto = ObjectMapperUtils.map(certificate, CertificateInfoDto.class);
+
+            X500Name subjectInfo = new X500Name(certificate.getX509Certificate().getSubjectX500Principal().getName());
+            X500Name issuerInfo = new X500Name(certificate.getX509Certificate().getIssuerX500Principal().getName());
+
+            dto.setSubjectInfo(new CertificateEntityInfoDto(subjectInfo));
+            dto.setIssuerInfo(new CertificateEntityInfoDto(issuerInfo));
+            dto.setRevoked(isRevoked(certificate.getSerialNumber()));
+            dto.setAlias(row.getAlias());
+
+            certificateDtos.add(dto);
+        }
+        return certificateDtos;
+    }
+
+    @Override
+    public Iterable<CertificateInfoDto> findAllInvalidForLoggedIn(UUID accountId) {
+        Account account = _accountService.findById(accountId);
+        List<KeystoreRowInfo> keystoreRowInfos = new ArrayList<>(account.getKeyStoreRowsInfo());
+        List<CertificateInfoDto> certificateDtos = new ArrayList<>();
+        for (KeystoreRowInfo row : keystoreRowInfos) {
+            Certificate certificate = new Certificate(_certificateRepository.GetCertificate(row.getAlias(), keyStorePassword));
+            if(!isExired(certificate) && !isRevoked(certificate.getSerialNumber())) {
+                continue;
+            }
+
+            CertificateInfoDto dto = ObjectMapperUtils.map(certificate, CertificateInfoDto.class);
+
+            X500Name subjectInfo = new X500Name(certificate.getX509Certificate().getSubjectX500Principal().getName());
+            X500Name issuerInfo = new X500Name(certificate.getX509Certificate().getIssuerX500Principal().getName());
+
+            dto.setSubjectInfo(new CertificateEntityInfoDto(subjectInfo));
+            dto.setIssuerInfo(new CertificateEntityInfoDto(issuerInfo));
+            dto.setRevoked(isRevoked(certificate.getSerialNumber()));
+            dto.setAlias(row.getAlias());
+
+            certificateDtos.add(dto);
+        }
+        return certificateDtos;
+    }
+
+    @Override
     public Certificate findById(UUID id) {
         return null;
     }
