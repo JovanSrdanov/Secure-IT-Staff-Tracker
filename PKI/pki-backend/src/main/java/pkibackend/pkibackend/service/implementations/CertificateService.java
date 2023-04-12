@@ -10,7 +10,6 @@ import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import pkibackend.pkibackend.Utilities.Keys;
@@ -50,9 +49,6 @@ public class CertificateService implements ICertificateService {
     private final OcspTableRepository _ocspTableRepository;
     private static final Logger logger = LogManager.getLogger(CertificateService.class);
 
-    @Value("${keystorePassword}")
-    private String keyStorePassword;
-
     @Autowired
     public CertificateService(CertificateRepository certificateRepository, AccountService accountService,
                               KeystoreRowInfoRepository keystoreRowInfoRepository,
@@ -65,46 +61,47 @@ public class CertificateService implements ICertificateService {
 
     @Override
     public Iterable<Certificate> findAll() {
-        List<KeystoreRowInfo> keystoreRowInfos = _keystoreRowInfoRepository.findAll();
-        List<Certificate> certificates = new ArrayList<>();
-        for (KeystoreRowInfo row : keystoreRowInfos) {
-            Certificate certificate = new Certificate(_certificateRepository.GetCertificate(row.getAlias(), keyStorePassword));
-            certificates.add(certificate);
-        }
-        return certificates;
+//        List<KeystoreRowInfo> keystoreRowInfos = _keystoreRowInfoRepository.findAll();
+//        List<Certificate> certificates = new ArrayList<>();
+//        for (KeystoreRowInfo row : keystoreRowInfos) {
+//            Certificate certificate = new Certificate(_certificateRepository.GetCertificate(row.getAlias(), keyStorePassword));
+//            certificates.add(certificate);
+//        }
+        //TODO obrisati
+        return null;
     }
 
     @Override
-    public Iterable<CertificateInfoDto> findAllAdmin(){
+    public Iterable<CertificateInfoDto> findAllAdmin() throws BadRequestException {
         List<KeystoreRowInfo> keystoreRowInfos = _keystoreRowInfoRepository.findAll();
         return findAllFromRowsWithCondition(keystoreRowInfos, false, false);
     }
 
     @Override
-    public Iterable<CertificateInfoDto> findAllCaAdmin(){
+    public Iterable<CertificateInfoDto> findAllCaAdmin() throws BadRequestException {
         List<KeystoreRowInfo> keystoreRowInfos = _keystoreRowInfoRepository.findAll();
         return findAllFromRowsWithCondition(keystoreRowInfos, true, true);
     }
 
     @Override
-    public Iterable<CertificateInfoDto> findAllForLoggedIn(UUID accountId){
+    public Iterable<CertificateInfoDto> findAllForLoggedIn(UUID accountId) throws BadRequestException {
         Account account = _accountService.findById(accountId);
         List<KeystoreRowInfo> keystoreRowInfos = new ArrayList<>(account.getKeyStoreRowsInfo());
         return findAllFromRowsWithCondition(keystoreRowInfos, false, false);
     }
 
     @Override
-    public Iterable<CertificateInfoDto> findAllValidCaForLoggedIn(UUID accountId) {
+    public Iterable<CertificateInfoDto> findAllValidCaForLoggedIn(UUID accountId) throws BadRequestException {
         Account account = _accountService.findById(accountId);
         List<KeystoreRowInfo> keystoreRowInfos = new ArrayList<>(account.getKeyStoreRowsInfo());
         return findAllFromRowsWithCondition(keystoreRowInfos, true, true);
     }
 
     private Iterable<CertificateInfoDto> findAllFromRowsWithCondition(List<KeystoreRowInfo> keystoreRowInfos,
-                                                                      boolean shouldBeCa, boolean sholudBeNotRevokedAndExpired) {
+                                                                      boolean shouldBeCa, boolean sholudBeNotRevokedAndExpired) throws BadRequestException {
         List<CertificateInfoDto> certificateDtos = new ArrayList<>();
         for (KeystoreRowInfo row : keystoreRowInfos) {
-            Certificate certificate = new Certificate(_certificateRepository.GetCertificate(row.getAlias(), keyStorePassword));
+            Certificate certificate = new Certificate(_certificateRepository.GetCertificate(row.getAlias(), row.getKeystoreName(), row.getPassword()));
             if(shouldBeCa && !certificate.isCa()) {
                 continue;
             }
@@ -118,7 +115,7 @@ public class CertificateService implements ICertificateService {
         
     }
 
-    private void makeCertificateDto(List<CertificateInfoDto> certificateDtos, KeystoreRowInfo row, Certificate certificate) {
+    private void makeCertificateDto(List<CertificateInfoDto> certificateDtos, KeystoreRowInfo row, Certificate certificate) throws BadRequestException {
         CertificateInfoDto dto = ObjectMapperUtils.map(certificate, CertificateInfoDto.class);
 
         X500Name subjectInfo = new X500Name(certificate.getX509Certificate().getSubjectX500Principal().getName());
@@ -144,8 +141,16 @@ public class CertificateService implements ICertificateService {
     }
 
     @Override
-    public X509Certificate GetCertificateBySerialNumber(BigInteger serialNumber) {
-        return (X509Certificate) _certificateRepository.GetCertificateBySerialNumber(keyStorePassword, serialNumber);
+    public X509Certificate GetCertificateBySerialNumber(BigInteger serialNumber) throws BadRequestException {
+        Optional<KeystoreRowInfo> issuerKeystoreInfo = _keystoreRowInfoRepository.findByCertificateSerialNumber(serialNumber);
+        if(issuerKeystoreInfo.isEmpty()){
+            throw new BadRequestException("Certificate not found");
+        }
+        String keystoreName = issuerKeystoreInfo.get().getKeystoreName();
+        //TODO aleksandar treba ga dekriptovati
+        String keyStorePassword = issuerKeystoreInfo.get().getPassword();
+
+        return (X509Certificate) _certificateRepository.GetCertificateBySerialNumber(keystoreName, keyStorePassword, serialNumber);
     }
 
     @Override
@@ -161,6 +166,10 @@ public class CertificateService implements ICertificateService {
     @Override
     public Certificate generateCertificate(CreateCertificateInfo info)
             throws RuntimeException, BadRequestException, CertificateEncodingException, InternalServerErrorException {
+
+
+        // TODO Refactor
+//        if (_certificateRepository.aliasPresentInKeystore(info.getAlias(), keyStorePassword)) {
 //        if (_certificateRepository.findAliasInKeystore(info.getAlias(), keyStorePassword)) {
 //            throw new BadRequestException("Given alias already exists in the keystore");
 //        }
@@ -170,6 +179,8 @@ public class CertificateService implements ICertificateService {
         String newCertificateAlias = UUID.randomUUID().toString();
         Certificate newCertificate = new Certificate();
         BigInteger serialNumber = new BigInteger(32, new SecureRandom());
+        String keystoreName;
+        String keyStorePassword;
 
         // provera dal je self-signed, ako jeste serijski broj sertifikata iznad u lancu je null recimo
         // u suprotnom serijski broj se moze dobiti iz ekstenzije sertifikata
@@ -180,6 +191,10 @@ public class CertificateService implements ICertificateService {
             }
 
             info.setIssuingCertificateSerialNumber(serialNumber);
+            keystoreName = newCertificateAlias + "_keystore.jks";
+            //It is being encrypted inside constructor
+            keyStorePassword = PasswordGenerator.generatePassword(15);
+
             issuer = buildSelfSignedIssuer(info.getSubjectInfo(), newCertificate);
             subject = issuer;
         }
@@ -198,12 +213,21 @@ public class CertificateService implements ICertificateService {
                         "is before the issuing certificates expiration date");
             }
 
+
+            Optional<KeystoreRowInfo> issuerKeystoreInfo = _keystoreRowInfoRepository.findByCertificateSerialNumber(info.getIssuingCertificateSerialNumber());
+            if(issuerKeystoreInfo.isEmpty()){
+                throw new BadRequestException("Issuer not found");
+            }
+            keystoreName = issuerKeystoreInfo.get().getKeystoreName();
+            //TODO aleksandar treba ga dekriptovati
+            keyStorePassword = issuerKeystoreInfo.get().getPassword();
+
             if (isEndEntity(info.getIssuingCertificateSerialNumber())) {
                 throw new BadRequestException("End entities cannot issue new certificates");
             }
 
-            issuer = buildIssuer(UUID.fromString(issuerId), info.getIssuingCertificateSerialNumber(), newCertificate);
-            subject = buildSubject(info.getSubjectInfo(), newCertificate);
+            issuer = buildIssuer(UUID.fromString(issuerId), info.getIssuingCertificateSerialNumber(), newCertificate, keystoreName, keyStorePassword);
+            subject = buildSubject(info.getSubjectInfo(), newCertificate, keystoreName, keyStorePassword);
         }
 
 
@@ -216,31 +240,42 @@ public class CertificateService implements ICertificateService {
         newCertificate.setEndDate(info.getEndDate());
         newCertificate.setX509Certificate(certificate);
 
-        KeystoreRowInfo rowInfo = new KeystoreRowInfo
-                (UUID.randomUUID(), newCertificateAlias, PasswordGenerator.generatePassword(15));
-
-       subject.getKeyStoreRowsInfo().add(rowInfo);
-
+        KeystoreRowInfo rowInfo = new KeystoreRowInfo 
+                (UUID.randomUUID(), keystoreName, keyStorePassword, serialNumber, newCertificateAlias, PasswordGenerator.generatePassword(15));
+                
+                
+        subject.getKeyStoreRowsInfo().add(rowInfo);
+        
         if (info.getSubjectInfo().getIsAccountNew()) {
             _accountService.save(subject);
         }
         else {
             _accountService.updateAccount(subject, subject.getId());
         }
-
+                
         _keystoreRowInfoRepository.save(rowInfo);
 
         _certificateRepository.SaveCertificate(
+                keystoreName,
+                keyStorePassword,
                 newCertificate,
-                keyStorePassword, newCertificateAlias,
-                rowInfo.getPassword());
+                newCertificateAlias,
+                rowInfo.getRowPassword());
 
         return newCertificate;
     }
 
-    private boolean isEndEntity(BigInteger issuingCertificateSerialNumber) throws CertificateEncodingException {
+    private boolean isEndEntity(BigInteger issuingCertificateSerialNumber) throws CertificateEncodingException, BadRequestException {
+        Optional<KeystoreRowInfo> issuerKeystoreInfo = _keystoreRowInfoRepository.findByCertificateSerialNumber(issuingCertificateSerialNumber);
+        if(issuerKeystoreInfo.isEmpty()){
+            throw new BadRequestException("Certificate not found");
+        }
+        String keystoreName = issuerKeystoreInfo.get().getKeystoreName();
+        //TODO aleksandar treba ga dekriptovati
+        String keyStorePassword = issuerKeystoreInfo.get().getPassword();
+
         X509Certificate certificate =
-                (X509Certificate) _certificateRepository.GetCertificateBySerialNumber(keyStorePassword, issuingCertificateSerialNumber);
+                (X509Certificate) _certificateRepository.GetCertificateBySerialNumber(keystoreName, keyStorePassword, issuingCertificateSerialNumber);
         X509CertificateHolder certificateHolder = new JcaX509CertificateHolder(certificate);
 
         Extension basicConstraintsExtension = certificateHolder.getExtension(Extension.basicConstraints);
@@ -253,10 +288,19 @@ public class CertificateService implements ICertificateService {
         return info.getSubjectInfo().getEmail().equals(issuer.getEmail());
     }
 
-    private String getIssuerIdFromCertificate(CreateCertificateInfo info) throws InternalServerErrorException {
+    private String getIssuerIdFromCertificate(CreateCertificateInfo info) throws InternalServerErrorException, BadRequestException {
+        Optional<KeystoreRowInfo> issuerKeystoreInfo = _keystoreRowInfoRepository.findByCertificateSerialNumber(info.getIssuingCertificateSerialNumber());
+        if(issuerKeystoreInfo.isEmpty()){
+            throw new BadRequestException("Certificate not found");
+        }
+        String keystoreName = issuerKeystoreInfo.get().getKeystoreName();
+        //TODO aleksandar treba ga dekriptovati
+        String keyStorePassword = issuerKeystoreInfo.get().getPassword();
+
+
         X509Certificate certificate =
-                (X509Certificate) _certificateRepository.GetCertificateBySerialNumber(keyStorePassword, info.getIssuingCertificateSerialNumber());
-        // ako uopste nije pronadjen sertifikat sa trazenim serijskim brojem
+                (X509Certificate) _certificateRepository.GetCertificateBySerialNumber(keystoreName, keyStorePassword, info.getIssuingCertificateSerialNumber());
+        // uopste nije pronadjen sertifikat sa trazenim serijskim brojem
         if (certificate == null) {
             return null;
         }
@@ -285,8 +329,17 @@ public class CertificateService implements ICertificateService {
         return null;
     }
 
-    private boolean isNewCertificateDateValid(Date startDate, Date endDate, BigInteger issuingCertificateSerialNumber) {
-        X509Certificate issuingCertificate = (X509Certificate) _certificateRepository.GetCertificateBySerialNumber(keyStorePassword, issuingCertificateSerialNumber);
+    private boolean isNewCertificateDateValid(Date startDate, Date endDate, BigInteger issuingCertificateSerialNumber) throws BadRequestException {
+        Optional<KeystoreRowInfo> issuerKeystoreInfo = _keystoreRowInfoRepository.findByCertificateSerialNumber(issuingCertificateSerialNumber);
+        if(issuerKeystoreInfo.isEmpty()){
+            throw new BadRequestException("Certificate not found");
+        }
+        String keystoreName = issuerKeystoreInfo.get().getKeystoreName();
+        //TODO aleksandar treba ga dekriptovati
+        String keyStorePassword = issuerKeystoreInfo.get().getPassword();
+
+
+        X509Certificate issuingCertificate = (X509Certificate) _certificateRepository.GetCertificateBySerialNumber(keystoreName, keyStorePassword, issuingCertificateSerialNumber);
         Date issuingStartDate = issuingCertificate.getNotBefore();
         Date issuingEndDate = issuingCertificate.getNotAfter();
         return (startDate.after(issuingStartDate) && endDate.before(issuingEndDate));
@@ -305,7 +358,7 @@ public class CertificateService implements ICertificateService {
         return newIssuer;
     }
 
-    private Account buildSubject(EntityInfo info, Certificate newCertificate) throws BadRequestException, CertificateEncodingException {
+    private Account buildSubject(EntityInfo info, Certificate newCertificate,  String keyStoreName, String keyStorePassword) throws BadRequestException, CertificateEncodingException {
         KeyPair kp = Keys.generateKeyPair();
         newCertificate.setSubjectPublicKey(kp.getPublic());
         newCertificate.setSubjectPrivateKey(kp.getPrivate());
@@ -322,7 +375,7 @@ public class CertificateService implements ICertificateService {
 
             // TODO Jovan: evo ti jovane za accountove info (koji vec postoje)
             String alias = accountKeystoreInfo.stream().findAny().get().getAlias();
-            java.security.cert.Certificate certificate = _certificateRepository.GetCertificate(alias, keyStorePassword);
+            java.security.cert.Certificate certificate = _certificateRepository.GetCertificate(alias, keyStoreName,  keyStorePassword);
             X500Name subjectName = new JcaX509CertificateHolder((X509Certificate) certificate).getSubject();
             logger.info("Existing subject info: {}", subjectName);
             newCertificate.setSubjectInfo(subjectName);
@@ -341,9 +394,9 @@ public class CertificateService implements ICertificateService {
         return new Account(accountId, info.getEmail(), info.getPassword(), new HashSet<>());
     }
 
-    private Account buildIssuer(UUID issuerId, BigInteger serialNumber, Certificate newCertificate)
+    private Account buildIssuer(UUID issuerId, BigInteger serialNumber, Certificate newCertificate, String keyStoreName, String keyStorePassword)
             throws BadRequestException, CertificateEncodingException {
-        String issuerCertificateAlias = _certificateRepository.GetCertificateAliasBySerialNumber (keyStorePassword, serialNumber);
+        String issuerCertificateAlias = _certificateRepository.GetCertificateAliasBySerialNumber (keyStoreName, keyStorePassword, serialNumber);
 
         if (issuerCertificateAlias == null) {
             throw new BadRequestException("Issuer with given serial number not found");
@@ -359,15 +412,15 @@ public class CertificateService implements ICertificateService {
             throw new BadRequestException("The user does not exist");
         }
 
-        PrivateKey issuerPrivateKey = _certificateRepository.GetCertificatePrivateKey(
-                keyStorePassword, issuerCertificateAlias, rowInfo.getPassword()
+        PrivateKey issuerPrivateKey = _certificateRepository.GetCertificatePrivateKey(keyStoreName,
+                keyStorePassword, issuerCertificateAlias, rowInfo.getRowPassword()
         );
         PublicKey issuerPublicKey =
-                _certificateRepository.GetCertificate(issuerCertificateAlias, keyStorePassword).getPublicKey();
+                _certificateRepository.GetCertificate(issuerCertificateAlias, keyStoreName,  keyStorePassword).getPublicKey();
 
         Account account = _accountService.findById(issuerId);
 
-        java.security.cert.Certificate certificate = _certificateRepository.GetCertificate(issuerCertificateAlias, keyStorePassword);
+        java.security.cert.Certificate certificate = _certificateRepository.GetCertificate(issuerCertificateAlias, keyStoreName, keyStorePassword);
         X500Name issuerName = new JcaX509CertificateHolder((X509Certificate) certificate).getSubject();
         logger.info("Issuer info: {}", issuerName);
 
@@ -391,9 +444,18 @@ public class CertificateService implements ICertificateService {
         return builder;
     }
 
-    public void revoke(BigInteger certSerialNum){
+    public void revoke(BigInteger certSerialNum) throws BadRequestException {
+        Optional<KeystoreRowInfo> issuerKeystoreInfo = _keystoreRowInfoRepository.findByCertificateSerialNumber(certSerialNum);
+        if(issuerKeystoreInfo.isEmpty()){
+            throw new BadRequestException("Issuer not found");
+        }
+        String keystoreName = issuerKeystoreInfo.get().getKeystoreName();
+        //TODO aleksandar treba ga dekriptovati
+        String keyStorePassword = issuerKeystoreInfo.get().getPassword();
+
+
         //Retrieve certificate
-        java.security.cert.Certificate rawCertificate = _certificateRepository.GetCertificateBySerialNumber(keyStorePassword, certSerialNum);
+        java.security.cert.Certificate rawCertificate = _certificateRepository.GetCertificateBySerialNumber(keystoreName, keyStorePassword, certSerialNum);
         Certificate certificate = new Certificate(rawCertificate);
 
         //Get issuers ocsp
@@ -419,8 +481,7 @@ public class CertificateService implements ICertificateService {
 
         if(certificate.isCa())
         {
-            Iterable<Certificate> children = _certificateRepository.
-                    GetChildren("src/main/resources/static/example.jks",keyStorePassword, certificate.getSerialNumber() );
+            Iterable<Certificate> children = _certificateRepository.GetChildren(keystoreName,keyStorePassword, certificate.getSerialNumber() );
 
             for(Certificate child : children)
             {
@@ -429,11 +490,20 @@ public class CertificateService implements ICertificateService {
         }
     }
 
-    public boolean isRevoked(BigInteger certSerialNum){
-        java.security.cert.Certificate rawCertificate = _certificateRepository.GetCertificateBySerialNumber(keyStorePassword, certSerialNum);
+    public boolean isRevoked(BigInteger certSerialNum) throws BadRequestException {
+        Optional<KeystoreRowInfo> issuerKeystoreInfo = _keystoreRowInfoRepository.findByCertificateSerialNumber(certSerialNum);
+        if(issuerKeystoreInfo.isEmpty()){
+            throw new BadRequestException("Certificate not found");
+        }
+        String keystoreName = issuerKeystoreInfo.get().getKeystoreName();
+        //TODO aleksandar treba ga dekriptovati
+        String keyStorePassword = issuerKeystoreInfo.get().getPassword();
+
+
+        java.security.cert.Certificate rawCertificate = _certificateRepository.GetCertificateBySerialNumber(keystoreName, keyStorePassword, certSerialNum);
         Certificate certificate = new Certificate(rawCertificate);
 
-        java.security.cert.Certificate issuerRawCertificate = _certificateRepository.GetCertificateBySerialNumber(keyStorePassword, certificate.getIssuerSerialNumber());
+        java.security.cert.Certificate issuerRawCertificate = _certificateRepository.GetCertificateBySerialNumber(keystoreName, keyStorePassword, certificate.getIssuerSerialNumber());
         Certificate issuerCertificate = new Certificate(issuerRawCertificate);
 
         Optional<OcspTable> result = _ocspTableRepository.findByCaSerialNumber(issuerCertificate.getSerialNumber());
@@ -445,13 +515,21 @@ public class CertificateService implements ICertificateService {
     }
 
     @Override
-    public boolean isChainValid(BigInteger certSerialNum) {
-        java.security.cert.Certificate rawCertificate = _certificateRepository.GetCertificateBySerialNumber(keyStorePassword, certSerialNum);
+    public boolean isChainValid(BigInteger certSerialNum) throws BadRequestException {
+        Optional<KeystoreRowInfo> issuerKeystoreInfo = _keystoreRowInfoRepository.findByCertificateSerialNumber(certSerialNum);
+        if(issuerKeystoreInfo.isEmpty()){
+            throw new BadRequestException("Certificate not found");
+        }
+        String keystoreName = issuerKeystoreInfo.get().getKeystoreName();
+        //TODO aleksandar treba ga dekriptovati
+        String keyStorePassword = issuerKeystoreInfo.get().getPassword();
+
+        java.security.cert.Certificate rawCertificate = _certificateRepository.GetCertificateBySerialNumber(keystoreName, keyStorePassword, certSerialNum);
         Certificate certificate = new Certificate(rawCertificate);
 
-        if(isExired(certificate)) return false;
+        if(isExpired(certificate)) return false;
 
-        if (!isSignatureValid(certificate)) return false;
+        if (!isSignatureValid(certificate, keystoreName, keyStorePassword)) return false;
 
         if(isRevoked(certSerialNum)) return false;
 
@@ -463,14 +541,14 @@ public class CertificateService implements ICertificateService {
         }
     }
 
-    private boolean isSignatureValid(Certificate certificate) {
+    private boolean isSignatureValid(Certificate certificate, String keyStoreName, String keyStorePassword) {
         PublicKey issuerPublicKey = null;
 
         if(Objects.equals(certificate.getSerialNumber(), certificate.getIssuerSerialNumber())) {
             issuerPublicKey = certificate.getSubjectPublicKey();
         }
         else  {
-            java.security.cert.Certificate issuerRawCertificate = _certificateRepository.GetCertificateBySerialNumber(keyStorePassword, certificate.getIssuerSerialNumber());
+            java.security.cert.Certificate issuerRawCertificate = _certificateRepository.GetCertificateBySerialNumber(keyStoreName, keyStorePassword, certificate.getIssuerSerialNumber());
             Certificate issuerCertificate = new Certificate(issuerRawCertificate);
             issuerPublicKey = issuerCertificate.getSubjectPublicKey();
         }
@@ -488,7 +566,7 @@ public class CertificateService implements ICertificateService {
         return true;
     }
 
-    private boolean isExired(Certificate certificate) {
+    private boolean isExpired(Certificate certificate) {
         Date today = new Date();
         if (certificate.getEndDate().after(today) || certificate.getStartDate().before(today)) {
             return false;

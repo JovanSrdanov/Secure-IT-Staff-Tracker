@@ -42,8 +42,15 @@ public class CertificateController {
         // TODO Jovan: iz jwt-a da se izvuku ifno o issuer-u
         // TODO Strahinja: provera dal moze da izda sertifikat nekom drugom (dal je CA il nije,
         // da li je zaista issuer-ov sertifikat)
-        if(!_certificateService.isChainValid(info.getIssuingCertificateSerialNumber())) {
-            return new ResponseEntity<>("Issuing certificate is not valid!", HttpStatus.CONFLICT);
+        if(info.getIssuingCertificateSerialNumber() != null)
+        {
+            try {
+                if(!_certificateService.isChainValid(info.getIssuingCertificateSerialNumber())) {
+                    return new ResponseEntity<>("Issuing certificate is not valid!", HttpStatus.CONFLICT);
+                }
+            } catch (BadRequestException e) {
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            }
         }
 
         try {
@@ -65,7 +72,11 @@ public class CertificateController {
     public ResponseEntity revokeCertificate(@RequestBody CertificateSerialNum certificateSerialNum){
 
         try{
-            _certificateService.revoke(certificateSerialNum.getSerialNumber());
+            try {
+                _certificateService.revoke(certificateSerialNum.getSerialNumber());
+            } catch (BadRequestException e) {
+                return new ResponseEntity(e.getMessage(), HttpStatus.BAD_REQUEST);
+            }
             return new ResponseEntity<>("Certificate revoked", HttpStatus.NO_CONTENT);
         }
         catch (NotFoundException e)
@@ -75,21 +86,36 @@ public class CertificateController {
     }
 
     //Cisto napravljeno za testiranje (ko zna mozda i zatreba)
-    @GetMapping("revoke/{serialNumber}")
-    public ResponseEntity<BooleanResponse> checkIfRevoked(@PathVariable("serialNumber") BigInteger certificateSerialNum){
-        boolean revoked = _certificateService.isRevoked(certificateSerialNum);
+
+    public ResponseEntity checkIfRevoked(@PathVariable("serialNumber") BigInteger certificateSerialNum){
+        boolean revoked = false;
+        try {
+            revoked = _certificateService.isRevoked(certificateSerialNum);
+        } catch (BadRequestException e) {
+            return new ResponseEntity(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
         return new ResponseEntity<BooleanResponse>(new BooleanResponse(revoked), HttpStatus.OK);
     }
 
     @GetMapping("valid/{serialNumber}")
-    public ResponseEntity<BooleanResponse> checkIfValid(@PathVariable("serialNumber") BigInteger certificateSerialNum){
-        boolean isValid = _certificateService.isChainValid(certificateSerialNum);
+    public ResponseEntity checkIfValid(@PathVariable("serialNumber") BigInteger certificateSerialNum){
+        boolean isValid = false;
+        try {
+            isValid = _certificateService.isChainValid(certificateSerialNum);
+        } catch (BadRequestException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
         return new ResponseEntity<>(new BooleanResponse(isValid), HttpStatus.OK);
     }
 
     @GetMapping(value = "download/{serialNumber}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public ResponseEntity<byte[]> downloadCertificate(@PathVariable("serialNumber") BigInteger certificateSerialNum) throws IOException {
-        X509Certificate x509Certificate = _certificateService.GetCertificateBySerialNumber(certificateSerialNum);
+    public ResponseEntity downloadCertificate(@PathVariable("serialNumber") BigInteger certificateSerialNum) throws IOException {
+        X509Certificate x509Certificate = null;
+        try {
+            x509Certificate = _certificateService.GetCertificateBySerialNumber(certificateSerialNum);
+        } catch (BadRequestException e) {
+            return new ResponseEntity(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
         try {
             byte[] certificateBytes = x509Certificate.getEncoded();
 
@@ -106,23 +132,45 @@ public class CertificateController {
     }
 
     @GetMapping("all")
-    public ResponseEntity<Iterable<CertificateInfoDto>> findAllAdmin(){
-        return new ResponseEntity<>(_certificateService.findAllAdmin(), HttpStatus.OK);
+    public ResponseEntity findAllAdmin(){
+
+        Iterable<CertificateInfoDto> result = null;
+        try {
+            result = _certificateService.findAllAdmin();
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (BadRequestException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @GetMapping("allCa")
-    public ResponseEntity<Iterable<CertificateInfoDto>> findAllCaAdmin(){
-        return new ResponseEntity<>(_certificateService.findAllCaAdmin(), HttpStatus.OK);
+    public ResponseEntity findAllCaAdmin(){
+        try {
+            Iterable<CertificateInfoDto> result = _certificateService.findAllCaAdmin();
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (BadRequestException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 
     //TODO Strahinja: Ovde treba iz jwt-a a ne iz uri-a
     @GetMapping("loggedIn/{accId}")
-    public ResponseEntity<Iterable<CertificateInfoDto>> findAllForLoggedIn(@PathVariable("accId") UUID accId){
-        return new ResponseEntity<>(_certificateService.findAllForLoggedIn(accId), HttpStatus.OK);
+    public ResponseEntity findAllForLoggedIn(@PathVariable("accId") UUID accId){
+        try {
+            Iterable<CertificateInfoDto>  result = _certificateService.findAllForLoggedIn(accId);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (BadRequestException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @GetMapping("loggedIn/validCa/{accId}")
-    public ResponseEntity<Iterable<CertificateInfoDto>> findAllInvalidForLoggedIn(@PathVariable("accId") UUID accId){
-        return new ResponseEntity<>(_certificateService.findAllValidCaForLoggedIn(accId), HttpStatus.OK);
+    public ResponseEntity findAllInvalidForLoggedIn(@PathVariable("accId") UUID accId){
+        try {
+            Iterable<CertificateInfoDto>  result = _certificateService.findAllValidCaForLoggedIn(accId);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (BadRequestException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.OK);
+        }
     }
 }
