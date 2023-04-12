@@ -244,7 +244,6 @@ public class CertificateService implements ICertificateService {
         builder.addRDN(BCStyle.UID, accountId.toString());
         newCertificate.setSubjectInfo(builder.build());
         List<Role> roles = _roleService.findByName("ROLE_CERTIFICATE_USER_CHANGE_PASSWORD");
-        // Todo JOVAN ovde dodati lepo generisanje passworda i salta i mail
         return new Account(accountId, info.getEmail(), "password", "salt", roles, new HashSet<>());
     }
 
