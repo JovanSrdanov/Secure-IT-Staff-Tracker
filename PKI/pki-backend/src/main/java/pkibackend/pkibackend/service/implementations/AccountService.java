@@ -2,6 +2,7 @@ package pkibackend.pkibackend.service.implementations;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.webjars.NotFoundException;
@@ -24,11 +25,14 @@ public class AccountService implements IAccountService {
     private final PasswordEncoder _passwordEncoder;
     private final IRoleService _roleService;
 
+    private final JavaMailSender _javaMailSender;
+
     @Autowired
-    public AccountService(AccountRepository accountRepository, PasswordEncoder passwordEncoder, RoleService roleService) {
+    public AccountService(AccountRepository accountRepository, PasswordEncoder passwordEncoder, RoleService roleService, JavaMailSender javaMailSender) {
         _accountRepository = accountRepository;
         _passwordEncoder = passwordEncoder;
         _roleService = roleService;
+        _javaMailSender = javaMailSender;
     }
 
     @Override
@@ -40,8 +44,8 @@ public class AccountService implements IAccountService {
     public List<Account> findAllNotAdmin() {
         List<Account> accounts = _accountRepository.findAll();
         List<Account> nonAdminAccounts = new ArrayList<>();
-        for(Account account : accounts) {
-            if(!isAccountAdmin(account)) {
+        for (Account account : accounts) {
+            if (!isAccountAdmin(account)) {
                 nonAdminAccounts.add(account);
             }
         }
@@ -52,8 +56,8 @@ public class AccountService implements IAccountService {
     public List<Account> findAllByIdIsNot(UUID accountId) {
         List<Account> accounts = _accountRepository.findAllByIdIsNot(accountId);
         List<Account> nonAdminAccounts = new ArrayList<>();
-        for(Account account : accounts) {
-            if(!isAccountAdmin(account)) {
+        for (Account account : accounts) {
+            if (!isAccountAdmin(account)) {
                 nonAdminAccounts.add(account);
             }
         }
@@ -115,13 +119,14 @@ public class AccountService implements IAccountService {
 
     @Override
     public boolean isAccountAdmin(Account account) {
-        for(Role role : account.getRoles()) {
-            if(role.getName().equals("ROLE_PKI_ADMIN")) {
+        for (Role role : account.getRoles()) {
+            if (role.getName().equals("ROLE_PKI_ADMIN")) {
                 return true;
             }
         }
         return false;
     }
+
 
     @Override
     public void changePassword(String email, UpdatePasswordDto updatePasswordDto) throws Exception {

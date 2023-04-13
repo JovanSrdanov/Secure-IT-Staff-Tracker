@@ -11,6 +11,10 @@ import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pkibackend.pkibackend.Utilities.Keys;
 import pkibackend.pkibackend.Utilities.ObjectMapperUtils;
@@ -48,17 +52,23 @@ public class CertificateService implements ICertificateService {
     private final KeystoreRowInfoRepository _keystoreRowInfoRepository;
     private final OcspTableRepository _ocspTableRepository;
     private final IRoleService _roleService;
+    private final JavaMailSender _javaMailSender;
+
+    private final PasswordEncoder _passwordEncoder;
 
 
     @Autowired
     public CertificateService(CertificateRepository certificateRepository, AccountService accountService,
                               KeystoreRowInfoRepository keystoreRowInfoRepository,
-                              OcspTableRepository ocspTableRepository, IRoleService roleService) {
+                              OcspTableRepository ocspTableRepository, IRoleService roleService, PasswordEncoder passwordEncoder, JavaMailSender javaMailSender) {
         _certificateRepository = certificateRepository;
         _accountService = accountService;
         _keystoreRowInfoRepository = keystoreRowInfoRepository;
         _ocspTableRepository = ocspTableRepository;
         _roleService = roleService;
+        _passwordEncoder = passwordEncoder;
+        _javaMailSender = javaMailSender;
+
     }
 
     private static X500NameBuilder setupBasicCertificateInfo(EntityInfo info) {
@@ -248,7 +258,20 @@ public class CertificateService implements ICertificateService {
         subject.getKeyStoreRowsInfo().add(rowInfo);
 
         if (info.getSubjectInfo().getIsAccountNew()) {
+            SecureRandom random = new SecureRandom();
+            byte[] salt = new byte[16];
+            random.nextBytes(salt);
+
+            byte[] password = new byte[16];
+            random.nextBytes(password);
+
+            List<Role> roles = _roleService.findByName("ROLE_CERTIFICATE_USER_CHANGE_PASSWORD");
+            subject.setRoles(roles);
+            subject.setSalt(salt.toString());
+            subject.setPassword(_passwordEncoder.encode(password.toString() + salt.toString()));
             _accountService.save(subject);
+            sendEmailWithPassword(subject.getEmail(), password.toString());
+
         } else {
             _accountService.updateAccount(subject, subject.getId());
         }
@@ -263,6 +286,18 @@ public class CertificateService implements ICertificateService {
                 rowInfo.getRowPassword());
 
         return newCertificate;
+    }
+
+    @Async
+    public void sendEmailWithPassword(String email, String password) {
+
+        SimpleMailMessage mail = new SimpleMailMessage();
+        mail.setTo(email);
+        mail.setFrom("PKI_BUSEP");
+        mail.setSubject("Protect your account");
+        mail.setText("Your password is: " + password);
+        _javaMailSender.send(mail);
+
     }
 
     private boolean isEndEntity(BigInteger issuingCertificateSerialNumber) throws CertificateEncodingException, BadRequestException {
