@@ -23,4 +23,6 @@ public interface IAccountService extends ICrudService<Account> {
     Account findAccountByEmail(String email);
 
     boolean isAccountAdmin(Account account);
+
+
 }
