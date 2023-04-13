@@ -44,6 +44,7 @@ public class CertificateController {
             return new ResponseEntity<>("You do not own issuing certificate!", HttpStatus.FORBIDDEN);
         }
 
+
         if (info.getIssuingCertificateSerialNumber() != null) {
             try {
                 if (!_certificateService.isChainValid(info.getIssuingCertificateSerialNumber())) {

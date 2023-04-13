@@ -22,6 +22,7 @@ import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import {useNavigate} from "react-router-dom";
 import interceptor from "../../interceptor/interceptor";
+import "./create-certificate.css"
 
 
 function CreateCertificate() {
@@ -30,7 +31,7 @@ function CreateCertificate() {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [activeStep, setActiveStep] = useState(0);
     const [typeOfCertificate, setTypeOfCertificate] = useState('selfsigned');
-    const [subjectTypeSelected, setSubjectTypeSelected] = useState('existing');
+    const [subjectTypeSelected, setSubjectTypeSelected] = useState('new');
     const [selectedSubjectEmail, setSelectedSubjectEmail] = useState(null);
     const [uniqueEmailForNewSubject, setUniqueEmailForNewSubject] = useState(false);
     const [uniqueEmailForNewIssuer, setUniqueEmailForNewIssuer] = useState(false);
@@ -105,6 +106,27 @@ function CreateCertificate() {
         setSubjectTypeSelected(event.target.value);
     };
 
+
+    const handleSelectedCertificate = (certificate) => {
+        setSelectedCertificate(certificate)
+
+    };
+    const isSelectedCertificate = (item) => {
+        return item && selectedCertificate.alias === item.alias
+
+    };
+
+    const handleSelectedAccount = (email) => {
+        setSelectedSubjectEmail(email)
+
+    };
+
+    const isSelectedAccount = (email) => {
+        return email && email === selectedSubjectEmail
+
+    };
+
+
     const handleSubjectInputChange = (event) => {
 
         const {name, value} = event.target;
@@ -143,16 +165,14 @@ function CreateCertificate() {
             if (subjectTypeSelected === "new") {
                 subjectInfoCorrected.isAccountNew = true;
             }
-            if (subjectTypeSelected === "existing") {
-                subjectInfoCorrected.isAccountNew = false;
-            }
+
         }
 
         let dto = {
             subjectInfo: subjectInfoCorrected,
             startDate: startDate,
             endDate: endDate,
-            issuingCertificateSerialNumber: selectedCertificate.issuingCertificateSerialNumber,
+            issuingCertificateSerialNumber: selectedCertificate.issuerSerialNumber,
             extensions: extensions
         }
 
@@ -168,6 +188,7 @@ function CreateCertificate() {
     useEffect(() => {
         interceptor.get("certificate/allCa").then(res => {
             setCertificates(res.data)
+            console.log(certificates)
         }).catch(err => {
             alert("Unexpected error")
         })
@@ -285,7 +306,46 @@ function CreateCertificate() {
 
                         {typeOfCertificate === "caissued" &&
                             (
-                                <h2>Select certificate that will be the issuer</h2>
+                                <>
+                                    <h2>Select certificate that will be the issuer</h2>
+                                    {certificates != null &&
+                                        (<div className="scrollCertificates">
+                                                {certificates.map((item) => (<div className="certificateWrapper"
+                                                                                  onClick={() => {
+                                                                                      handleSelectedCertificate(item)
+                                                                                  }}
+                                                                                  style={{
+                                                                                      backgroundColor: isSelectedCertificate(item) ? "var(--outlines)" : "inherit",
+
+                                                                                  }}>
+                                                    <p>Subject</p>
+                                                    <li>Country code: {item.subjectInfo.country}</li>
+                                                    <li>Organization unit: {item.subjectInfo.orgUnit}</li>
+                                                    <li>Organization: {item.subjectInfo.organization}</li>
+                                                    <li>Common name: {item.subjectInfo.commonName}</li>
+                                                    <li>Surname: {item.subjectInfo.surname}</li>
+                                                    <li>Given name: {item.subjectInfo.givenName}</li>
+                                                    <p>Issuer</p>
+                                                    <li>Country code: {item.issuerInfo.country}</li>
+                                                    <li>Organization unit: {item.issuerInfo.orgUnit}</li>
+                                                    <li>Organization: {item.issuerInfo.organization}</li>
+                                                    <li>Common name: {item.issuerInfo.commonName}</li>
+                                                    <li>Surname: {item.issuerInfo.surname}</li>
+                                                    <li>Given name: {item.issuerInfo.givenName}</li>
+                                                    <p>Certificate info</p>
+                                                    <li>Valid not before: {item.startDate}</li>
+                                                    <li>Valid not after: {item.endDate}</li>
+                                                    <li>Alias: {item.alias}</li>
+                                                    <li>Issuer serial number: {item.issuerSerialNumber}</li>
+                                                    <li>Revoked: {item.revoked.toString()}</li>
+                                                    <li>Is CA: {item.ca.toString()}</li>
+
+                                                </div>))}
+
+                                            </div>
+                                        )
+                                    }
+                                </>
                             )
                         }
 
@@ -301,11 +361,8 @@ function CreateCertificate() {
                         {typeOfCertificate === "caissued" &&
                             (
                                 <>
-                                    <h2>Select subject or create a new subject</h2>
-                                    <RadioGroup value={subjectTypeSelected} onChange={handleSubjectTypeSelectedChange}>
-                                        <FormControlLabel value="existing" control={<Radio/>} label="Existing"/>
-                                        <FormControlLabel value="new" control={<Radio/>} label="New"/>
-                                    </RadioGroup>
+                                    <h2>Enter subject</h2>
+
                                     {subjectTypeSelected === "new" &&
                                         (
                                             <>
@@ -372,21 +429,35 @@ function CreateCertificate() {
                                                     value={subjectInfo.email}
                                                     onChange={handleSubjectInputChange}
                                                 />
-                                                <p>
-                                                    {uniqueEmailForNewSubject && (<span>Email is unique</span>)}
-                                                    {!uniqueEmailForNewSubject && (<span>Email is not unique</span>)}
-                                                </p>
+
 
                                             </>
                                         )
                                     }
 
-                                    {subjectTypeSelected === "existing" &&
-                                        (
-                                            <>
-                                                <p>TODO</p>
-                                            </>
-                                        )
+                                    {subjectTypeSelected === "existing" && (
+                                        <>
+                                            {existingAccounts != null &&
+                                                (<div className="scrollAccounts">
+                                                        {existingAccounts.map((item) => (
+                                                            <div className="accountsWrapper"
+                                                                 onClick={() => {
+                                                                     handleSelectedAccount(item.email)
+                                                                 }}
+                                                                 style={{
+                                                                     backgroundColor: isSelectedAccount(item.email) ? "var(--outlines)" : "inherit",
+
+                                                                 }}>
+                                                                <li>{item.email}</li>
+
+
+                                                            </div>))}
+
+                                                    </div>
+                                                )
+                                            }
+                                        </>
+                                    )
                                     }
 
                                 </>
@@ -427,8 +498,8 @@ function CreateCertificate() {
                                         <DatePicker label="End date"
                                                     value={startDate}
                                                     onChange={handleStartDateChange}
-                                                    minDate={selectedCertificate.startDate}
-                                                    maxDate={selectedCertificate.endDate}
+                                                    minDate={dayjs(selectedCertificate.startDate)}
+                                                    maxDate={dayjs(selectedCertificate.endDate)}
                                                     sx={{
                                                         width: "fit-content",
                                                         margin: "auto"
@@ -479,7 +550,7 @@ function CreateCertificate() {
                                                     value={endDate}
                                                     minDate={startDate}
                                                     onChange={handleEndDateChange}
-                                                    maxDate={selectedCertificate.endDate}
+                                                    maxDate={dayjs(selectedCertificate.endDate)}
                                                     sx={{
                                                         width: "fit-content",
                                                         margin: "auto"
@@ -536,7 +607,7 @@ function CreateCertificate() {
                             onClick={handleNext}
                             disabled={
                                 // TODO popravi ovo true u false
-                                (activeStep === 1 && typeOfCertificate === "caissued" && selectedCertificate.issuerSerialNumber != null) ||
+                                (activeStep === 1 && typeOfCertificate === "caissued" && selectedCertificate.issuerSerialNumber == null) ||
                                 (activeStep === 1 && typeOfCertificate === "selfsigned" && uniqueEmailForNewIssuer === true) ||
                                 (activeStep === 2 && typeOfCertificate === "caissued" && subjectTypeSelected === "new" && uniqueEmailForNewSubject === true) ||
                                 (activeStep === 2 && typeOfCertificate === "caissued" && subjectTypeSelected === "existing" && selectedSubjectEmail == null) ||

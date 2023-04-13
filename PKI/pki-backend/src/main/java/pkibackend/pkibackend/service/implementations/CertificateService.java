@@ -513,8 +513,8 @@ public class CertificateService implements ICertificateService {
 
     @Override
     public boolean isInKeystore(Set<KeystoreRowInfo> rows, BigInteger certSerialNum) {
-        for(KeystoreRowInfo row : rows) {
-            if(row.getCertificateSerialNumber().equals(certSerialNum)) {
+        for (KeystoreRowInfo row : rows) {
+            if (row.getCertificateSerialNumber().equals(certSerialNum)) {
                 return true;
             }
         }
