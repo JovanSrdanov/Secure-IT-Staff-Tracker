@@ -45,6 +45,7 @@ public class CertificateController {
             // Todo accoutn all da ne vraca admina i onaj drugi isto iz onog drugog kontrolera
         }
 
+
         if (info.getIssuingCertificateSerialNumber() != null) {
             try {
                 if (!_certificateService.isChainValid(info.getIssuingCertificateSerialNumber())) {

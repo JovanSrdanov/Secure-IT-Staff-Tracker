@@ -1,0 +1,35 @@
+.scrollCertificates {
+    height: 450px;
+    overflow-x: scroll;
+    display: flex;
+    gap: 10px;
+
+}
+
+.certificateWrapper {
+    background: var(--outlines);
+    border-radius: var(--border-radius);
+    padding: 10px;
+}
+
+.certificateWrapper:hover {
+    background: var(--backs);
+    cursor: pointer;
+}
+
+li {
+    list-style-type: none
+}
+
+.scrollAccounts {
+    padding: 10px;
+    height: 150px;
+    overflow-y: scroll;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.accountsWrapper:hover {
+    cursor: pointer;
+}

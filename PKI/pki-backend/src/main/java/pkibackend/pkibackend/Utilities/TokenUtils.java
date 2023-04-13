@@ -16,8 +16,7 @@ import java.util.Date;
 public class TokenUtils {
     private static final String AUDIENCE_WEB = "web";
     private final SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS512;
-    //Todo jovan, ovo isto negde tajno smestiti
-    @Value("somesecret")
+    @Value("${jwtKey}")
     public String SECRET;
     @Value("PKI_BUSEP")
     private String APP_NAME;
