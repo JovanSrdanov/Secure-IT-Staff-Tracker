@@ -11,8 +11,6 @@ function AllCertificates() {
             setCertificates(res.data)
         }).catch(err => {
         })
-
-
     }, []);
 
     const download = (item) => {
@@ -32,7 +30,7 @@ function AllCertificates() {
     };
 
 
-    const rewoke = (item) => {
+    const revoke = (item) => {
         interceptor.post("certificate/revoke", {serialNumber: item.serialNumber}).then(res => {
 
             interceptor.get("certificate/all").then(res => {
@@ -75,7 +73,7 @@ function AllCertificates() {
                             <Button variant="contained" onClick={() => download(item)}>Download</Button>
                             {item.revoked && (<>REVOKED</>)}
                             {!item.revoked && (
-                                <Button variant="contained" onClick={() => rewoke(item)}>REVOKE</Button>)}
+                                <Button variant="contained" onClick={() => revoke(item)}>REVOKE</Button>)}
                         </div>))}
                     </div>
                 )

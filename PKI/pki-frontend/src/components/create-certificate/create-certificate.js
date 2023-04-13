@@ -31,7 +31,7 @@ function CreateCertificate() {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [activeStep, setActiveStep] = useState(0);
     const [typeOfCertificate, setTypeOfCertificate] = useState('selfsigned');
-    const [subjectTypeSelected, setSubjectTypeSelected] = useState('existing');
+    const [subjectTypeSelected, setSubjectTypeSelected] = useState('new');
     const [selectedSubjectEmail, setSelectedSubjectEmail] = useState(null);
     const [uniqueEmailForNewSubject, setUniqueEmailForNewSubject] = useState(false);
     const [uniqueEmailForNewIssuer, setUniqueEmailForNewIssuer] = useState(false);
@@ -165,11 +165,7 @@ function CreateCertificate() {
             if (subjectTypeSelected === "new") {
                 subjectInfoCorrected.isAccountNew = true;
             }
-            if (subjectTypeSelected === "existing") {
-                subjectInfoCorrected.isAccountNew = false;
-                subjectInfoCorrected.email = selectedSubjectEmail;
 
-            }
         }
 
         let dto = {
@@ -365,11 +361,8 @@ function CreateCertificate() {
                         {typeOfCertificate === "caissued" &&
                             (
                                 <>
-                                    <h2>Select subject or create a new subject</h2>
-                                    <RadioGroup value={subjectTypeSelected} onChange={handleSubjectTypeSelectedChange}>
-                                        <FormControlLabel value="existing" control={<Radio/>} label="Existing"/>
-                                        <FormControlLabel value="new" control={<Radio/>} label="New"/>
-                                    </RadioGroup>
+                                    <h2>Enter subject</h2>
+
                                     {subjectTypeSelected === "new" &&
                                         (
                                             <>
@@ -436,10 +429,7 @@ function CreateCertificate() {
                                                     value={subjectInfo.email}
                                                     onChange={handleSubjectInputChange}
                                                 />
-                                                <p>
-                                                    {uniqueEmailForNewSubject && (<span>Email is unique</span>)}
-                                                    {!uniqueEmailForNewSubject && (<span>Email is not unique</span>)}
-                                                </p>
+
 
                                             </>
                                         )
