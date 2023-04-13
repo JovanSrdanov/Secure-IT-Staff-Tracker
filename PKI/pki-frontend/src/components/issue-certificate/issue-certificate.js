@@ -184,7 +184,7 @@ function IssueCertificate() {
 
 
     useEffect(() => {
-        interceptor.get("certificate/loggedIn").then(res => {
+        interceptor.get("certificate/loggedIn/validCa").then(res => {
             setCertificates(res.data)
             console.log(certificates)
         }).catch(err => {
