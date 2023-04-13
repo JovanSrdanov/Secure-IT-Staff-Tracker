@@ -598,6 +598,9 @@ function CreateCertificate() {
                         >
                             <MenuItem value="keyEncipherment" selected>Key Encipherment</MenuItem>
                             <MenuItem value="dataEncipherment">Data Encipherment</MenuItem>
+                            <MenuItem value="keyAgreement">Key Agreement</MenuItem>
+                            <MenuItem value="certificateSigning">Certificate Signing</MenuItem>
+                            <MenuItem value="digitalSignature">Digital Signature</MenuItem>
                         </Select>
                         <FormGroup>
                             <FormControlLabel
