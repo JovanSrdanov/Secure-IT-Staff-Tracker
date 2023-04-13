@@ -13,8 +13,9 @@
 }
 
 .certificateWrapper:hover {
-    background: var(--backs);
+    border: 3px solid   var(--backs);
     cursor: pointer;
+    transition: 0.5s;
 }
 
 li {

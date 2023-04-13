@@ -170,7 +170,7 @@ function IssueCertificate() {
             subjectInfo: subjectInfoCorrected,
             startDate: startDate,
             endDate: endDate,
-            issuingCertificateSerialNumber: selectedCertificate.issuerSerialNumber,
+            issuingCertificateSerialNumber: selectedCertificate.serialNumber,
             extensions: extensions
         }
 
