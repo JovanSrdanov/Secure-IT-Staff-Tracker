@@ -84,6 +84,21 @@ public class CertificateGenerator {
                     usage = new KeyUsage(KeyUsage.dataEncipherment);
                     certGen.addExtension(Extension.keyUsage, false, usage);
                 }
+                // ovo znaci da kljuc moze da se koristi u "key agreement protokolima",
+                // 2 strane se dogovore da koriste deljeni tajni kljuc. Koristi se u
+                // SSL/TLS enkripcijama kod web aplikacija
+                case "keyAgreement" -> {
+                    usage = new KeyUsage(KeyUsage.keyAgreement);
+                    certGen.addExtension(Extension.keyUsage, false, usage);
+                }
+                case "certificateSigning" -> {
+                    usage = new KeyUsage(KeyUsage.keyCertSign);
+                    certGen.addExtension(Extension.keyUsage, false, usage);
+                }
+                case "digitalSignature" -> {
+                    usage = new KeyUsage(KeyUsage.digitalSignature);
+                    certGen.addExtension(Extension.keyUsage, false, usage);
+                }
                 default -> {
                     usage = new KeyUsage(KeyUsage.digitalSignature);
                     certGen.addExtension(Extension.keyUsage, false, usage);
