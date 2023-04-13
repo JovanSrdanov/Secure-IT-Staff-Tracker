@@ -37,6 +37,7 @@ function CreateCertificate() {
     const [uniqueEmailForNewIssuer, setUniqueEmailForNewIssuer] = useState(false);
     const [certificates, setCertificates] = useState(null);
     const [existingAccounts, setExistingAccounts] = useState(null);
+    const [useExistingAccount, setUseExistingAccount] = useState(false);
 
 
     const [subjectInfo, setSubjectInfo] = useState({
@@ -116,8 +117,12 @@ function CreateCertificate() {
 
     };
 
-    const handleSelectedAccount = (email) => {
-        setSelectedSubjectEmail(email)
+    const handleSelectedAccount = (selectedEmail) => {
+        setSelectedSubjectEmail(selectedEmail)
+
+        let newInfo = subjectInfo;
+        newInfo.email = selectedEmail; 
+        setSubjectInfo(newInfo);
 
     };
 
@@ -144,7 +149,16 @@ function CreateCertificate() {
         }));
     }
 
+    const handleUseExistingAccountChange = (event) => {
+        setUseExistingAccount(!useExistingAccount);
+    }
+
     const createCertificate = () => {
+        //***WARNING */
+        let updatedSubjectInfo = subjectInfo;
+        updatedSubjectInfo.isAccountNew = !useExistingAccount;
+        setSubjectInfo(updatedSubjectInfo); 
+        //***WARNING */
         let extensions = {}
         extensions.keyUsage = keyUsage;
         if (CAChecked) {
@@ -162,9 +176,10 @@ function CreateCertificate() {
         }
         if (typeOfCertificate === "caissued") {
             subjectInfoCorrected = subjectInfo;
-            if (subjectTypeSelected === "new") {
-                subjectInfoCorrected.isAccountNew = true;
-            }
+            // ALEKSANDAR ZAKOMENTARISAO
+            // if (subjectTypeSelected === "new") {
+            //     subjectInfoCorrected.isAccountNew = true;
+            // }
 
         }
 
@@ -172,7 +187,7 @@ function CreateCertificate() {
             subjectInfo: subjectInfoCorrected,
             startDate: startDate,
             endDate: endDate,
-            issuingCertificateSerialNumber: selectedCertificate.issuerSerialNumber,
+            issuingCertificateSerialNumber: selectedCertificate.serialNumber,
             extensions: extensions
         }
 
@@ -287,15 +302,15 @@ function CreateCertificate() {
                                         value={issuer.countryCode}
                                         onChange={handelIssuerInputChange}
                                     />
-                                    <TextField
-                                        fullWidth
-                                        variant="filled"
-                                        label="E-mail"
-                                        type="text"
-                                        name="email"
-                                        value={issuer.email}
-                                        onChange={handelIssuerInputChange}
-                                    />
+                                        <TextField
+                                            fullWidth
+                                            variant="filled"
+                                            label="E-mail"
+                                            type="text"
+                                            name="email"
+                                            value={issuer.email}
+                                            onChange={handelIssuerInputChange}
+                                        />
                                     <p>
                                         {uniqueEmailForNewIssuer && (<span>Email is unique</span>)}
                                         {!uniqueEmailForNewIssuer && (<span>Email is not unique</span>)}
@@ -420,6 +435,10 @@ function CreateCertificate() {
                                                     value={subjectInfo.countryCode}
                                                     onChange={handleSubjectInputChange}
                                                 />
+                                                <input type="checkbox" onChange={handleUseExistingAccountChange}/>
+                                                <p>Use existing account</p>
+                                                { !useExistingAccount &&
+
                                                 <TextField
                                                     fullWidth
                                                     variant="filled"
@@ -429,13 +448,12 @@ function CreateCertificate() {
                                                     value={subjectInfo.email}
                                                     onChange={handleSubjectInputChange}
                                                 />
-
-
+                                                }
                                             </>
                                         )
                                     }
 
-                                    {subjectTypeSelected === "existing" && (
+                                    {useExistingAccount && (
                                         <>
                                             {existingAccounts != null &&
                                                 (<div className="scrollAccounts">
