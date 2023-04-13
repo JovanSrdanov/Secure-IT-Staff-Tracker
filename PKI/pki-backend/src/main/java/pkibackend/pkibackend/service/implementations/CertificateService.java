@@ -368,18 +368,20 @@ public class CertificateService implements ICertificateService {
             logger.info("Building existing subject...");
 
             Account account = _accountService.findByEmail(info.getEmail());
-            Set<KeystoreRowInfo> accountKeystoreInfo = account.getKeyStoreRowsInfo();
-            if (accountKeystoreInfo.isEmpty()) {
-                throw new BadRequestException("The subject already exists but does not have a certificate");
-            }
-
-            String alias = accountKeystoreInfo.stream().findAny().get().getAlias();
-            java.security.cert.Certificate certificate = _certificateRepository.GetCertificate(alias, keyStoreName, keyStorePassword);
-            // X500Name subjectInfo = new X500Name(certificate.getX509Certificate().getSubjectX500Principal().getName());
-            X509Certificate KURAC = (X509Certificate) certificate;
-            X500Name subjectName = new JcaX509CertificateHolder((X509Certificate) certificate).getSubject();
-            logger.info("Existing subject info: {}", subjectName);
-            newCertificate.setSubjectInfo(subjectName);
+//            Set<KeystoreRowInfo> accountKeystoreInfo = account.getKeyStoreRowsInfo();
+//            if (accountKeystoreInfo.isEmpty()) {
+//                throw new BadRequestException("The subject already exists but does not have a certificate");
+//            }
+//
+//            String alias = accountKeystoreInfo.stream().findAny().get().getAlias();
+//            java.security.cert.Certificate certificate = _certificateRepository.GetCertificate(alias, keyStoreName, keyStorePassword);
+//            X500Name subjectName = new JcaX509CertificateHolder((X509Certificate) certificate).getSubject();
+//            logger.info("Existing subject info: {}", subjectName);
+            //Ne ovo:
+            //newCertificate.setSubjectInfo(subjectName);
+            //Nego:
+            X500NameBuilder builder = setupBasicCertificateInfo(info, account.getId());
+            newCertificate.setSubjectInfo(builder.build());
 
             return account;
         }
