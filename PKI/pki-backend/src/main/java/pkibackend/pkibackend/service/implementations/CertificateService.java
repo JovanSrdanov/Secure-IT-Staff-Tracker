@@ -375,6 +375,8 @@ public class CertificateService implements ICertificateService {
 
             String alias = accountKeystoreInfo.stream().findAny().get().getAlias();
             java.security.cert.Certificate certificate = _certificateRepository.GetCertificate(alias, keyStoreName, keyStorePassword);
+            // X500Name subjectInfo = new X500Name(certificate.getX509Certificate().getSubjectX500Principal().getName());
+            X509Certificate KURAC = (X509Certificate) certificate;
             X500Name subjectName = new JcaX509CertificateHolder((X509Certificate) certificate).getSubject();
             logger.info("Existing subject info: {}", subjectName);
             newCertificate.setSubjectInfo(subjectName);
@@ -509,8 +511,8 @@ public class CertificateService implements ICertificateService {
 
     @Override
     public boolean isInKeystore(Set<KeystoreRowInfo> rows, BigInteger certSerialNum) {
-        for(KeystoreRowInfo row : rows) {
-            if(row.getCertificateSerialNumber().equals(certSerialNum)) {
+        for (KeystoreRowInfo row : rows) {
+            if (row.getCertificateSerialNumber().equals(certSerialNum)) {
                 return true;
             }
         }
