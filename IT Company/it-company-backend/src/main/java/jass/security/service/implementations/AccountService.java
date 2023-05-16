@@ -40,4 +40,9 @@ public class AccountService implements IAccountService {
     public void delete(UUID id) {
 
     }
+
+    @Override
+    public Account findByEmail(String email) {
+        return _accountRepository.findByEmail(email);
+    }
 }

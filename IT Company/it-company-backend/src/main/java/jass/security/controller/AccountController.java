@@ -30,7 +30,7 @@ public class AccountController {
         Account newAccount = new Account();
         newAccount.setEmail(account.email());
         newAccount.setPassword(account.password());
-        newAccount.setRole(account.role());
+        //newAccount.setRole(account.role());
         //DELETE
         newAccount.setEmployeeId(UUID.randomUUID());
         newAccount.setSalt("sol");

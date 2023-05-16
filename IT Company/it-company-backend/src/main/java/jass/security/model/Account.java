@@ -1,13 +1,12 @@
 package jass.security.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Collection;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -25,11 +24,18 @@ public class Account {
     private String password;
     @Column(nullable = false)
     private String salt;
-    // TODO: Change to spring security role
-    @Column(nullable = false)
-    private Role role;
+
     private RegistrationRequestStatus status;
     private UUID employeeId;
+
+    @ManyToMany
+    @JoinTable(
+            name = "users_roles",
+            joinColumns = @JoinColumn(
+                    name = "user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(
+                    name = "role_id", referencedColumnName = "id"))
+    private Collection<Role> roles;
 }
 
 
