@@ -203,7 +203,7 @@ public class CertificateService implements ICertificateService {
             }
 
             info.setIssuingCertificateSerialNumber(serialNumber);
-            keystoreName = newCertificateAlias + "_keystore.jks";
+            keystoreName = newCertificateAlias + "_keystore.p12";
             //It is being encrypted inside constructor
             keyStorePassword = PasswordGenerator.generatePassword(15);
 

@@ -16,7 +16,7 @@ public class KeyStoreWriter {
 
     public KeyStoreWriter() {
         try {
-            keyStore = KeyStore.getInstance("JKS", "SUN");
+            keyStore = KeyStore.getInstance("PKCS12", "SUN");
         } catch (KeyStoreException | NoSuchProviderException e) {
             throw new RuntimeException(e);
         }
