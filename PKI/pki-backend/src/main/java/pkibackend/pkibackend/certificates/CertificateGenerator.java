@@ -119,5 +119,8 @@ public class CertificateGenerator {
         AuthorityKeyIdentifier identifier = new AuthorityKeyIdentifier(
                 issuingCertificateSerialNumber.toByteArray());
         certGen.addExtension(Extension.authorityKeyIdentifier, true, identifier);
+        // SAN ekstenzija da bi chrome mogao da prepozna sertifikat, zbog HTTPS-a
+        GeneralNames subjectAltNames = new GeneralNames(new GeneralName(GeneralName.dNSName, "localhost"));
+        certGen.addExtension(Extension.subjectAlternativeName, true, subjectAltNames);
     }
 }
