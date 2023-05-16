@@ -17,6 +17,7 @@ import java.math.BigInteger;
 import java.security.Security;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 
@@ -114,13 +115,22 @@ public class CertificateGenerator {
             boolean isCA = extensions.get("basicConstraints").equals("CA");
             certGen.addExtension(Extension.basicConstraints, true, new BasicConstraints(isCA));
         }
+        else {
+            certGen.addExtension(Extension.basicConstraints, true, new BasicConstraints(false));
+        }
         // opciono cuva identifikator za javni kljuc issuer-a i/ili serijski broj sertifikata koji je
         // iskoriscen za potpis
         AuthorityKeyIdentifier identifier = new AuthorityKeyIdentifier(
                 issuingCertificateSerialNumber.toByteArray());
         certGen.addExtension(Extension.authorityKeyIdentifier, true, identifier);
         // SAN ekstenzija da bi chrome mogao da prepozna sertifikat, zbog HTTPS-a
-        GeneralNames subjectAltNames = new GeneralNames(new GeneralName(GeneralName.dNSName, "localhost"));
+        GeneralName[] generalName = new GeneralName[3];
+        generalName[0] = new GeneralName(GeneralName.dNSName, "localhost");
+        generalName[1] = new GeneralName(GeneralName.dNSName, "https://localhost");
+        generalName[2] = new GeneralName(GeneralName.iPAddress, "127.0.0.1");
+
+        GeneralNames subjectAltNames = new GeneralNames(generalName);
+
         certGen.addExtension(Extension.subjectAlternativeName, true, subjectAltNames);
     }
 }
