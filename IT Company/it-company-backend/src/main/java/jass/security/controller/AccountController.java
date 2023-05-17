@@ -8,11 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.UUID;
 
 @RestController
@@ -30,13 +29,20 @@ public class AccountController {
         Account newAccount = new Account();
         newAccount.setEmail(account.email());
         newAccount.setPassword(account.password());
-        newAccount.setRole(account.role());
+        //newAccount.setRole(account.role());
         //DELETE
         newAccount.setEmployeeId(UUID.randomUUID());
         newAccount.setSalt("sol");
         _accountService.save(newAccount);
         return new ResponseEntity(HttpStatus.CREATED);
    }
+
+
+    @GetMapping("/test")
+    @PreAuthorize("hasAuthority('permisija')")
+    public ResponseEntity<?> testAuth(Principal acc) {
+        return ResponseEntity.ok("EZ");
+    }
 
 
 
