@@ -6,6 +6,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jass.security.exception.TokenExpiredException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -37,6 +38,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
         // 1. Preuzimanje JWT tokena iz zahteva
         String authToken = tokenUtils.getToken(request);
+        Boolean isExpired = false;
 
         try {
 
@@ -61,12 +63,15 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
 
-        } catch (ExpiredJwtException ex) {
-            LOGGER.debug("Token expired!");
+        } catch (ExpiredJwtException | TokenExpiredException ex) {
+            isExpired = true;
+            response.sendError(HttpServletResponse.SC_GONE, "Token expired");
         }
 
         // prosledi request dalje u sledeci filter
-        chain.doFilter(request, response);
+        if(!isExpired) {
+            chain.doFilter(request, response);
+        }
     }
 
 }

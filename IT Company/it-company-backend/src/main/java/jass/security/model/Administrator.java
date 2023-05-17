@@ -1,5 +1,6 @@
 package jass.security.model;
 
+
 import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,5 +9,5 @@ import lombok.Setter;
 
 
 @Entity
-public class HrManager extends Employee {
+public class Administrator extends Employee {
 }

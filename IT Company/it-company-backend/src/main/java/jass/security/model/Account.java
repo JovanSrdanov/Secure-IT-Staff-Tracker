@@ -22,11 +22,15 @@ public class Account {
     private String email;
     @Column(nullable = false)
     private String password;
+
     @Column(nullable = false)
     private String salt;
 
+    @Column(nullable = false)
     private RegistrationRequestStatus status;
+
     private UUID employeeId;
+    private Boolean isActivated;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

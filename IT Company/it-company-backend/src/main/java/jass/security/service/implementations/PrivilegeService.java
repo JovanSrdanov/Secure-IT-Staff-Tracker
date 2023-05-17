@@ -5,10 +5,14 @@ import jass.security.repository.IPrivilegeRepository;
 import jass.security.repository.IRoleRepository;
 import jass.security.service.interfaces.IPrivilegeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
+@Service
+@Primary
 public class PrivilegeService implements IPrivilegeService {
     private final IPrivilegeRepository _privilegeRepositroy;
 
@@ -19,7 +23,7 @@ public class PrivilegeService implements IPrivilegeService {
 
     @Override
     public List<Privilege> findAll() {
-        return null;
+        return _privilegeRepositroy.findAll();
     }
 
     @Override
