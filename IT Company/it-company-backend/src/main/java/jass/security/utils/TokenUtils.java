@@ -20,8 +20,7 @@ public class TokenUtils {
     // Algoritam za potpisivanje JWT
     private final SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS512;
     // Tajna koju samo backend aplikacija treba da zna kako bi mogla da generise i proveri JWT https://jwt.io/
-    @Value("somesecret")
-    public String SECRET;
+ 
     // Izdavac tokena
     @Value("spring-security-example")
     private String APP_NAME;

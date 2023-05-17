@@ -2,6 +2,7 @@ package jass.security.service.implementations;
 
 import jass.security.dto.RegisterAccountDto;
 import jass.security.exception.EmailTakenException;
+import jass.security.exception.NotFoundException;
 import jass.security.model.Account;
 import jass.security.model.RegistrationRequestStatus;
 import jass.security.model.Role;
@@ -98,8 +99,11 @@ public class AccountService implements IAccountService {
     }
 
     @Override
-    public void approveAccount(String email, Boolean approve) {
+    public void approveAccount(String email, Boolean approve) throws NotFoundException {
         Account account = findByEmail(email);
+        if(account == null) {
+            throw new NotFoundException("Account not found");
+        }
         if(approve) {
             account.setStatus(RegistrationRequestStatus.APPROVED);
         } else
