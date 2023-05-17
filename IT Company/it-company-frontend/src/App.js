@@ -34,7 +34,7 @@ function App() {
             return null;
         }
         const decodedToken = jwt_decode(token);
-        console.log(decodedToken);
+
         const currentTime = Date.now() / 1000;
         if (decodedToken.exp < currentTime) {
             removeTokens();
@@ -56,8 +56,10 @@ function App() {
     };
     const handleTest = () => {
         interceptor.get('/account/test', {}).then(res => {
+            console.log("res")
             console.log(res)
         }).catch(err => {
+            console.log("err")
             console.log(err)
         });
     };

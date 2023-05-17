@@ -26,9 +26,6 @@ function Login() {
             email: email,
             password: password
         }).then(res => {
-            console.log(res.data);
-            // Set HTTP-only cookies
-
             document.cookie = `accessToken=${encodeURIComponent(res.data.accessToken)}; Secure; SameSite=Strict;`;
             document.cookie = `refreshToken=${encodeURIComponent(res.data.refreshToken)}; Secure; SameSite=Strict;`;
             navigate("/");

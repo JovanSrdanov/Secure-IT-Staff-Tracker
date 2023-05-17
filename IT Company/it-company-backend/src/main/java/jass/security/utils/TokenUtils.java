@@ -24,11 +24,12 @@ public class TokenUtils {
     // Izdavac tokena
     @Value("spring-security-example")
     private String APP_NAME;
-    // Period vazenja tokena - 30 minuta
-    @Value("60000")
+
+    @Value("10000")
     private int EXPIRES_IN;
-    @Value("180000")
+    @Value("30000")
     private int REFRESH_EXPIRES_IN;
+    
     // Moguce je generisati JWT za razlicite klijente (npr. web i mobilni klijenti nece imati isto trajanje JWT,
     // JWT za mobilne klijente ce trajati duze jer se mozda aplikacija redje koristi na taj nacin)
     // Radi jednostavnosti primera, necemo voditi racuna o uređaju sa kojeg zahtev stiže.

@@ -35,14 +35,16 @@ interceptor.interceptors.response.use(
                 });
 
                 if (response.status === 200) {
-                    const {access_token: newAccessToken, refresh_token: newRefreshToken} = response.data;
-                    setAccessToken(newAccessToken);
-                    originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+                    removeTokens();
+                    setTokens(response);
+                    originalRequest.headers.Authorization = `Bearer ${getAccessToken()}`;
                     return axios(originalRequest);
                 }
             } catch (refreshError) {
                 removeTokens();
             }
+        } else if (error.response && error.response.status === 403) {
+            alert("You can not access this path: ")
         }
         return Promise.reject(error);
     }
@@ -72,12 +74,12 @@ function getRefreshToken() {
     return decodeURIComponent(refreshToken);
 }
 
-function setAccessToken(accessToken) {
-    document.cookie = `accessToken=${encodeURIComponent(accessToken)}; Secure; SameSite=Strict;`;
+function setTokens(res) {
+    document.cookie = `accessToken=${encodeURIComponent(res.data.accessToken)}; Secure; SameSite=Strict;`;
+    document.cookie = `refreshToken=${encodeURIComponent(res.data.refreshToken)}; Secure; SameSite=Strict;`;
 }
 
 function removeTokens() {
-    // Remove access and refresh tokens from secure storage
     document.cookie = 'accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; Secure; SameSite=Strict;';
     document.cookie = 'refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; Secure; SameSite=Strict;';
 }
