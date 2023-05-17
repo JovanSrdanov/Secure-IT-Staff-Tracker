@@ -8,6 +8,7 @@ import jass.security.dto.UserTokenState;
 import jass.security.exception.EmailActivationExpiredException;
 import jass.security.exception.EmailTakenException;
 import jass.security.exception.NotFoundException;
+import jass.security.exception.TokenExpiredException;
 import jass.security.model.Account;
 import jass.security.model.RegistrationRequestStatus;
 import jass.security.model.Role;
@@ -95,13 +96,17 @@ public class AuthenticationController {
 
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestBody RefreshRequest token) {
-        if(tokenUtils.validateRefreshToken(token.getToken())) {
-            String email = tokenUtils.getUsernameFromToken(token.getToken());
-            Account account = accountService.findByEmail(email);
-            var roles = new ArrayList<>(account.getRoles());
-            String jwt = tokenUtils.generateToken(email, roles.get(0).getName());
-            int expiresIn = tokenUtils.getExpiredIn();
-            return ResponseEntity.ok(new UserTokenState(jwt, token.getToken(), expiresIn));
+        try {
+            if(tokenUtils.validateRefreshToken(token.getToken())) {
+                String email = tokenUtils.getUsernameFromToken(token.getToken());
+                Account account = accountService.findByEmail(email);
+                var roles = new ArrayList<>(account.getRoles());
+                String jwt = tokenUtils.generateToken(email, roles.get(0).getName());
+                int expiresIn = tokenUtils.getExpiredIn();
+                return ResponseEntity.ok(new UserTokenState(jwt, token.getToken(), expiresIn));
+            }
+        } catch (TokenExpiredException e) {
+            return ResponseEntity.status(HttpStatus.GONE).body("Token expired");
         }
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Token not valid");
