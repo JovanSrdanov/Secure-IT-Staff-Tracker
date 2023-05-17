@@ -46,7 +46,9 @@ public class AccountService implements IAccountService {
 
     @Override
     public Account save(Account entity) {
-        entity.setId(UUID.randomUUID());
+        if( entity.getId() == null) {
+            entity.setId(UUID.randomUUID());
+        }
         return _accountRepository.save(entity);
     }
 
@@ -77,6 +79,7 @@ public class AccountService implements IAccountService {
         //TODO Strahinja: Ovde treba id normalan ne random
         newAcc.setEmployeeId(UUID.randomUUID());
         newAcc.setStatus(RegistrationRequestStatus.PENDING);
+        newAcc.setIsActivated(false);
 
         //TODO Strahinja: Da li ovo ovako ili nekako bolje da se salju ove role sa fronta?
         var role = _roleRespository.findByName(dto.getRole());
@@ -92,6 +95,23 @@ public class AccountService implements IAccountService {
         _roleRespository.save(role);
 
         return newAcc.getId();
+    }
+
+    @Override
+    public void approveAccount(String email, Boolean approve) {
+        Account account = findByEmail(email);
+        if(approve) {
+            account.setStatus(RegistrationRequestStatus.APPROVED);
+        } else
+            account.setStatus(RegistrationRequestStatus.REJECTED);
+
+        save(account);
+    }
+
+    @Override
+    public ArrayList<Account> findAllByStatus(RegistrationRequestStatus status) {
+        var accs = _accountRepository.findAllByStatus(status);
+        return accs;
     }
 
     private String genereteSalt() {
