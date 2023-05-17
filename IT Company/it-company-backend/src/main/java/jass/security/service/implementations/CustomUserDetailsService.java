@@ -21,8 +21,8 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Autowired
     private IAccountService accountService;
     
-    @Autowired
-    private IRoleService roleService;
+    /*@Autowired
+    private IRoleService roleService;*/
 
     @Override
     public UserDetails loadUserByUsername(String email)

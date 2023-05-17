@@ -7,18 +7,14 @@ import jass.security.model.Account;
 import jass.security.service.interfaces.IAccountService;
 import jass.security.utils.TokenUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.bind.annotation.*;
 
 //Kontroler zaduzen za autentifikaciju korisnika
 @RestController
@@ -42,15 +38,16 @@ public class AuthenticationController {
         // Ukoliko kredencijali nisu ispravni, logovanje nece biti uspesno, desice se
         // AuthenticationException
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                authenticationRequest.getUsername(), authenticationRequest.getPassword()));
+                authenticationRequest.getEmail(), authenticationRequest.getPassword()));
 
         // Ukoliko je autentifikacija uspesna, ubaci korisnika u trenutni security
         // kontekst
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         // Kreiraj token za tog korisnika
-        Account user = (Account) authentication.getPrincipal();
-        String jwt = tokenUtils.generateToken(user.getEmail());
+        //TODO Strahinja: Zasto ovde baca error?
+        //Account user = (Account) authentication.getPrincipal();
+        String jwt = tokenUtils.generateToken(authenticationRequest.getEmail());
         int expiresIn = tokenUtils.getExpiredIn();
 
         // Vrati token kao odgovor na uspesnu autentifikaciju
