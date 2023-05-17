@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+let failedRequests = 0; // Counter for failed requests with 401 status
+
 const interceptor = axios.create({
     baseURL: 'http://localhost:4761/',
     withCredentials: true
@@ -24,8 +26,12 @@ interceptor.interceptors.request.use(
 );
 
 interceptor.interceptors.response.use(
-    (response) => response,
+    (response) => {
+        return response;
+    },
     async (error) => {
+        failedRequests++;
+        console.log(failedRequests)
         const originalRequest = error.config;
         if (error.response && error.response.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
@@ -33,18 +39,21 @@ interceptor.interceptors.response.use(
                 const response = await axios.post('http://localhost:4761/auth/refresh', {
                     token: getRefreshToken(),
                 });
-
                 if (response.status === 200) {
                     removeTokens();
                     setTokens(response);
                     originalRequest.headers.Authorization = `Bearer ${getAccessToken()}`;
-                    return axios(originalRequest);
+                    failedRequests = 0; // Set failedRequests to 0 when there is no error
+                    return interceptor(originalRequest);
                 }
             } catch (refreshError) {
+                console.log("Token expired: ");
                 removeTokens();
             }
-        } else if (error.response && error.response.status === 403) {
-            alert("You can not access this path: ")
+        }
+        if (failedRequests > 0) {
+            alert(" You are unauthorized to access this url: " + interceptor.getUri(originalRequest))
+            failedRequests = 0
         }
         return Promise.reject(error);
     }
@@ -83,6 +92,5 @@ function removeTokens() {
     document.cookie = 'accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; Secure; SameSite=Strict;';
     document.cookie = 'refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; Secure; SameSite=Strict;';
 }
-
 
 export default interceptor;

@@ -63,6 +63,16 @@ function App() {
             console.log(err)
         });
     };
+
+    const Una = () => {
+        interceptor.get('/account/pending', {}).then(res => {
+            console.log("res")
+            console.log(res)
+        }).catch(err => {
+            console.log("err")
+            console.log(err)
+        });
+    };
     return (
         <div>
             <ParticlesBg color="#000000" type="cobweb" num={200} bg={true}/>
@@ -114,7 +124,10 @@ function App() {
                     <Route path="/register" element={<RegisterPage/>}/>
                     <Route path="/*" element={<Navigate to="/login"/>}/>
                     <Route path="/button"
-                           element={<Button variant="contained" onClick={handleTest}>Klikni</Button>}/>
+                           element={<><Button variant="contained" onClick={handleTest}>Klikni </Button>
+                               <Button variant="contained" color="error" onClick={Una}>Klikni
+                                   unauthorized </Button>
+                           </>}/>
 
 
                 </Routes>

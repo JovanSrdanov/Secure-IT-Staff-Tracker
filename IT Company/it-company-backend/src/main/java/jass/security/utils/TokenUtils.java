@@ -1,19 +1,11 @@
 package jass.security.utils;
 
-import java.util.Date;
-
-import jakarta.servlet.http.HttpServletRequest;
-import jass.security.exception.TokenExpiredException;
-import jass.security.model.Account;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.servlet.http.HttpServletRequest;
+import jass.security.exception.TokenExpiredException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -39,10 +31,10 @@ public class TokenUtils {
     @Value("${tokenExpiration}")
     private int EXPIRES_IN;
 
-    @Value("7200000")
+    @Value("20000")
     private int REFRESH_EXPIRES_IN;
-    
-    
+
+
     // Moguce je generisati JWT za razlicite klijente (npr. web i mobilni klijenti nece imati isto trajanje JWT,
     // JWT za mobilne klijente ce trajati duze jer se mozda aplikacija redje koristi na taj nacin)
     // Radi jednostavnosti primera, necemo voditi racuna o uređaju sa kojeg zahtev stiže.
