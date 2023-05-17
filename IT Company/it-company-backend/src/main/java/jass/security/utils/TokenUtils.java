@@ -34,7 +34,9 @@ public class TokenUtils {
     @Value("spring-security-example")
     private String APP_NAME;
 
-    @Value("900000")
+
+    // Period vazenja tokena - 15 minuta
+    @Value("${tokenExpiration}")
     private int EXPIRES_IN;
 
     @Value("7200000")
@@ -171,13 +173,13 @@ public class TokenUtils {
      * @param token JWT token.
      * @return Datum kada je token kreiran.
      */
-    public Date getIssuedAtDateFromToken(String token) {
+    public Date getIssuedAtDateFromToken(String token) throws TokenExpiredException {
         Date issueAt;
         try {
             final Claims claims = this.getAllClaimsFromToken(token);
             issueAt = claims.getIssuedAt();
         } catch (ExpiredJwtException ex) {
-            throw ex;
+            throw new TokenExpiredException();
         } catch (Exception e) {
             issueAt = null;
         }
@@ -258,7 +260,7 @@ public class TokenUtils {
      * @param userDetails Informacije o korisniku koji je vlasnik JWT tokena.
      * @return Informacija da li je token validan ili ne.
      */
-    public Boolean validateToken(String token, UserDetails userDetails) {
+    public Boolean validateToken(String token, UserDetails userDetails) throws TokenExpiredException {
         final String username = getUsernameFromToken(token);
         final Date created = getIssuedAtDateFromToken(token);
 
@@ -277,9 +279,9 @@ public class TokenUtils {
         ); //isto u bazi
     }
 
-    public Boolean validateRefreshToken(String token) {
+    public Boolean validateRefreshToken(String token) throws TokenExpiredException {
         final String username = getUsernameFromToken(token);
-        //final Date created = getIssuedAtDateFromToken(token);
+        final Date created = getIssuedAtDateFromToken(token);
 
 
         var claims = Jwts.parser()
