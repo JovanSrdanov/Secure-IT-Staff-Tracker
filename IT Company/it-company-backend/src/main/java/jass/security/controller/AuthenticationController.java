@@ -5,8 +5,13 @@ import jass.security.dto.JwtAuthenticationRequest;
 import jass.security.dto.RefreshRequest;
 import jass.security.dto.RegisterAccountDto;
 import jass.security.dto.UserTokenState;
+import jass.security.exception.EmailActivationExpiredException;
 import jass.security.exception.EmailTakenException;
+import jass.security.exception.NotFoundException;
 import jass.security.model.Account;
+import jass.security.model.RegistrationRequestStatus;
+import jass.security.model.Role;
+import jass.security.service.interfaces.IAccountActivationService;
 import jass.security.service.interfaces.IAccountService;
 import jass.security.utils.TokenUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +25,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.UUID;
 
 //Kontroler zaduzen za autentifikaciju korisnika
 @RestController
@@ -35,6 +43,9 @@ public class AuthenticationController {
     @Autowired
     private IAccountService accountService;
 
+    @Autowired
+    private IAccountActivationService accountActivationService;
+
     // Prvi endpoint koji pogadja korisnik kada se loguje.
     // Tada zna samo svoje korisnicko ime i lozinku i to prosledjuje na backend.
     @PostMapping("/login")
@@ -45,6 +56,14 @@ public class AuthenticationController {
         Account acc = accountService.findByEmail(authenticationRequest.getEmail());
         if(acc == null) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not found");
+        }
+
+        if(acc.getStatus() != RegistrationRequestStatus.APPROVED) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Registration is not accepted by admin");
+        }
+
+        if (!acc.getIsActivated()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Account not activated");
         }
 
         Authentication authentication = null;
@@ -63,7 +82,10 @@ public class AuthenticationController {
         // Kreiraj token za tog korisnika
         //TODO Strahinja: Zasto ovde baca error?
         //Account user = (Account) authentication.getPrincipal();
-        String jwt = tokenUtils.generateToken(authenticationRequest.getEmail());
+        Account account = accountService.findByEmail(authenticationRequest.getEmail());
+        var roles = new ArrayList<Role>(account.getRoles());
+
+        String jwt = tokenUtils.generateToken(authenticationRequest.getEmail(), roles.get(0).getName());
         String resfresh = tokenUtils.generateRefreshToken(authenticationRequest.getEmail());
         int expiresIn = tokenUtils.getExpiredIn();
 
@@ -75,7 +97,9 @@ public class AuthenticationController {
     public ResponseEntity<?> refreshToken(@RequestBody RefreshRequest token) {
         if(tokenUtils.validateRefreshToken(token.getToken())) {
             String email = tokenUtils.getUsernameFromToken(token.getToken());
-            String jwt = tokenUtils.generateToken(email);
+            Account account = accountService.findByEmail(email);
+            var roles = new ArrayList<>(account.getRoles());
+            String jwt = tokenUtils.generateToken(email, roles.get(0).getName());
             int expiresIn = tokenUtils.getExpiredIn();
             return ResponseEntity.ok(new UserTokenState(jwt, token.getToken(), expiresIn));
         }
@@ -87,25 +111,46 @@ public class AuthenticationController {
     @PostMapping("/register")
     public ResponseEntity<?> registerNewAccount(@RequestBody RegisterAccountDto dto) {
         try {
-            return ResponseEntity.ok(accountService.registerAccount(dto));
+            //Namesti acc u bazi
+            accountService.registerAccount(dto);
+
+            //Admin treba da odobri
+            //TODO Strahinja: admin da odobri
+
+            //Posalji mail
+            String link = accountActivationService.createAcctivationLink(dto.getEmail());
+
+
+            return ResponseEntity.ok(link);
         } catch (EmailTakenException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("This e-mail is taken");
         }
     }
 
-    // Endpoint za registraciju novog korisnika
-    //Endpoint za registrovanje
-    /*
-    @PostMapping("/signup")
-    public ResponseEntity<Account> addUser(@RequestBody UserRequest userRequest, UriComponentsBuilder ucBuilder) {
-        User existUser = this.accountService.findByUsername(userRequest.getUsername());
+    @PreAuthorize("hasAuthority('chagneAccStatus')")
+    @GetMapping("/accept-registration/{mail}")
+    public ResponseEntity<?> acceptRegistration(@PathVariable String mail) {
+        accountService.approveAccount(mail, true);
+        return ResponseEntity.ok("Registration approved");
+    }
 
-        if (existUser != null) {
-            throw new ResourceConflictException(userRequest.getId(), "Username already exists");
+    @PreAuthorize("hasAuthority('chagneAccStatus')")
+    @GetMapping("/reject-registration/{mail}")
+    public ResponseEntity<?> rejectRegistration(@PathVariable String mail) {
+        accountService.approveAccount(mail, false);
+        return ResponseEntity.ok("Registration rejected");
+    }
+
+    @GetMapping("/activate/{id}")
+    public ResponseEntity<?> activateAccount(@PathVariable UUID id) {
+        try {
+            accountActivationService.activateAccount(id);
+        } catch (EmailActivationExpiredException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Expired link");
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Corrupted link");
         }
 
-        User user = this.accountService.save(userRequest);
-
-        return new ResponseEntity<>(user, HttpStatus.CREATED);
-    }*/
+        return ResponseEntity.ok("Account activated");
+    }
 }
