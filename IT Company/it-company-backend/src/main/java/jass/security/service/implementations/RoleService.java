@@ -4,10 +4,13 @@ import jass.security.model.Role;
 import jass.security.repository.IRoleRepository;
 import jass.security.service.interfaces.IRoleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
-
+@Service
+@Primary
 public class RoleService implements IRoleService {
     private final IRoleRepository _roleRepository;
 

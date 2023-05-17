@@ -1,9 +1,12 @@
 package jass.security.controller;
 
+import jass.security.dto.AccountApprovalDto;
 import jass.security.dto.RegisterEmployeeDto;
 import jass.security.exception.BadRequestException;
 import jass.security.model.Account;
+import jass.security.model.RegistrationRequestStatus;
 import jass.security.service.interfaces.IAccountService;
+import jass.security.utils.ObjectMapperUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -42,6 +45,14 @@ public class AccountController {
     @PreAuthorize("hasAuthority('permisija')")
     public ResponseEntity<?> testAuth(Principal acc) {
         return ResponseEntity.ok("EZ");
+    }
+
+    @GetMapping("/pending")
+    @PreAuthorize("hasAuthority('chagneAccStatus')")
+    public ResponseEntity<?> findAllPendingApproval() {
+        //return ResponseEntity.ok("alo");
+        var res = ObjectMapperUtils.mapAll(_accountService.findAllByStatus(RegistrationRequestStatus.PENDING), AccountApprovalDto.class);
+        return ResponseEntity.ok(res);
     }
 
 

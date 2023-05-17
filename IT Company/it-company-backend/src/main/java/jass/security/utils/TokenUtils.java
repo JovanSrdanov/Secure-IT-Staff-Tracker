@@ -1,5 +1,14 @@
 package jass.security.utils;
 
+import java.util.Date;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jass.security.exception.TokenExpiredException;
+import jass.security.model.Account;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -25,10 +34,12 @@ public class TokenUtils {
     @Value("spring-security-example")
     private String APP_NAME;
 
-    @Value("10000")
+    @Value("900000")
     private int EXPIRES_IN;
-    @Value("30000")
+
+    @Value("7200000")
     private int REFRESH_EXPIRES_IN;
+    
     
     // Moguce je generisati JWT za razlicite klijente (npr. web i mobilni klijenti nece imati isto trajanje JWT,
     // JWT za mobilne klijente ce trajati duze jer se mozda aplikacija redje koristi na taj nacin)
@@ -49,7 +60,7 @@ public class TokenUtils {
      * @param username Korisničko ime korisnika kojem se token izdaje
      * @return JWT token
      */
-    public String generateToken(String username) {
+    public String generateToken(String username, String role) {
         return Jwts.builder()
                 .setIssuer(APP_NAME)
                 .setSubject(username)
@@ -57,6 +68,7 @@ public class TokenUtils {
                 .setIssuedAt(new Date())
                 .setExpiration(generateExpirationDate())
                 .claim("isRefresh", false)
+                .claim("role", role)
                 .signWith(SIGNATURE_ALGORITHM, SECRET).compact();
 
 
@@ -197,13 +209,13 @@ public class TokenUtils {
      * @param token JWT token.
      * @return Datum do kojeg token važi.
      */
-    public Date getExpirationDateFromToken(String token) {
+    public Date getExpirationDateFromToken(String token) throws TokenExpiredException {
         Date expiration;
         try {
             final Claims claims = this.getAllClaimsFromToken(token);
             expiration = claims.getExpiration();
         } catch (ExpiredJwtException ex) {
-            throw ex;
+            throw new TokenExpiredException();
         } catch (Exception e) {
             expiration = null;
         }
