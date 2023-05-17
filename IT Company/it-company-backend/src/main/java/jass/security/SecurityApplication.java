@@ -10,7 +10,7 @@ public class SecurityApplication {
         SpringApplication.run(SecurityApplication.class, args);
         System.Logger logger = System.getLogger(SecurityApplication.class.getName());
         logger.log(System.Logger.Level.INFO, "Empty search history tells more then full one ~ Confucius");
-        System.out.println("ZNATNO BOLJE NEGO MIRKOSERVISI I GOLANG I DOKER");
+        System.out.println("ZNATNO BOLJE NEGO MIRKOSERVISI I GOLANG I DOCKER");
     }
 
 }
