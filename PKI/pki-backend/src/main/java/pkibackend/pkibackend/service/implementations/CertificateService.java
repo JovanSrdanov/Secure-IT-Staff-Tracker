@@ -557,6 +557,11 @@ public class CertificateService implements ICertificateService {
     }
 
     @Override
+    public PrivateKey GetCertificatePrivateKey(String keyStoreName, String keyStorePass, String alias, String pass) {
+        return _certificateRepository.GetCertificatePrivateKey(keyStoreName, keyStorePass, alias, pass);
+    }
+
+    @Override
     public boolean isChainValid(BigInteger certSerialNum) throws BadRequestException {
         Optional<KeystoreRowInfo> issuerKeystoreInfo = _keystoreRowInfoRepository.findByCertificateSerialNumber(certSerialNum);
         if (issuerKeystoreInfo.isEmpty()) {
