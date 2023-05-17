@@ -117,11 +117,8 @@ public class AuthenticationController {
             //Admin treba da odobri
             //TODO Strahinja: admin da odobri
 
-            //Posalji mail
-            String link = accountActivationService.createAcctivationLink(dto.getEmail());
 
-
-            return ResponseEntity.ok(link);
+            return ResponseEntity.ok("Account created, waiting admin approval");
         } catch (EmailTakenException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("This e-mail is taken");
         }
@@ -131,13 +128,20 @@ public class AuthenticationController {
     @GetMapping("/accept-registration/{mail}")
     public ResponseEntity<?> acceptRegistration(@PathVariable String mail) {
         accountService.approveAccount(mail, true);
-        return ResponseEntity.ok("Registration approved");
+
+        //Posalji mail
+        String link = accountActivationService.createAcctivationLink(mail);
+
+        //TODO Strhinja: poslati na mail link umesto u response
+        return ResponseEntity.ok("Registration approved \n Activation link: " + link);
     }
 
     @PreAuthorize("hasAuthority('chagneAccStatus')")
     @GetMapping("/reject-registration/{mail}")
     public ResponseEntity<?> rejectRegistration(@PathVariable String mail) {
         accountService.approveAccount(mail, false);
+
+        //TODO Strhinja: poslati na mail da je nalog odbijen
         return ResponseEntity.ok("Registration rejected");
     }
 
