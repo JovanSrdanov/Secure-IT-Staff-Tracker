@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.UUID;
 
 @RestController
@@ -39,7 +40,7 @@ public class AccountController {
 
     @GetMapping("/test")
     @PreAuthorize("hasAuthority('permisija')")
-    public ResponseEntity<?> testAuth() {
+    public ResponseEntity<?> testAuth(Principal acc) {
         return ResponseEntity.ok("EZ");
     }
 

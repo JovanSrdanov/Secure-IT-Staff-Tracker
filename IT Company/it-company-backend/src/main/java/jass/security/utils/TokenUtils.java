@@ -29,6 +29,9 @@ public class TokenUtils {
     @Value("1800000")
     private int EXPIRES_IN;
 
+    @Value("18000000")
+    private int REFRESH_EXPIRES_IN;
+
     // Naziv headera kroz koji ce se prosledjivati JWT u komunikaciji server-klijent
     @Value("Authorization")
     private String AUTH_HEADER;
@@ -61,10 +64,22 @@ public class TokenUtils {
                 .setAudience(generateAudience())
                 .setIssuedAt(new Date())
                 .setExpiration(generateExpirationDate())
+                .claim("isRefresh", false)
                 .signWith(SIGNATURE_ALGORITHM, SECRET).compact();
 
 
         // moguce je postavljanje proizvoljnih podataka u telo JWT tokena pozivom funkcije .claim("key", value), npr. .claim("role", user.getRole())
+    }
+
+    public String generateRefreshToken(String email) {
+        return Jwts.builder()
+                .setIssuer(APP_NAME)
+                .setSubject(email)
+                .setAudience(generateAudience())
+                .setIssuedAt(new Date())
+                .setExpiration(generateRefreshExpirationDate())
+                .claim("isRefresh", true)
+                .signWith(SIGNATURE_ALGORITHM, SECRET).compact();
     }
 
     /**
@@ -95,6 +110,10 @@ public class TokenUtils {
      */
     private Date generateExpirationDate() {
         return new Date(new Date().getTime() + EXPIRES_IN);
+    }
+
+    private Date generateRefreshExpirationDate() {
+        return new Date(new Date().getTime() + REFRESH_EXPIRES_IN);
     }
 
     // =================================================================
@@ -237,9 +256,34 @@ public class TokenUtils {
         final Date created = getIssuedAtDateFromToken(token);
 
 
+        var claims = Jwts.parser()
+                .setSigningKey(SECRET)
+                .parseClaimsJws(token)
+                .getBody();
+
+
         // Token je validan kada:
-        return (username != null // korisnicko ime nije null
-                && username.equals(userDetails.getUsername())); //isto u bazi
+        return (
+                username != null // korisnicko ime nije null
+                && username.equals(userDetails.getUsername())
+                && !claims.get("isRefresh", Boolean.class)
+        ); //isto u bazi
+    }
+
+    public Boolean validateRefreshToken(String token) {
+        final String username = getUsernameFromToken(token);
+        //final Date created = getIssuedAtDateFromToken(token);
+
+
+        var claims = Jwts.parser()
+                .setSigningKey(SECRET)
+                .parseClaimsJws(token)
+                .getBody();
+
+        return (
+                username != null // korisnicko ime nije null
+                        && claims.get("isRefresh", Boolean.class)
+        );
     }
 
     /**
@@ -274,5 +318,4 @@ public class TokenUtils {
     public String getAuthHeaderFromHeader(HttpServletRequest request) {
         return request.getHeader(AUTH_HEADER);
     }
-
 }
