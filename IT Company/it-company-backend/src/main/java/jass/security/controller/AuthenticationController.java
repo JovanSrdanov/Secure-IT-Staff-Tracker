@@ -3,7 +3,9 @@ package jass.security.controller;
 import jakarta.servlet.http.HttpServletResponse;
 import jass.security.dto.JwtAuthenticationRequest;
 import jass.security.dto.RefreshRequest;
+import jass.security.dto.RegisterAccountDto;
 import jass.security.dto.UserTokenState;
+import jass.security.exception.EmailTakenException;
 import jass.security.model.Account;
 import jass.security.service.interfaces.IAccountService;
 import jass.security.utils.TokenUtils;
@@ -40,12 +42,17 @@ public class AuthenticationController {
             @RequestBody JwtAuthenticationRequest authenticationRequest, HttpServletResponse response) {
         // Ukoliko kredencijali nisu ispravni, logovanje nece biti uspesno, desice se
         // AuthenticationException
+        Account acc = accountService.findByEmail(authenticationRequest.getEmail());
+        if(acc == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not found");
+        }
+
         Authentication authentication = null;
         try {
             authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                    authenticationRequest.getEmail(), authenticationRequest.getPassword()));
+                    authenticationRequest.getEmail(), authenticationRequest.getPassword() + acc.getSalt()));
         } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not found");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Auth failed");
         }
 
 
@@ -75,6 +82,15 @@ public class AuthenticationController {
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Token not valid");
 
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> registerNewAccount(@RequestBody RegisterAccountDto dto) {
+        try {
+            return ResponseEntity.ok(accountService.registerAccount(dto));
+        } catch (EmailTakenException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("This e-mail is taken");
+        }
     }
 
     // Endpoint za registraciju novog korisnika

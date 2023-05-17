@@ -28,6 +28,8 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email)
             throws UsernameNotFoundException {
         Account account = accountService.findByEmail(email);
+
+        //TODO Strahinja: Ako je acc pendind da li to proveriti ovde ili?
         if (account == null) {
             throw new UsernameNotFoundException(String.format("No user found with email '%s'.", email));
             /*return new org.springframework.security.core.userdetails.User(
