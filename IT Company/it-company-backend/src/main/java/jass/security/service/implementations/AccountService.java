@@ -2,11 +2,14 @@ package jass.security.service.implementations;
 
 import jass.security.dto.AddressDto;
 import jass.security.dto.RegisterAccountDto;
+import jass.security.exception.EmailRejectedException;
 import jass.security.exception.EmailTakenException;
 import jass.security.exception.NotFoundException;
 import jass.security.model.*;
 import jass.security.repository.*;
 import jass.security.service.interfaces.IAccountService;
+import jass.security.service.interfaces.IRejectedMailService;
+import jass.security.utils.DateUtils;
 import jass.security.utils.ObjectMapperUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
@@ -14,7 +17,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.SQLException;
 import java.util.*;
 
 @Service
@@ -32,17 +34,20 @@ public class AccountService implements IAccountService {
 
     private final IAddressRepository addressRepository;
 
+    private final IRejectedMailService rejectedMailService;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    public AccountService(IAccountRepository accountRepository, IRoleRepository roleRespository, IHrManagerRepository hrManagerRepository, IProjectManagerRepository projectManagerRepository, ISoftwareEngineerRepository softwareEngineerRepository, IAddressRepository addressRepository) {
+    public AccountService(IAccountRepository accountRepository, IRoleRepository roleRespository, IHrManagerRepository hrManagerRepository, IProjectManagerRepository projectManagerRepository, ISoftwareEngineerRepository softwareEngineerRepository, IAddressRepository addressRepository, IRejectedMailService rejectedMailService) {
         this._accountRepository = accountRepository;
         _roleRespository = roleRespository;
         this.hrManagerRepository = hrManagerRepository;
         this.projectManagerRepository = projectManagerRepository;
         this.softwareEngineerRepository = softwareEngineerRepository;
         this.addressRepository = addressRepository;
+        this.rejectedMailService = rejectedMailService;
     }
 
     @Override
@@ -75,7 +80,13 @@ public class AccountService implements IAccountService {
 
     @Override
     @Transactional(rollbackFor = { Exception.class })
-    public UUID registerAccount(RegisterAccountDto dto) throws EmailTakenException, NotFoundException {
+    public UUID registerAccount(RegisterAccountDto dto) throws EmailTakenException, NotFoundException, EmailRejectedException {
+        //Check if mail is not rejected
+        if(rejectedMailService.isMailRejected(dto.getEmail())) {
+            throw new EmailRejectedException();
+        }
+
+
         //make adres
         Address address = makeAddress(dto.getAddress());
         //make employye
@@ -206,16 +217,44 @@ public class AccountService implements IAccountService {
         }
         if(approve) {
             account.setStatus(RegistrationRequestStatus.APPROVED);
-        } else
-            account.setStatus(RegistrationRequestStatus.REJECTED);
 
-        var softwareEngineer = softwareEngineerRepository.findById(account.getEmployeeId());
-        if(softwareEngineer.isPresent()) {
-            softwareEngineer.get().setDateOfEmployment(new Date());
-            softwareEngineerRepository.save(softwareEngineer.get());
+            var softwareEngineer = softwareEngineerRepository.findById(account.getEmployeeId());
+            if(softwareEngineer.isPresent()) {
+                softwareEngineer.get().setDateOfEmployment(new Date());
+                softwareEngineerRepository.save(softwareEngineer.get());
+            }
+
+            save(account);
+        } else {
+            //account.setStatus(RegistrationRequestStatus.REJECTED);
+
+            //Del acc
+            Account acc = _accountRepository.findByEmail(email);
+            _accountRepository.deleteById(acc.getId());
+            //Del employee
+            UUID addressId = UUID.randomUUID();
+            if(hrManagerRepository.findById(acc.getEmployeeId()).isPresent()) {
+                var employee = hrManagerRepository.findById(acc.getEmployeeId()).get();
+                addressId = employee.getAddress().getId();
+                hrManagerRepository.deleteById(employee.getId());
+            } else if(projectManagerRepository.findById(acc.getEmployeeId()).isPresent()) {
+                var employee = projectManagerRepository.findById(acc.getEmployeeId()).get();
+                addressId = employee.getAddress().getId();
+                projectManagerRepository.deleteById(employee.getId());
+            } else if(softwareEngineerRepository.findById(acc.getEmployeeId()).isPresent()) {
+                var employee = softwareEngineerRepository.findById(acc.getEmployeeId()).get();
+                addressId = employee.getAddress().getId();
+                softwareEngineerRepository.deleteById(employee.getId());
+            }
+            //Del adr
+            addressRepository.deleteById(addressId);
+
+            //Add to rejected table
+            Date date = DateUtils.addHoursToDate(new Date(), 72);
+            RejectedMail rejectedMail = new RejectedMail(UUID.randomUUID(), email, date);
+            rejectedMailService.save(rejectedMail);
+
         }
-
-        save(account);
     }
 
     @Override
