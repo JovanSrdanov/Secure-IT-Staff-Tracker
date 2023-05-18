@@ -1,7 +1,9 @@
 package jass.security;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 @SpringBootApplication
@@ -13,5 +15,4 @@ public class SecurityApplication {
 		System.Logger logger = System.getLogger(SecurityApplication.class.getName());
 		logger.log(System.Logger.Level.INFO, "Empty search history tells more then full one ~ Confucius");
 	}
-
 }

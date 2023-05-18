@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,5 +18,5 @@ import java.util.ArrayList;
 @Entity
 public class ProjectManager extends  Employee{
     @OneToMany
-    private ArrayList<Project> projects;
+    private List<Project> projects;
 }
