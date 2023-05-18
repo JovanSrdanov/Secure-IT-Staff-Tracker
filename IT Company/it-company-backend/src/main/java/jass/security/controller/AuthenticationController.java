@@ -140,7 +140,7 @@ public class AuthenticationController {
         //Posalji mail
         String link = accountActivationService.createAcctivationLink(mail);
 
-        mailSenderService.sendSimpleEmail("karte32114@gmail.com", "GAS", link);
+        mailSenderService.sendSimpleEmail(mail, "GAS", link);
         return ResponseEntity.ok("Registration approved");
     }
 

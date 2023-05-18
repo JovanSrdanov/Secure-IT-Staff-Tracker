@@ -20,20 +20,16 @@ public class TokenUtils {
     // Algoritam za potpisivanje JWT
     private final SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS512;
     // Tajna koju samo backend aplikacija treba da zna kako bi mogla da generise i proveri JWT https://jwt.io/
- 
+    @Value("${tokenSecretKey}")
+    public String SECRET;
     // Izdavac tokena
     @Value("spring-security-example")
     private String APP_NAME;
-
-
     // Period vazenja tokena - 15 minuta
     @Value("${tokenExpiration}")
     private int EXPIRES_IN;
-
-    @Value("20000")
+    @Value("${refreshTokenExpiration}")
     private int REFRESH_EXPIRES_IN;
-
-
     // Moguce je generisati JWT za razlicite klijente (npr. web i mobilni klijenti nece imati isto trajanje JWT,
     // JWT za mobilne klijente ce trajati duze jer se mozda aplikacija redje koristi na taj nacin)
     // Radi jednostavnosti primera, necemo voditi racuna o uređaju sa kojeg zahtev stiže.
@@ -43,7 +39,6 @@ public class TokenUtils {
     // Naziv headera kroz koji ce se prosledjivati JWT u komunikaciji server-klijent
     @Value("Authorization")
     private String AUTH_HEADER;
-
 
     // ============= Funkcije za generisanje JWT tokena =============
 

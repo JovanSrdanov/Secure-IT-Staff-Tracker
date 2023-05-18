@@ -8,7 +8,9 @@ INSERT INTO public.privilege
 (id, "name")
 values
     ('8fdec74e-b0ee-4928-a962-4bfee21da797', 'permisija'),
-    ('fc784caa-1a09-459f-9fef-d2ce4b1b89e6', 'chagneAccStatus');
+    ('fc784caa-1a09-459f-9fef-d2ce4b1b89e6', 'chagneAccStatus'),
+    ('ecf70d65-5b85-4ef9-971f-611bad77076e', 'updatePrivilege'),
+    ('355c6b04-6db3-4330-8ab0-e42538dabe90', 'getPrivilege');
 
 INSERT INTO public."role"
 (id, "name")
@@ -26,4 +28,6 @@ INSERT INTO public.roles_privileges
 (role_id, privilege_id)
 values
     ('79113e08-0b50-41ee-a8ea-42559259d44e', '8fdec74e-b0ee-4928-a962-4bfee21da797'),
-    ('037bbd08-1f2c-4f9d-80af-1710d90efb01', 'fc784caa-1a09-459f-9fef-d2ce4b1b89e6');
+    ('037bbd08-1f2c-4f9d-80af-1710d90efb01', 'fc784caa-1a09-459f-9fef-d2ce4b1b89e6'),
+    ('037bbd08-1f2c-4f9d-80af-1710d90efb01', 'ecf70d65-5b85-4ef9-971f-611bad77076e'),
+    ('037bbd08-1f2c-4f9d-80af-1710d90efb01', '355c6b04-6db3-4330-8ab0-e42538dabe90');

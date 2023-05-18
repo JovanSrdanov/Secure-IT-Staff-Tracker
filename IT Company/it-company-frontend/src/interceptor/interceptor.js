@@ -33,12 +33,13 @@ interceptor.interceptors.response.use(
         failedRequests++;
         console.log(failedRequests)
         const originalRequest = error.config;
-        if (error.response && error.response.status === 401 && !originalRequest._retry) {
+        if (error.response && error.response.status === 410 && !originalRequest._retry) {
             originalRequest._retry = true;
             try {
                 const response = await axios.post('http://localhost:4761/auth/refresh', {
                     token: getRefreshToken(),
                 });
+
                 if (response.status === 200) {
                     removeTokens();
                     setTokens(response);
@@ -52,7 +53,7 @@ interceptor.interceptors.response.use(
             }
         }
         if (failedRequests > 0) {
-            alert(" You are unauthorized to access this url: " + interceptor.getUri(originalRequest))
+            alert(" You are unauthorized to access data from this url: " + interceptor.getUri(originalRequest))
             failedRequests = 0
         }
         return Promise.reject(error);
