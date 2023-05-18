@@ -25,6 +25,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -138,7 +140,12 @@ public class AuthenticationController {
         }
 
         //Posalji mail
-        String link = accountActivationService.createAcctivationLink(mail);
+        String link = "nolink";
+        try {
+            link = accountActivationService.createAcctivationLink(mail);
+        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+            return ResponseEntity.ok("Error while hashing!");
+        }
 
         mailSenderService.sendSimpleEmail(mail, "GAS", link);
         return ResponseEntity.ok("Registration approved");
@@ -158,10 +165,10 @@ public class AuthenticationController {
         return ResponseEntity.ok("Registration rejected");
     }
 
-    @GetMapping("/activate/{id}")
-    public RedirectView activateAccount(@PathVariable UUID id, RedirectAttributes attributes) {
+    @GetMapping("/activate/{hash}")
+    public RedirectView activateAccount(@PathVariable String hash, RedirectAttributes attributes) {
         try {
-            accountActivationService.activateAccount(id);
+            accountActivationService.activateAccount(hash);
         } catch (EmailActivationExpiredException | NotFoundException e) {
             return new RedirectView("https://www.youtube.com/");
         }
