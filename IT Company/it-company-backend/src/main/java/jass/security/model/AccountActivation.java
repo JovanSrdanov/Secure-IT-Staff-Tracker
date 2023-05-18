@@ -25,4 +25,7 @@ public class AccountActivation {
 
     @Column(nullable = false)
     private Date expireyDate;
+
+    @Column(nullable = false)
+    private String token;
 }

@@ -6,5 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.UUID;
 
 public interface IAccountActivationRepository extends JpaRepository<AccountActivation, UUID>  {
-    public void deleteAccountActivationById(UUID id);
+    void deleteAccountActivationById(UUID id);
+    AccountActivation findByToken(String token);
 }
