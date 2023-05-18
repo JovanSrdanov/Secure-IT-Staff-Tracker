@@ -14,9 +14,9 @@ import java.io.Serializable;
 @Setter
 
 @Entity
-public class EngineerProjectStats implements Serializable {
+public class SwEngineerProjectStats implements Serializable {
     @Id
-    private EngineerProjectStatsId id;
+    private SwEngineerProjectStatsId id;
     @Column(nullable = false)
     private String jobDescription;
     @Column(nullable = false)

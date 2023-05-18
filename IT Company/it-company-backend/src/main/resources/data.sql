@@ -48,3 +48,12 @@ INSERT INTO public.users_roles
 values
     ('c46b1a28-fe30-4f6b-834c-72fe7de6ee7f', '79113e08-0b50-41ee-a8ea-42559259d44e'),
     ('9d0dc40b-a0c6-4610-ac51-23ed75b94a9a', '037bbd08-1f2c-4f9d-80af-1710d90efb01');
+
+
+
+--TODO OBRISI
+INSERT INTO public.software_engineer ("id", "name", "phone_number", "profession", "surname")
+VALUES('d2cdc04e-a199-46d3-b202-4289c6b1ea3b', 'Marko', '1234567', 'DevOps', 'Markovic' );
+
+INSERT INTO public.project (id,start_date,end_date,"name") VALUES
+    ('6eeb9244-9c87-4545-a940-fe39bf3a268f','2023-05-25 02:00:00','2023-09-25 02:00:00','Mega projekat');

@@ -2,7 +2,10 @@ package jass.security.controller;
 
 import jass.security.dto.project.AddSwEngineerToProjectDto;
 import jass.security.dto.project.CreateProjectDto;
+import jass.security.dto.project.DismissSwEngineerFromProjectDto;
+import jass.security.exception.NotFoundException;
 import jass.security.model.Project;
+import jass.security.model.SoftwareEngineer;
 import jass.security.service.interfaces.IProjectService;
 import jass.security.utils.ObjectMapperUtils;
 import org.hibernate.cfg.NotYetImplementedException;
@@ -32,7 +35,7 @@ public class ProjectController {
         var result = _projectService.save(ObjectMapperUtils.map(dto, Project.class));
         return new ResponseEntity<>(result, HttpStatus.CREATED);
     }
-    codeaction-selected)
+    @GetMapping
     @PreAuthorize("hasAuthority('getAllProject')")
     public ResponseEntity<List<Project>> GetAll(){
         var result = _projectService.findAll();
@@ -41,21 +44,32 @@ public class ProjectController {
 
 
 
-    @PostMapping("{id}/add-sw-engineer")
+    @PatchMapping("{id}/add-sw-engineer")
     @PreAuthorize("hasAuthority('addSwEngineerToProject')")
     public ResponseEntity<?> AddSwEngineerToProject(@RequestBody AddSwEngineerToProjectDto dto, @PathVariable("id") UUID projectId){
-        throw new NotYetImplementedException();
+        try {
+            _projectService.AddSwEngineerToProject(dto, projectId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
     }
 
     @PatchMapping("{id}/dismiss-sw-engineer")
     @PreAuthorize("hasAuthority('dismissSwEngineerFromProject')")
-    public ResponseEntity<?> DismissSwEngineerFromProject(@RequestBody AddSwEngineerToProjectDto dto, @PathVariable("id") UUID projectId){
-        throw new NotYetImplementedException();
+    public ResponseEntity<?> DismissSwEngineerFromProject(@RequestBody DismissSwEngineerFromProjectDto dto, @PathVariable("id") UUID projectId){
+        try {
+            _projectService.DismissSwEngineerFromProject(dto.getSwEngineerId(), projectId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
     }
 
     @GetMapping("{id}/sw-engineers")
     @PreAuthorize("hasAuthority('getSwEngineersOnProject')")
     public ResponseEntity<?> GetSwEngineersOnProject(@PathVariable("id") UUID projectId){
-        throw new NotYetImplementedException();
+        var result = _projectService.GetSwEngineersOnProject(projectId);
+        return new ResponseEntity<>(result ,HttpStatus.OK);
     }
 }
