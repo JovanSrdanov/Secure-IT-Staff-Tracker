@@ -15,8 +15,10 @@ values
 INSERT INTO public."role"
 (id, "name")
 values
-    ('79113e08-0b50-41ee-a8ea-42559259d44e', 'ROLE_USER'),
-    ('037bbd08-1f2c-4f9d-80af-1710d90efb01', 'ROLE_ADMIN');
+    ('79113e08-0b50-41ee-a8ea-42559259d44e', 'ROLE_ENGINEER'),
+    ('037bbd08-1f2c-4f9d-80af-1710d90efb01', 'ROLE_ADMIN'),
+    ('2cdfba8e-78a3-46a9-b414-96a41d1a5c62', 'ROLE_PROJECT_MANAGER'),
+    ('407d5496-2b68-4052-9219-f87ed4126fc9', 'ROLE_HR_MANAGER');
 
 INSERT INTO public.users_roles
 (user_id, role_id)

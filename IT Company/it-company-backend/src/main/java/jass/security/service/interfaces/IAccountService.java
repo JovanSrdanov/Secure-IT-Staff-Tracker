@@ -12,7 +12,7 @@ import java.util.UUID;
 
 public interface IAccountService extends ICrudService<Account> {
     Account findByEmail(String email);
-    UUID registerAccount(RegisterAccountDto dto) throws EmailTakenException;
+    UUID registerAccount(RegisterAccountDto dto) throws EmailTakenException, NotFoundException;
 
     void approveAccount(String email, Boolean approve) throws NotFoundException;
 

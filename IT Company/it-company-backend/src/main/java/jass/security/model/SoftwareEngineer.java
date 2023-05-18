@@ -11,6 +11,7 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Set;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,12 +20,11 @@ import java.util.Date;
 
 @Entity
 public class SoftwareEngineer extends Employee {
-    @Column(nullable = false)
     private Date dateOfEmployment;
     @OneToMany
-    private ArrayList<Skill> skills;
+    private Set<Skill> skills;
     @OneToOne
     private Cv cv;
     @OneToMany(mappedBy = "softwareEngineer")
-    private ArrayList<EngineerProjectStats> projectStats;
+    private Set<EngineerProjectStats> projectStats;
 }
