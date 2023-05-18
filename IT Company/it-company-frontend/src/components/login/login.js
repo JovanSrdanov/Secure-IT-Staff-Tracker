@@ -8,7 +8,6 @@ import {Flex} from "reflexbox";
 
 
 function Login() {
-
     const navigate = useNavigate();
     const [email, setEmail] = React.useState("");
     const [emailPasswordLess, setEmailPasswordLess] = React.useState("");
@@ -23,24 +22,34 @@ function Login() {
         setPassword(event.target.value);
     };
     const handleLogin = async () => {
-        interceptor.post('api-1/account-credentials/login', {
-            username: email,
+        interceptor.post('auth/login', {
+            email: email,
             password: password
         }).then(res => {
-            const accessToken = res.data.accessToken;
-            const refreshToken = res.data.refreshToken;
-            localStorage.setItem('accessToken', accessToken);
-            localStorage.setItem('refreshToken', refreshToken);
-            navigate("/")
+            document.cookie = `accessToken=${encodeURIComponent(res.data.accessToken)}; Secure; SameSite=Strict;`;
+            document.cookie = `refreshToken=${encodeURIComponent(res.data.refreshToken)}; Secure; SameSite=Strict;`;
+            navigate("/");
         }).catch(err => {
             setShowAlert(true);
-        })
-
+        });
     };
     const handleAlertClose = () => {
         setShowAlert(false);
     };
 
+    const handlePasswordlessEmailChange = (event) => {
+        setEmailPasswordLess(event.target.value);
+    };
+    const handlePasswordlessLogin = () => {
+        interceptor.post('auth/login-GASCINA', {
+            email: emailPasswordLess,
+        }).then(res => {
+            console.log(res.data)
+
+        }).catch(err => {
+            setShowAlert(true);
+        })
+    };
     return (
         <>
             <Flex flexDirection="row">
@@ -76,12 +85,12 @@ function Login() {
                         variant="filled"
                         label="Email"
                         type={"email"}
-                        value={email}
-                        onChange={handleEmailChange}
+                        value={emailPasswordLess}
+                        onChange={handlePasswordlessEmailChange}
                     />
                     <Button
                         variant="contained" color="primary" endIcon={<LoginIcon/>}
-                        onClick={handleLogin}
+                        onClick={handlePasswordlessLogin}
                     >Passwordless Login
                     </Button>
                     <Flex flexDirection="row" justifyContent="center">
@@ -91,7 +100,7 @@ function Login() {
             </Flex>
             {showAlert && (
                 <Alert sx={{width: "fit-content", margin: "10px auto"}} severity="error" onClose={handleAlertClose}>
-                    Invalid username or password, please try again.
+                    Invalid credentials, please try again.
                 </Alert>
             )}
         </>

@@ -1,5 +1,6 @@
 package jass.security.controller;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.HttpServletResponse;
 import jass.security.dto.*;
 import jass.security.exception.EmailActivationExpiredException;
@@ -58,11 +59,11 @@ public class AuthenticationController {
         // Ukoliko kredencijali nisu ispravni, logovanje nece biti uspesno, desice se
         // AuthenticationException
         Account acc = accountService.findByEmail(authenticationRequest.getEmail());
-        if(acc == null) {
+        if (acc == null) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not found");
         }
 
-        if(acc.getStatus() != RegistrationRequestStatus.APPROVED) {
+        if (acc.getStatus() != RegistrationRequestStatus.APPROVED) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Registration is not accepted by admin");
         }
 
@@ -100,7 +101,7 @@ public class AuthenticationController {
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestBody RefreshRequest token) {
         try {
-            if(tokenUtils.validateRefreshToken(token.getToken())) {
+            if (tokenUtils.validateRefreshToken(token.getToken())) {
                 String email = tokenUtils.getUsernameFromToken(token.getToken());
                 Account account = accountService.findByEmail(email);
                 var roles = new ArrayList<>(account.getRoles());
@@ -108,7 +109,7 @@ public class AuthenticationController {
                 int expiresIn = tokenUtils.getExpiredIn();
                 return ResponseEntity.ok(new UserTokenState(jwt, token.getToken(), expiresIn));
             }
-        } catch (TokenExpiredException e) {
+        } catch (ExpiredJwtException | TokenExpiredException ex) {
             return ResponseEntity.status(HttpStatus.GONE).body("Token expired");
         }
 
@@ -139,7 +140,7 @@ public class AuthenticationController {
         //Posalji mail
         String link = accountActivationService.createAcctivationLink(mail);
 
-        mailSenderService.sendSimpleEmail("karte32114@gmail.com", "GAS", link);
+        mailSenderService.sendSimpleEmail(mail, "GAS", link);
         return ResponseEntity.ok("Registration approved");
     }
 
