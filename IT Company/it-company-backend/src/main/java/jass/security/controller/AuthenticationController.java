@@ -3,10 +3,7 @@ package jass.security.controller;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.HttpServletResponse;
 import jass.security.dto.*;
-import jass.security.exception.EmailActivationExpiredException;
-import jass.security.exception.EmailTakenException;
-import jass.security.exception.NotFoundException;
-import jass.security.exception.TokenExpiredException;
+import jass.security.exception.*;
 import jass.security.model.Account;
 import jass.security.model.RegistrationRequestStatus;
 import jass.security.model.Role;
@@ -126,6 +123,8 @@ public class AuthenticationController {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("This e-mail is taken!");
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("This role does not exist!");
+        } catch (EmailRejectedException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Email is blocked temporarily!");
         }
     }
 
