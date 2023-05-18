@@ -2,6 +2,10 @@ package jass.security.dto;
 
 import jass.security.model.Address;
 import jass.security.model.Role;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 public record RegisterEmployeeDto(
         String email,
