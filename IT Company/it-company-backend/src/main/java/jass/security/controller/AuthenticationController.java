@@ -129,7 +129,7 @@ public class AuthenticationController {
         }
     }
 
-    @PreAuthorize("hasAuthority('chagneAccStatus')")
+    @PreAuthorize("hasAuthority('changeAccStatus')")
     @GetMapping("/accept-registration/{mail}")
     public ResponseEntity<?> acceptRegistration(@PathVariable String mail) {
         try {
