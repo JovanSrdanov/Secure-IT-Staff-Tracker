@@ -2,7 +2,7 @@ package jass.security.service.implementations;
 
 import jass.security.model.ProjectManager;
 import jass.security.repository.IProjectManagerRepository;
-import jass.security.service.interfaces.IProjectManagerService;
+import jass.security.service.interfaces.ICrudService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @Service
 @Primary
-public class ProjectManagerService implements IProjectManagerService {
+public class ProjectManagerService implements ICrudService<ProjectManager> {
 
     private final IProjectManagerRepository projectManagerRepository;
 

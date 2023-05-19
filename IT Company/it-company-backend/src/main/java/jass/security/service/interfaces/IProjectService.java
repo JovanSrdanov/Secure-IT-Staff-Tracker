@@ -1,9 +1,6 @@
 package jass.security.service.interfaces;
 
-import jass.security.dto.project.AddProjectMangerToProjectDto;
-import jass.security.dto.project.AddSwEngineerToProjectDto;
-import jass.security.dto.project.PrManagerProjectStatsDto;
-import jass.security.dto.project.SwEngineerProjectStatsDto;
+import jass.security.dto.project.*;
 import jass.security.exception.NotFoundException;
 import jass.security.model.PrManagerProjectStats;
 import jass.security.model.Project;
@@ -18,4 +15,5 @@ public interface IProjectService extends ICrudService<Project> {
       void DismissPrManagerFromProject(UUID prManagerId , UUID projectId) throws NotFoundException;
       List<SwEngineerProjectStatsDto> GetSwEngineersOnProject(UUID projectId);
       List<PrManagerProjectStatsDto> GetPrManagersOnProject(UUID projectId);
+      List<PrManagerProjectStatsProjectDto> GetPrManagersProjects(UUID prMangerId);
 }
