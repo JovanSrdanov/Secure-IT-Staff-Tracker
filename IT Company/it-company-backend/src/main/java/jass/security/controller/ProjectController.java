@@ -1,9 +1,6 @@
 package jass.security.controller;
 
-import jass.security.dto.project.AddProjectMangerToProjectDto;
-import jass.security.dto.project.AddSwEngineerToProjectDto;
-import jass.security.dto.project.CreateProjectDto;
-import jass.security.dto.project.DismissWorkerFromProjectDto;
+import jass.security.dto.project.*;
 import jass.security.exception.NotFoundException;
 import jass.security.model.Account;
 import jass.security.model.Project;
@@ -116,5 +113,29 @@ public class ProjectController {
 
         var projects = _projectService.GetPrManagersProjects(prManager.getEmployeeId());
         return new ResponseEntity<>(projects, HttpStatus.OK);
+    }
+
+    @GetMapping("sw-engineer")
+    @PreAuthorize("hasAuthority('getSwEngineersProjects')")
+    public ResponseEntity<?> GetSwEngineersProjects(Principal principal){
+        String swEngineerEmail = principal.getName();
+        Account swEngineer = _accountService.findByEmail(swEngineerEmail);
+
+        var projects = _projectService.GetSwEngineersProjects(swEngineer.getEmployeeId());
+        return new ResponseEntity<>(projects, HttpStatus.OK);
+    }
+
+    @PatchMapping("{id}/sw-engineer")
+    @PreAuthorize("hasAuthority('changeSwEngineersJobDescription')")
+    public ResponseEntity<?> ChangeSwEngineersJobDescription(Principal principal, @RequestBody SwEngineerChangeJobDescriptionDto dto, @PathVariable("id") UUID projectId){
+        String swEngineerEmail = principal.getName();
+        Account swEngineer = _accountService.findByEmail(swEngineerEmail);
+
+        try {
+            _projectService.ChangeSwEngineersJobDescription(projectId, swEngineer.getEmployeeId(), dto.getNewJobDescription());
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
     }
 }

@@ -133,4 +133,23 @@ public class ProjectService implements IProjectService {
     public List<PrManagerProjectStatsProjectDto> GetPrManagersProjects(UUID prMangerId) {
         return _prManagerProjectStatsRepository.GetPrManagersProjects(prMangerId);
     }
+
+    @Override
+    public List<SwEngineerProjectStatsProjectDto> GetSwEngineersProjects(UUID swEngineerId) {
+        return _swEngineerProjectStatsRepository.GetSwEngineersProjects(swEngineerId);
+    }
+
+    @Override
+    public void ChangeSwEngineersJobDescription(UUID projectId, UUID swEngineerId, String newJobDescription) throws NotFoundException {
+        SwEngineerProjectStatsId statsId = new SwEngineerProjectStatsId(swEngineerId,projectId);
+        var stats = _swEngineerProjectStatsRepository.findById(statsId);
+
+        if(stats.isEmpty()){
+            throw  new NotFoundException("Software engineer project stats not found");
+        }
+
+        var newStats = stats.get();
+        newStats.setJobDescription(newJobDescription);
+        _swEngineerProjectStatsRepository.save(newStats);
+    }
 }
