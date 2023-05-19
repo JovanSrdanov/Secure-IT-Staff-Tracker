@@ -28,9 +28,11 @@ values ('c46b1a28-fe30-4f6b-834c-72fe7de6ee7f', 'user', 'aafbd593-de86-4510-8c63
 
 INSERT INTO public.privilege
     (id, "name")
-values ('fc784caa-1a09-459f-9fef-d2ce4b1b89e6', 'changeAccStatus'),
+values ('fc784caa-1a09-459f-9fef-d2ce4b1b89e6', 'changeAccStatusAccept'),
+       ('2a616b1b-9018-4cf1-aa89-7995a54a2e88', 'changeAccStatusReject'),
+       ('1c0ad581-3e6c-4eb0-9d3c-4bef1ac07c25', 'allPendingApproval'),
        ('ecf70d65-5b85-4ef9-971f-611bad77076e', 'updatePrivilege'),
-       ('355c6b04-6db3-4330-8ab0-e42538dabe90', 'getPrivilege'),
+       ('355c6b04-6db3-4330-8ab0-e42538dabe90', 'getAllPrivilege'),
        ('9e17c976-789a-47e2-a65c-26a0929036f8', 'createProject'),
        ('69111b7d-910d-49a6-8a43-2c28762b1a25', 'getAllProject'),
        ('f60d3289-526a-4aae-b720-5409f472cd2b', 'addSwEngineerToProject'),
@@ -43,6 +45,9 @@ values ('fc784caa-1a09-459f-9fef-d2ce4b1b89e6', 'changeAccStatus'),
        ('9c571498-c945-4089-a529-8e3746d0a4b3', 'getSwEngineersProjects'),
        ('c7133aa4-d7e9-4f2f-839d-e4524ebd3bb4', 'changeSwEngineersJobDescription'),
        ('c7877299-353d-4938-95da-0e6b97aadd6f', 'addSkillSwEngineer'),
+       ('e020ef1f-eb11-4d1d-bedf-b87c033de306', 'getAllPrivilegeForRole'),
+       ('fc797a4e-009a-44de-aec0-d7ca52c64609', 'getRoles'),
+       ('d270db68-12fb-4dce-a9f0-7ef64d091731', 'adminPasswordChange'),
        ('b7b7775c-e81a-4ec7-bfbf-81bdd3c15100', 'removeSkillSwEngineer');
 
 
@@ -52,7 +57,8 @@ INSERT INTO public."role"
 values ('79113e08-0b50-41ee-a8ea-42559259d44e', 'ROLE_ENGINEER'),
        ('037bbd08-1f2c-4f9d-80af-1710d90efb01', 'ROLE_ADMIN'),
        ('2cdfba8e-78a3-46a9-b414-96a41d1a5c62', 'ROLE_PROJECT_MANAGER'),
-       ('407d5496-2b68-4052-9219-f87ed4126fc9', 'ROLE_HR_MANAGER');
+       ('407d5496-2b68-4052-9219-f87ed4126fc9', 'ROLE_HR_MANAGER'),
+       ('153c2366-eb2d-4ce2-b55e-42c83609da8a', 'ROLE_ADMIN_PASSWORD_CHANGE');
 
 INSERT INTO public.users_roles
     (user_id, role_id)
@@ -65,6 +71,10 @@ INSERT INTO public.roles_privileges
     (role_id, privilege_id)
 values
 -- ADMIN
+('037bbd08-1f2c-4f9d-80af-1710d90efb01', '1c0ad581-3e6c-4eb0-9d3c-4bef1ac07c25'),
+('037bbd08-1f2c-4f9d-80af-1710d90efb01', 'e020ef1f-eb11-4d1d-bedf-b87c033de306'),
+('037bbd08-1f2c-4f9d-80af-1710d90efb01', 'fc797a4e-009a-44de-aec0-d7ca52c64609'),
+('037bbd08-1f2c-4f9d-80af-1710d90efb01', '2a616b1b-9018-4cf1-aa89-7995a54a2e88'),
 ('037bbd08-1f2c-4f9d-80af-1710d90efb01', 'fc784caa-1a09-459f-9fef-d2ce4b1b89e6'),
 ('037bbd08-1f2c-4f9d-80af-1710d90efb01', 'ecf70d65-5b85-4ef9-971f-611bad77076e'),
 ('037bbd08-1f2c-4f9d-80af-1710d90efb01', '355c6b04-6db3-4330-8ab0-e42538dabe90'),
@@ -82,9 +92,9 @@ values
 ('79113e08-0b50-41ee-a8ea-42559259d44e', '9c571498-c945-4089-a529-8e3746d0a4b3'),
 ('79113e08-0b50-41ee-a8ea-42559259d44e', 'c7133aa4-d7e9-4f2f-839d-e4524ebd3bb4'),
 ('79113e08-0b50-41ee-a8ea-42559259d44e', 'c7877299-353d-4938-95da-0e6b97aadd6f'),
-('79113e08-0b50-41ee-a8ea-42559259d44e', 'b7b7775c-e81a-4ec7-bfbf-81bdd3c15100');
-
-
+('79113e08-0b50-41ee-a8ea-42559259d44e', 'b7b7775c-e81a-4ec7-bfbf-81bdd3c15100'),
+-- ADMIN_PASSWORD_CHANGE
+('153c2366-eb2d-4ce2-b55e-42c83609da8a', 'd270db68-12fb-4dce-a9f0-7ef64d091731');
 
 INSERT INTO public.project (id, start_date, end_date, "name")
 VALUES ('6eeb9244-9c87-4545-a940-fe39bf3a268f', '2023-05-25 02:00:00', '2023-09-25 02:00:00', 'Mega projekat');
