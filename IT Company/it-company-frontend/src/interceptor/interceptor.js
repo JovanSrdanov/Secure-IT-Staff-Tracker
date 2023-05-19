@@ -31,7 +31,7 @@ interceptor.interceptors.response.use(
     },
     async (error) => {
         failedRequests++;
-        console.log(failedRequests)
+
         const originalRequest = error.config;
         if (error.response && error.response.status === 410 && !originalRequest._retry) {
             originalRequest._retry = true;
@@ -48,6 +48,7 @@ interceptor.interceptors.response.use(
                     return interceptor(originalRequest);
                 }
             } catch (refreshError) {
+
                 console.log("Token expired: ");
                 removeTokens();
             }

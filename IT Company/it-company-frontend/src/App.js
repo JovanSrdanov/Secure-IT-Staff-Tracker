@@ -11,7 +11,13 @@ import RegisterPage from "./pages/unauthenticated-pages/register-page";
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import jwt_decode from "jwt-decode";
-import interceptor from "./interceptor/interceptor";
+import LockIcon from '@mui/icons-material/Lock';
+import ChecklistIcon from '@mui/icons-material/Checklist';
+import PersonSearchIcon from '@mui/icons-material/PersonSearch';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import Diversity3Icon from '@mui/icons-material/Diversity3';
+import PermissionsPage from "./pages/admin-pages/permissions-page";
+import ProfilePage from "./pages/for-all-pages/profile-page";
 
 function App() {
     const navigate = useNavigate()
@@ -31,16 +37,24 @@ function App() {
         const token = getCookieValue('accessToken');
         if (!token) {
             removeTokens();
+
+            return null;
+        }
+        const currentTime = Date.now() / 1000;
+        const refreshToken = getCookieValue('accessToken');
+
+        if (!refreshToken) {
+            removeTokens();
+
+            return null;
+        }
+
+        console.log(new Date(jwt_decode(refreshToken).exp))
+        if (jwt_decode(refreshToken).exp < currentTime) {
+            removeTokens();
             return null;
         }
         const decodedToken = jwt_decode(token);
-
-        const currentTime = Date.now() / 1000;
-        if (decodedToken.exp < currentTime) {
-            removeTokens();
-            navigate("/login");
-            return null;
-        }
         return decodedToken.role;
     }
 
@@ -54,81 +68,162 @@ function App() {
         removeTokens()
         navigate('/login');
     };
-    const handleTest = () => {
-        interceptor.get('/account/test', {}).then(res => {
-            console.log("res")
-            console.log(res)
-        }).catch(err => {
-            console.log("err")
-            console.log(err)
-        });
-    };
 
-    const Una = () => {
-        interceptor.get('/account/pending', {}).then(res => {
-            console.log("res")
-            console.log(res)
-        }).catch(err => {
-            console.log("err")
-            console.log(err)
-        });
-    };
     return (
         <div>
-            <ParticlesBg color="#000000" type="cobweb" num={200} bg={true}/>
+            <ParticlesBg color="#000000" type="cobweb" num={250} bg={true}/>
             <Box>
                 <AppBar position="static">
                     <Toolbar>
                         <Tooltip title="IT Company" arrow>
-                            <Button sx={{color: "white"}}
-                                    startIcon={<ComputerIcon/>}>
+                            <Button
+                                sx={{color: "white", marginRight: 5}}
+                                startIcon={<ComputerIcon/>}>
                                 It Company
                             </Button>
                         </Tooltip>
-                        <>
-                            <Tooltip title="Log in to your account" arrow>
-                                <Button color="primary" sx={{marginLeft: 'auto'}} startIcon={<LoginIcon/>}>
-                                    Log in
-                                </Button>
-                            </Tooltip>
-                            <Tooltip title="Register a new account" arrow>
-                                <Button color="success" startIcon={<HowToRegIcon/>}
-                                >
-                                    Register
-                                </Button>
-                            </Tooltip>
+                        {ROLE === "ROLE_ADMIN" && (
                             <>
-                                <Tooltip title="Your informations" arrow>
+                                <Tooltip title="Set or remove permissions for roles" arrow>
+                                    <Button startIcon={<LockIcon/>}
+                                            sx={{color: 'inherit'}}
+                                            onClick={() => {
+                                                navigate('/permissions');
+                                            }}>
+
+                                        Permissions
+                                    </Button>
+                                </Tooltip>
+                                <Tooltip title="Registration approval of new employees" arrow>
+                                    <Button startIcon={<ChecklistIcon/>}
+                                            sx={{color: 'inherit'}}
+                                            onClick={() => {
+                                                navigate('/registration-approval');
+                                            }}
+                                    >
+                                        Registration approval
+                                    </Button>
+                                </Tooltip>
+                                <Tooltip title="Search engineers" arrow>
+                                    <Button startIcon={<PersonSearchIcon/>}
+                                            sx={{color: 'inherit'}}
+                                            onClick={() => {
+                                                navigate('/search-engineers');
+                                            }}
+                                    >
+                                        Search engineers
+                                    </Button>
+                                </Tooltip>
+                                <Tooltip title="Search engineers" arrow>
+                                    <Button startIcon={<Diversity3Icon/>}
+                                            sx={{color: 'inherit'}}
+                                            onClick={() => {
+                                                navigate('/employees-and-projects');
+                                            }}
+                                    >
+                                        Employees and projects
+                                    </Button>
+                                </Tooltip>
+                                <Tooltip title="Register admins" arrow>
+                                    <Button startIcon={<PersonAddIcon/>}
+                                            sx={{color: 'inherit'}}
+                                            onClick={() => {
+                                                navigate('/register-admins');
+                                            }}
+                                    >
+                                        Register admins
+                                    </Button>
+                                </Tooltip>
+                            </>)}
+                        {ROLE === "ROLE_ENGINEER" && (
+                            <>
+                            </>)}
+                        {ROLE === "ROLE_PROJECT_MANAGER" && (
+                            <>
+                            </>)}
+                        {ROLE === "ROLE_HR_MANAGER" && (
+                            <>
+                            </>)}
+                        {ROLE === null && (
+                            <>
+                                <Tooltip title="Log in to your account" arrow>
+                                    <Button color="primary" sx={{marginLeft: 'auto'}} startIcon={<LoginIcon/>}
+                                            onClick={() => {
+                                                navigate('/login');
+                                            }}>
+                                        Log in
+                                    </Button>
+                                </Tooltip>
+                                <Tooltip title="Register a new account" arrow>
+                                    <Button color="success" startIcon={<HowToRegIcon/>}
+                                            onClick={() => {
+                                                navigate('/register');
+                                            }}
+                                    >
+                                        Register
+                                    </Button>
+                                </Tooltip>
+                            </>)}
+                        {ROLE !== null && (
+                            <>
+                                <Tooltip title="Your information" arrow>
                                     <Button color="info"
+                                            sx={{marginLeft: 'auto'}}
                                             startIcon={<PersonOutlineOutlinedIcon/>}
                                             onClick={() => {
                                                 navigate('/profile');
                                             }}>
-
                                         My profile
                                     </Button>
                                 </Tooltip>
                                 <Tooltip title="Log out of the system" arrow>
                                     <Button color="error" onClick={handleLogout} startIcon={<LogoutOutlinedIcon/>}>
-
                                         Log out
                                     </Button>
                                 </Tooltip>
-                            </>
-                        </>
+                            </>)}
+
                     </Toolbar>
                 </AppBar>
                 <Routes>
+                    {ROLE === "ROLE_ADMIN" && (
+                        <>
+                            <Route path="/permissions" element={<PermissionsPage/>}/>
+                            <Route path="/registration-approval" element={<PermissionsPage/>}/>
+                            <Route path="/search-engineers" element={<PermissionsPage/>}/>
+                            <Route path="/employees-and-projects" element={<PermissionsPage/>}/>
+                            <Route path="/register-admins" element={<PermissionsPage/>}/>
+                            <Route path="/profile" element={<ProfilePage/>}/>
+                            <Route path="/*" element={<Navigate to="/profile"/>}/>
+                        </>
+                    )}
+                    {ROLE === "ROLE_ENGINEER" && (
+                        <>
+                            <Route path="/profile" element={<ProfilePage/>}/>
+                            <Route path="/*" element={<Navigate to="/profile"/>}/>
+                        </>
+                    )}
 
-                    <Route path="/login" element={<LoginPage/>}/>
-                    <Route path="/register" element={<RegisterPage/>}/>
-                    <Route path="/*" element={<Navigate to="/login"/>}/>
-                    <Route path="/button"
-                           element={<><Button variant="contained" onClick={handleTest}>Klikni </Button>
-                               <Button variant="contained" color="error" onClick={Una}>Klikni
-                                   unauthorized </Button>
-                           </>}/>
+                    {ROLE === "ROLE_PROJECT_MANAGER" && (
+                        <>
+                            <Route path="/profile" element={<ProfilePage/>}/>
+                            <Route path="/*" element={<Navigate to="/profile"/>}/>
+                        </>
+                    )}
 
+                    {ROLE === "ROLE_HR_MANAGER" && (
+                        <>
+                            <Route path="/profile" element={<ProfilePage/>}/>
+                            <Route path="/*" element={<Navigate to="/profile"/>}/>
+                        </>
+                    )}
+                    {ROLE === null && (
+                        <>
+                            <Route path="/login" element={<LoginPage/>}/>
+                            <Route path="/register" element={<RegisterPage/>}/>
+                            <Route path="/*" element={<Navigate to="/login"/>}/>
+                        </>
+                    )}
 
                 </Routes>
             </Box>

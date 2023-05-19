@@ -28,7 +28,6 @@ import org.springframework.web.servlet.view.RedirectView;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.UUID;
 
 //Kontroler zaduzen za autentifikaciju korisnika
 @RestController
@@ -151,7 +150,7 @@ public class AuthenticationController {
         return ResponseEntity.ok("Registration approved");
     }
 
-    @PreAuthorize("hasAuthority('chagneAccStatus')")
+    @PreAuthorize("hasAuthority('changeAccStatus')")
     @PostMapping("/reject-registration")
     public ResponseEntity<?> rejectRegistration(@RequestBody RejectAccountDto dto) {
         try {
@@ -160,7 +159,7 @@ public class AuthenticationController {
             return ResponseEntity.ok("Account with this mail does not exist");
         }
 
-        mailSenderService.sendSimpleEmail(dto.getMail(), "GAS", dto.getReason());
+        mailSenderService.sendSimpleEmail(dto.getMail(), "Account rejected", dto.getReason());
 
         return ResponseEntity.ok("Registration rejected");
     }
@@ -175,14 +174,8 @@ public class AuthenticationController {
 
         attributes.addFlashAttribute("flashAttribute", "redirectWithRedirectView");
         attributes.addAttribute("attribute", "redirectWithRedirectView");
+        //Todo  JOVAN dodaj https
         return new RedirectView("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
     }
 
-    @GetMapping("/gascina")
-    public RedirectView redirectWithUsingRedirectView(
-            RedirectAttributes attributes) {
-        attributes.addFlashAttribute("flashAttribute", "redirectWithRedirectView");
-        attributes.addAttribute("attribute", "redirectWithRedirectView");
-        return new RedirectView("https://www.youtube.com/");
-    }
 }
