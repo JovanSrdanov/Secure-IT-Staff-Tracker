@@ -1,4 +1,5 @@
 package jass.security.model;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -18,7 +19,7 @@ import java.util.Set;
 @Entity
 public class SoftwareEngineer extends Employee {
     private Date dateOfEmployment;
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     private Set<Skill> skills;
     @OneToOne
     private Cv cv;
