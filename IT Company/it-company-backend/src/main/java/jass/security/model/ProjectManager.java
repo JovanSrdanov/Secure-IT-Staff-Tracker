@@ -9,13 +9,6 @@ import lombok.Setter;
 
 import java.util.Set;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@Setter
 
 @Entity
-public class ProjectManager extends Employee{
-    @OneToMany
-    private Set<Project> projects;
-}
+public class ProjectManager extends Employee{ }
