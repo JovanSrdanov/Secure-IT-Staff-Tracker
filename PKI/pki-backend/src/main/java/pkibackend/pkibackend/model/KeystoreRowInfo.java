@@ -34,15 +34,18 @@ public class KeystoreRowInfo {
     @Column(nullable = false)
     private BigInteger certificateSerialNumber;
     @Column(nullable = false)
+    private BigInteger issuingCertificateSerialNumber;
+    @Column(nullable = false)
     private String alias;
     @Column(nullable = false)
     private String rowPassword;
 
 
-    public KeystoreRowInfo(UUID id, String keystoreName, String clearTextPassword, BigInteger certificateSerialNumber, String alias, String rowPassword) {
+    public KeystoreRowInfo(UUID id, String keystoreName, String clearTextPassword, BigInteger certificateSerialNumber, BigInteger issuingCertificateSerialNumber, String alias, String rowPassword) {
         this.id = id;
         this.keystoreName = keystoreName;
         this.certificateSerialNumber = certificateSerialNumber;
+        this.issuingCertificateSerialNumber = issuingCertificateSerialNumber;
         this.alias = alias;
         this.rowPassword = rowPassword;
 

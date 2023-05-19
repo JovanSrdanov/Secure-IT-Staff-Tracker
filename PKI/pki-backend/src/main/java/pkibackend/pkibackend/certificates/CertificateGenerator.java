@@ -136,7 +136,8 @@ public class CertificateGenerator {
 //            throw new RuntimeException(e);
 //        }
         AuthorityKeyIdentifier identifier = new AuthorityKeyIdentifier(
-                issuingCertificateSerialNumber.toByteArray()
+                //issuingCertificateSerialNumber.toByteArray()
+                newCertificate.getIssuerPublicKey().getEncoded()
         );
 
         certGen.addExtension(Extension.authorityKeyIdentifier, false, identifier);

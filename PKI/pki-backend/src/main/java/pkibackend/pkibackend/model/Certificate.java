@@ -75,7 +75,7 @@ public class Certificate {
         this.subjectPublicKey = this.x509Certificate.getPublicKey();
         // Ovo baca neki exception (totalno srbija)
         // this.subjectInfo = X500Name.getInstance(this.x509Certificate.getSubjectX500Principal());
-        this.issuerSerialNumber = GetIssuerSerialNumber(this.x509Certificate);
+        //this.issuerSerialNumber = GetIssuerSerialNumber(this.x509Certificate);
         this.isCa = CheckCA(this.x509Certificate);
     }
 

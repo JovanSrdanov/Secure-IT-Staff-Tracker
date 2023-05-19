@@ -124,6 +124,7 @@ public class CertificateService implements ICertificateService {
         for (KeystoreRowInfo row : keystoreRowInfos) {
             var test = _certificateRepository.GetCertificate(row.getAlias(), row.getKeystoreName(), row.getPassword());
             Certificate certificate = new Certificate(test);
+            certificate.setIssuerSerialNumber(row.getIssuingCertificateSerialNumber());
             if (shouldBeCa && !certificate.isCa()) {
                 continue;
             }
@@ -189,7 +190,6 @@ public class CertificateService implements ICertificateService {
     public Certificate generateCertificate(CreateCertificateInfo info)
             throws RuntimeException, BadRequestException, CertificateEncodingException, InternalServerErrorException {
 
-
         Account issuer = new Account();
         Account subject = new Account();
         String newCertificateAlias = UUID.randomUUID().toString();
@@ -212,7 +212,7 @@ public class CertificateService implements ICertificateService {
             keyStorePassword = PasswordGenerator.generatePassword(15);
 
             // TEST
-            createTextFile(keyStorePassword, "keystorePassword.txt");
+            //createTextFile(keyStorePassword, "keystorePassword.txt");
 
             issuer = buildSelfSignedIssuer(info.getSubjectInfo(), newCertificate);
             subject = issuer;
@@ -260,10 +260,10 @@ public class CertificateService implements ICertificateService {
 
         String keystoreRowInfoPassword = PasswordGenerator.generatePassword(15);
         // TEST
-        createTextFile(keystoreRowInfoPassword, "rowPassword.txt");
+        //createTextFile(keystoreRowInfoPassword, "rowPassword.txt");
 
         KeystoreRowInfo rowInfo = new KeystoreRowInfo
-                (UUID.randomUUID(), keystoreName, keyStorePassword, serialNumber, newCertificateAlias, keystoreRowInfoPassword);
+                (UUID.randomUUID(), keystoreName, keyStorePassword, serialNumber, info.getIssuingCertificateSerialNumber(), newCertificateAlias, keystoreRowInfoPassword);
 
         subject.getKeyStoreRowsInfo().add(rowInfo);
 
@@ -407,18 +407,18 @@ public class CertificateService implements ICertificateService {
         newCertificate.setSubjectPublicKey(kp.getPublic());
         newCertificate.setSubjectPrivateKey(kp.getPrivate());
         // TEST
-        File keyFile = UniqueFIleCreator.createUniqueFile("privateKeyTEST.key");
+        //File keyFile = UniqueFIleCreator.createUniqueFile("privateKeyTEST.key");
 
-        FileOutputStream fileOutputStream = null;
-        try {
-            fileOutputStream = new FileOutputStream(keyFile);
-            PEMWriter pemWriter = new PEMWriter(new OutputStreamWriter(fileOutputStream));
-            pemWriter.writeObject(newCertificate.getSubjectPrivateKey());
-
-            pemWriter.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+//        FileOutputStream fileOutputStream = null;
+//        try {
+//            fileOutputStream = new FileOutputStream(keyFile);
+//            PEMWriter pemWriter = new PEMWriter(new OutputStreamWriter(fileOutputStream));
+//            pemWriter.writeObject(newCertificate.getSubjectPrivateKey());
+//
+//            pemWriter.close();
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
 
         newCertificate.setIssuerPublicKey(newCertificate.getSubjectPublicKey());
         newCertificate.setIssuerPrivateKey(newCertificate.getSubjectPrivateKey());
@@ -529,6 +529,7 @@ public class CertificateService implements ICertificateService {
         //Retrieve certificate
         java.security.cert.Certificate rawCertificate = _certificateRepository.GetCertificateBySerialNumber(keystoreName, keyStorePassword, certSerialNum);
         Certificate certificate = new Certificate(rawCertificate);
+        certificate.setIssuerSerialNumber(issuerKeystoreInfo.get().getCertificateSerialNumber());
 
         //Get issuers ocsp
         Optional<OcspTable> queryResult = _ocspTableRepository.findByCaSerialNumber(certificate.getIssuerSerialNumber());
@@ -570,6 +571,7 @@ public class CertificateService implements ICertificateService {
 
         java.security.cert.Certificate rawCertificate = _certificateRepository.GetCertificateBySerialNumber(keystoreName, keyStorePassword, certSerialNum);
         Certificate certificate = new Certificate(rawCertificate);
+        certificate.setIssuerSerialNumber(issuerKeystoreInfo.get().getCertificateSerialNumber());
 
         java.security.cert.Certificate issuerRawCertificate = _certificateRepository.GetCertificateBySerialNumber(keystoreName, keyStorePassword, certificate.getIssuerSerialNumber());
         Certificate issuerCertificate = new Certificate(issuerRawCertificate);
@@ -608,6 +610,7 @@ public class CertificateService implements ICertificateService {
 
         java.security.cert.Certificate rawCertificate = _certificateRepository.GetCertificateBySerialNumber(keystoreName, keyStorePassword, certSerialNum);
         Certificate certificate = new Certificate(rawCertificate);
+        certificate.setIssuerSerialNumber(issuerKeystoreInfo.get().getCertificateSerialNumber());
 
         if (isExpired(certificate)) return false;
 
