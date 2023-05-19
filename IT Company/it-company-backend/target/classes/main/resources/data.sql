@@ -37,7 +37,9 @@ values
     ('7facde86-1695-4281-aeb9-34fda5913f05', 'getPrManagersOnProject'),
     ('b3adb8f2-4ea3-41c2-a3e1-709b9e7ba7a8', 'getPrManagersProjects'),
     ('9c571498-c945-4089-a529-8e3746d0a4b3', 'getSwEngineersProjects'),
-    ('c7133aa4-d7e9-4f2f-839d-e4524ebd3bb4', 'changeSwEngineersJobDescription');
+    ('c7133aa4-d7e9-4f2f-839d-e4524ebd3bb4', 'changeSwEngineersJobDescription'),
+    ('c7877299-353d-4938-95da-0e6b97aadd6f', 'addSkillSwEngineer'),
+    ('b7b7775c-e81a-4ec7-bfbf-81bdd3c15100', 'removeSkillSwEngineer');
 
 
 
@@ -77,7 +79,9 @@ values
     ('2cdfba8e-78a3-46a9-b414-96a41d1a5c62', 'b3adb8f2-4ea3-41c2-a3e1-709b9e7ba7a8'),
 -- SOFTWARE ENGINEER
     ('79113e08-0b50-41ee-a8ea-42559259d44e', '9c571498-c945-4089-a529-8e3746d0a4b3'),
-    ('79113e08-0b50-41ee-a8ea-42559259d44e', 'c7133aa4-d7e9-4f2f-839d-e4524ebd3bb4');
+    ('79113e08-0b50-41ee-a8ea-42559259d44e', 'c7133aa4-d7e9-4f2f-839d-e4524ebd3bb4'),
+    ('79113e08-0b50-41ee-a8ea-42559259d44e', 'c7877299-353d-4938-95da-0e6b97aadd6f'),
+    ('79113e08-0b50-41ee-a8ea-42559259d44e', 'b7b7775c-e81a-4ec7-bfbf-81bdd3c15100');
 
 
 
