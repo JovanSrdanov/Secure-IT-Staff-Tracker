@@ -1,6 +1,7 @@
 package pkibackend.pkibackend.controller;
 
 import org.bouncycastle.openssl.PEMWriter;
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -128,6 +129,14 @@ public class CertificateController {
         }
         try {
             byte[] certificateBytes = x509Certificate.getEncoded();
+            // Convert the X509Certificate to PEM format
+            ByteArrayOutputStream pemStream = new ByteArrayOutputStream();
+            JcaPEMWriter certPemWriter = new JcaPEMWriter(new OutputStreamWriter(pemStream));
+            certPemWriter.writeObject(x509Certificate);
+            certPemWriter.close();
+
+            byte[] pemBytes = pemStream.toByteArray();
+
 
             // skidanje alias-a, privatnog kljuca, lozinke od keystore-a od sertifikata
             Optional<KeystoreRowInfo> downloadedCertificateKeystoreInfo = _keystoreRowInfoService.findByCertificateSerialNumber(certificateSerialNum);
@@ -140,11 +149,13 @@ public class CertificateController {
             String downloadedCertificateRowPassword = downloadedCertificateKeystoreInfo.get().getRowPassword();
             PrivateKey downloadedCertificatePrivateKey = _certificateService.GetCertificatePrivateKey(keystoreName,
                     keyStorePassword, downloadedCertificateAlias, downloadedCertificateRowPassword);
+            String downloadedCertificatePrivateKeyPassword = downloadedCertificateKeystoreInfo.get().getRowPassword();
 
             // kreiranje tekstualnih info za sertifikat za https
             File file = UniqueFIleCreator.createUniqueFile("certInfo.txt");
             FileWriter writer = new FileWriter(file);
-            writer.write("keystore password: " + keyStorePassword + ", alias: " + downloadedCertificateAlias);
+            writer.write("keystore password: " + keyStorePassword + ", alias: " + downloadedCertificateAlias +
+                    "key password: " + downloadedCertificatePrivateKeyPassword);
             writer.close();
 
             // cuvanje privatnog kljuca koji odgovara sertifikatu
@@ -153,12 +164,6 @@ public class CertificateController {
             FileOutputStream fileOutputStream = new FileOutputStream(keyFile);
             PEMWriter pemWriter = new PEMWriter(new OutputStreamWriter(fileOutputStream));
 
-            // Optionally, you can encrypt the private key with a passphrase
-            // Uncomment the following lines if you want to encrypt the key
-//            PEMEncryptor encryptor = new PEMEncryptorBuilder("AES-256-CBC").build("passphrase".toCharArray());
-//            pemWriter.writeObject(privateKey, encryptor);
-
-            // Write the unencrypted private key
             pemWriter.writeObject(downloadedCertificatePrivateKey);
 
             pemWriter.close();
@@ -169,7 +174,7 @@ public class CertificateController {
 
             return ResponseEntity.ok()
                     .headers(headers)
-                    .body(certificateBytes);
+                    .body(pemBytes);
         } catch (CertificateEncodingException e) {
             throw new RuntimeException(e);
         }

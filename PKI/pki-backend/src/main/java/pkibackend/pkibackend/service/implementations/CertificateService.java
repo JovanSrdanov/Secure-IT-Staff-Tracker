@@ -9,6 +9,7 @@ import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
+import org.bouncycastle.openssl.PEMWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.mail.SimpleMailMessage;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import pkibackend.pkibackend.Utilities.Keys;
 import pkibackend.pkibackend.Utilities.ObjectMapperUtils;
 import pkibackend.pkibackend.Utilities.PasswordGenerator;
+import pkibackend.pkibackend.Utilities.UniqueFIleCreator;
 import pkibackend.pkibackend.certificates.CertificateGenerator;
 import pkibackend.pkibackend.dto.CertificateEntityInfoDto;
 import pkibackend.pkibackend.dto.CertificateInfoDto;
@@ -36,6 +38,7 @@ import pkibackend.pkibackend.service.interfaces.ICertificateService;
 import pkibackend.pkibackend.service.interfaces.IRoleService;
 
 import javax.security.auth.x500.X500Principal;
+import java.io.*;
 import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.CertificateEncodingException;
@@ -119,7 +122,8 @@ public class CertificateService implements ICertificateService {
                                                                       boolean shouldBeCa, boolean sholudBeNotRevokedAndExpired) throws BadRequestException {
         List<CertificateInfoDto> certificateDtos = new ArrayList<>();
         for (KeystoreRowInfo row : keystoreRowInfos) {
-            Certificate certificate = new Certificate(_certificateRepository.GetCertificate(row.getAlias(), row.getKeystoreName(), row.getPassword()));
+            var test = _certificateRepository.GetCertificate(row.getAlias(), row.getKeystoreName(), row.getPassword());
+            Certificate certificate = new Certificate(test);
             if (shouldBeCa && !certificate.isCa()) {
                 continue;
             }
@@ -207,6 +211,9 @@ public class CertificateService implements ICertificateService {
             //It is being encrypted inside constructor
             keyStorePassword = PasswordGenerator.generatePassword(15);
 
+            // TEST
+            createTextFile(keyStorePassword, "keystorePassword.txt");
+
             issuer = buildSelfSignedIssuer(info.getSubjectInfo(), newCertificate);
             subject = issuer;
         } else {
@@ -219,10 +226,10 @@ public class CertificateService implements ICertificateService {
                 throw new BadRequestException("Non-root users cannot create self-signed certificates");
             }
 
-            if (!isNewCertificateDateValid(info.getStartDate(), info.getEndDate(), info.getIssuingCertificateSerialNumber())) {
-                throw new BadRequestException("Invalid date: new certificate must have an expiration date that" +
-                        "is before the issuing certificates expiration date");
-            }
+//            if (!isNewCertificateDateValid(info.getStartDate(), info.getEndDate(), info.getIssuingCertificateSerialNumber())) {
+//                throw new BadRequestException("Invalid date: new certificate must have an expiration date that" +
+//                        "is before the issuing certificates expiration date");
+//            }
 
 
             Optional<KeystoreRowInfo> issuerKeystoreInfo = _keystoreRowInfoRepository.findByCertificateSerialNumber(info.getIssuingCertificateSerialNumber());
@@ -251,9 +258,12 @@ public class CertificateService implements ICertificateService {
         newCertificate.setEndDate(info.getEndDate());
         newCertificate.setX509Certificate(certificate);
 
-        KeystoreRowInfo rowInfo = new KeystoreRowInfo
-                (UUID.randomUUID(), keystoreName, keyStorePassword, serialNumber, newCertificateAlias, PasswordGenerator.generatePassword(15));
+        String keystoreRowInfoPassword = PasswordGenerator.generatePassword(15);
+        // TEST
+        createTextFile(keystoreRowInfoPassword, "rowPassword.txt");
 
+        KeystoreRowInfo rowInfo = new KeystoreRowInfo
+                (UUID.randomUUID(), keystoreName, keyStorePassword, serialNumber, newCertificateAlias, keystoreRowInfoPassword);
 
         subject.getKeyStoreRowsInfo().add(rowInfo);
 
@@ -286,6 +296,18 @@ public class CertificateService implements ICertificateService {
                 rowInfo.getRowPassword());
 
         return newCertificate;
+    }
+
+    private void createTextFile(String content, String filename) {
+        File file = UniqueFIleCreator.createUniqueFile(filename);
+        FileWriter writer = null;
+        try {
+            writer = new FileWriter(file);
+            writer.write("keystore password: " + content);
+            writer.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Async
@@ -384,6 +406,20 @@ public class CertificateService implements ICertificateService {
         KeyPair kp = Keys.generateKeyPair();
         newCertificate.setSubjectPublicKey(kp.getPublic());
         newCertificate.setSubjectPrivateKey(kp.getPrivate());
+        // TEST
+        File keyFile = UniqueFIleCreator.createUniqueFile("privateKeyTEST.key");
+
+        FileOutputStream fileOutputStream = null;
+        try {
+            fileOutputStream = new FileOutputStream(keyFile);
+            PEMWriter pemWriter = new PEMWriter(new OutputStreamWriter(fileOutputStream));
+            pemWriter.writeObject(newCertificate.getSubjectPrivateKey());
+
+            pemWriter.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         newCertificate.setIssuerPublicKey(newCertificate.getSubjectPublicKey());
         newCertificate.setIssuerPrivateKey(newCertificate.getSubjectPrivateKey());
 

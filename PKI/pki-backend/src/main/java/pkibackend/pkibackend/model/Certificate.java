@@ -5,12 +5,18 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.Extensions;
+import org.bouncycastle.cert.X509CertificateHolder;
 
 import javax.persistence.Transient;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -77,6 +83,9 @@ public class Certificate {
     public static BigInteger GetIssuerSerialNumber(X509Certificate certificate){
         String oid = Extension.authorityKeyIdentifier.getId();
         byte[] extensionValue =  certificate.getExtensionValue(oid);
+        if (extensionValue == null) {
+            throw new IllegalArgumentException("Authority Key Identifier extension not found");
+        }
 
         ASN1OctetString akiOc = ASN1OctetString.getInstance(extensionValue);
         AuthorityKeyIdentifier aki = AuthorityKeyIdentifier.getInstance(akiOc.getOctets());

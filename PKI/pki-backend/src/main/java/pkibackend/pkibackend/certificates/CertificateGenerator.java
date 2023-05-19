@@ -1,5 +1,6 @@
 package pkibackend.pkibackend.certificates;
 
+import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.x509.*;
 import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.cert.X509CertificateHolder;
@@ -13,6 +14,7 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.springframework.stereotype.Component;
 import pkibackend.pkibackend.model.Certificate;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.Security;
 import java.security.cert.CertificateException;
@@ -96,10 +98,6 @@ public class CertificateGenerator {
                     usage = new KeyUsage(KeyUsage.keyCertSign);
                     certGen.addExtension(Extension.keyUsage, false, usage);
                 }
-                case "digitalSignature" -> {
-                    usage = new KeyUsage(KeyUsage.digitalSignature);
-                    certGen.addExtension(Extension.keyUsage, false, usage);
-                }
                 default -> {
                     usage = new KeyUsage(KeyUsage.digitalSignature);
                     certGen.addExtension(Extension.keyUsage, false, usage);
@@ -113,16 +111,36 @@ public class CertificateGenerator {
         // odredjuje dal je CA il nije
         if (extensions.containsKey("basicConstraints")) {
             boolean isCA = extensions.get("basicConstraints").equals("CA");
-            certGen.addExtension(Extension.basicConstraints, true, new BasicConstraints(isCA));
+            certGen.addExtension(Extension.basicConstraints, false, new BasicConstraints(isCA));
         }
-        else {
-            certGen.addExtension(Extension.basicConstraints, true, new BasicConstraints(false));
-        }
+//        else {
+//            certGen.addExtension(Extension.basicConstraints, true, new BasicConstraints(false));
+//        }
+
         // opciono cuva identifikator za javni kljuc issuer-a i/ili serijski broj sertifikata koji je
         // iskoriscen za potpis
+//        SubjectPublicKeyInfo issuerPublicKeyInfo = SubjectPublicKeyInfo.getInstance(newCertificate.getIssuerPublicKey().getEncoded());
+//        try {
+//            DEROctetString publicKeyOctetString = new DEROctetString(issuerPublicKeyInfo.getEncoded());
+//            GeneralName generalName = new GeneralName(GeneralName.otherName, publicKeyOctetString);
+//            GeneralName[] generalNames = { generalName };
+//            GeneralNames generalNamesExtension = new GeneralNames(generalNames);
+//
+//            AuthorityKeyIdentifier identifier = new AuthorityKeyIdentifier(
+//                    generalNamesExtension,
+//                    issuingCertificateSerialNumber
+//            );
+//
+//            certGen.addExtension(Extension.authorityKeyIdentifier, false, identifier);
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
         AuthorityKeyIdentifier identifier = new AuthorityKeyIdentifier(
-                issuingCertificateSerialNumber.toByteArray());
-        certGen.addExtension(Extension.authorityKeyIdentifier, true, identifier);
+                issuingCertificateSerialNumber.toByteArray()
+        );
+
+        certGen.addExtension(Extension.authorityKeyIdentifier, false, identifier);
+
         // SAN ekstenzija da bi chrome mogao da prepozna sertifikat, zbog HTTPS-a
         GeneralName[] generalName = new GeneralName[3];
         generalName[0] = new GeneralName(GeneralName.dNSName, "localhost");
@@ -130,7 +148,8 @@ public class CertificateGenerator {
         generalName[2] = new GeneralName(GeneralName.iPAddress, "127.0.0.1");
 
         GeneralNames subjectAltNames = new GeneralNames(generalName);
+        //GeneralNames subjectAltNames = new GeneralNames(new GeneralName(GeneralName.dNSName, "localhost"));
 
-        certGen.addExtension(Extension.subjectAlternativeName, true, subjectAltNames);
+        certGen.addExtension(Extension.subjectAlternativeName, false, subjectAltNames);
     }
 }
