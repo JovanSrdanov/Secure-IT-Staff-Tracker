@@ -1,6 +1,7 @@
 package jass.security.service.interfaces;
 
 import jass.security.dto.RegisterAccountDto;
+import jass.security.exception.EmailRejectedException;
 import jass.security.exception.EmailTakenException;
 import jass.security.exception.NotFoundException;
 import jass.security.model.Account;
@@ -12,7 +13,7 @@ import java.util.UUID;
 
 public interface IAccountService extends ICrudService<Account> {
     Account findByEmail(String email);
-    UUID registerAccount(RegisterAccountDto dto) throws EmailTakenException;
+    UUID registerAccount(RegisterAccountDto dto) throws EmailTakenException, NotFoundException, EmailRejectedException;
 
     void approveAccount(String email, Boolean approve) throws NotFoundException;
 

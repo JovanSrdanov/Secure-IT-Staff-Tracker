@@ -5,18 +5,73 @@ import React from "react";
 import LoginIcon from '@mui/icons-material/Login';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import ComputerIcon from '@mui/icons-material/Computer';
-import {Route, Routes, useNavigate} from "react-router-dom";
+import {Navigate, Route, Routes, useNavigate} from "react-router-dom";
 import LoginPage from "./pages/unauthenticated-pages/login-page";
 import RegisterPage from "./pages/unauthenticated-pages/register-page";
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
+import jwt_decode from "jwt-decode";
+import interceptor from "./interceptor/interceptor";
 
 function App() {
     const navigate = useNavigate()
+
+    function getCookieValue(name) {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.startsWith(`${name}=`)) {
+                return cookie.substring(name.length + 1);
+            }
+        }
+        return null;
+    }
+
+    function getRoleFromToken() {
+        const token = getCookieValue('accessToken');
+        if (!token) {
+            removeTokens();
+            return null;
+        }
+        const decodedToken = jwt_decode(token);
+
+        const currentTime = Date.now() / 1000;
+        if (decodedToken.exp < currentTime) {
+            removeTokens();
+            navigate("/login");
+            return null;
+        }
+        return decodedToken.role;
+    }
+
+    function removeTokens() {
+        document.cookie = 'accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        document.cookie = 'refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    }
+
+    const ROLE = getRoleFromToken();
     const handleLogout = () => {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
+        removeTokens()
         navigate('/login');
+    };
+    const handleTest = () => {
+        interceptor.get('/account/test', {}).then(res => {
+            console.log("res")
+            console.log(res)
+        }).catch(err => {
+            console.log("err")
+            console.log(err)
+        });
+    };
+
+    const Una = () => {
+        interceptor.get('/account/pending', {}).then(res => {
+            console.log("res")
+            console.log(res)
+        }).catch(err => {
+            console.log("err")
+            console.log(err)
+        });
     };
     return (
         <div>
@@ -64,8 +119,16 @@ function App() {
                     </Toolbar>
                 </AppBar>
                 <Routes>
+
                     <Route path="/login" element={<LoginPage/>}/>
                     <Route path="/register" element={<RegisterPage/>}/>
+                    <Route path="/*" element={<Navigate to="/login"/>}/>
+                    <Route path="/button"
+                           element={<><Button variant="contained" onClick={handleTest}>Klikni </Button>
+                               <Button variant="contained" color="error" onClick={Una}>Klikni
+                                   unauthorized </Button>
+                           </>}/>
+
 
                 </Routes>
             </Box>

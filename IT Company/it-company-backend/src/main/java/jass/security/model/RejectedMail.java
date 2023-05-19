@@ -1,14 +1,15 @@
 package jass.security.model;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Date;
-import java.util.Set;
+import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,10 +17,11 @@ import java.util.Set;
 @Setter
 
 @Entity
-public class SoftwareEngineer extends Employee {
-    private Date dateOfEmployment;
-    @OneToMany
-    private Set<Skill> skills;
-    @OneToOne
-    private Cv cv;
+public class RejectedMail {
+    @Id
+    private UUID id;
+    @Column(nullable = false)
+    String email;
+    @Column(nullable = false)
+    Date blockedUntil;
 }
