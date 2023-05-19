@@ -1,9 +1,6 @@
 package jass.security.service.implementations;
 
-import jass.security.dto.project.AddProjectMangerToProjectDto;
-import jass.security.dto.project.AddSwEngineerToProjectDto;
-import jass.security.dto.project.PrManagerProjectStatsDto;
-import jass.security.dto.project.SwEngineerProjectStatsDto;
+import jass.security.dto.project.*;
 import jass.security.exception.NotFoundException;
 import jass.security.model.*;
 import jass.security.repository.*;
@@ -130,5 +127,10 @@ public class ProjectService implements IProjectService {
     @Override
     public List<PrManagerProjectStatsDto> GetPrManagersOnProject(UUID projectId) {
         return _prManagerProjectStatsRepository.GetPrManagersOnProject(projectId);
+    }
+
+    @Override
+    public List<PrManagerProjectStatsProjectDto> GetPrManagersProjects(UUID prMangerId) {
+        return _prManagerProjectStatsRepository.GetPrManagersProjects(prMangerId);
     }
 }

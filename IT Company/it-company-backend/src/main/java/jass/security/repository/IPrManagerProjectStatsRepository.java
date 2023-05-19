@@ -1,6 +1,7 @@
 package jass.security.repository;
 
 import jass.security.dto.project.PrManagerProjectStatsDto;
+import jass.security.dto.project.PrManagerProjectStatsProjectDto;
 import jass.security.dto.project.SwEngineerProjectStatsDto;
 import jass.security.model.PrManagerProjectStats;
 import jass.security.model.PrManagerProjectStatsId;
@@ -21,4 +22,9 @@ public interface IPrManagerProjectStatsRepository extends JpaRepository<PrManage
             "on manager.id = stats.id.prManagerId " +
             "where stats.id.projectId = :projectId")
     List<PrManagerProjectStatsDto> GetPrManagersOnProject(UUID projectId);
+    @Query("select new jass.security.dto.project.PrManagerProjectStatsProjectDto(project,stats.workingPeriod) " +
+            "from Project project left join PrManagerProjectStats stats " +
+            "on project.id = stats.id.projectId " +
+            "where stats.id.prManagerId = :prManagerId")
+    List<PrManagerProjectStatsProjectDto> GetPrManagersProjects(UUID prManagerId);
 }
