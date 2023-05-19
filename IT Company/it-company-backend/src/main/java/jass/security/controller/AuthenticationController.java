@@ -62,7 +62,7 @@ public class AuthenticationController {
         }
 
         if (acc.getStatus() != RegistrationRequestStatus.APPROVED) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Registration is not accepted by admin");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Registration is not yet accepted by admin");
         }
 
         if (!acc.getIsActivated()) {
@@ -129,7 +129,7 @@ public class AuthenticationController {
         }
     }
 
-    @PreAuthorize("hasAuthority('changeAccStatus')")
+    @PreAuthorize("hasAuthority('changeAccStatusAccept')")
     @GetMapping("/accept-registration/{mail}")
     public ResponseEntity<?> acceptRegistration(@PathVariable String mail) {
         try {
@@ -146,11 +146,11 @@ public class AuthenticationController {
             return ResponseEntity.ok("Error while hashing!");
         }
 
-        mailSenderService.sendSimpleEmail(mail, "GAS", link);
+        mailSenderService.sendSimpleEmail(mail, "IT COMPANY", link);
         return ResponseEntity.ok("Registration approved");
     }
 
-    @PreAuthorize("hasAuthority('changeAccStatus')")
+    @PreAuthorize("hasAuthority('changeAccStatusReject')")
     @PostMapping("/reject-registration")
     public ResponseEntity<?> rejectRegistration(@RequestBody RejectAccountDto dto) {
         try {
@@ -168,14 +168,15 @@ public class AuthenticationController {
     public RedirectView activateAccount(@PathVariable String hash, RedirectAttributes attributes) {
         try {
             accountActivationService.activateAccount(hash);
+            //Todo  JOVAN dodaj https
         } catch (EmailActivationExpiredException | NotFoundException e) {
-            return new RedirectView("https://www.youtube.com/");
+            return new RedirectView("http://localhost:4444/error-page");
         }
 
         attributes.addFlashAttribute("flashAttribute", "redirectWithRedirectView");
         attributes.addAttribute("attribute", "redirectWithRedirectView");
         //Todo  JOVAN dodaj https
-        return new RedirectView("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+        return new RedirectView("http://localhost:4444/login");
     }
 
 }
