@@ -11,6 +11,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @Getter
 @Setter
-public class DismissSwEngineerFromProjectDto {
-    private UUID swEngineerId;
+public class DismissWorkerFromProjectDto {
+    private UUID workerId;
 }

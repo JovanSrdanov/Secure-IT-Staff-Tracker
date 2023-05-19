@@ -1,12 +1,12 @@
 package jass.security.service.implementations;
 
+import jass.security.dto.project.AddProjectMangerToProjectDto;
 import jass.security.dto.project.AddSwEngineerToProjectDto;
+import jass.security.dto.project.PrManagerProjectStatsDto;
 import jass.security.dto.project.SwEngineerProjectStatsDto;
 import jass.security.exception.NotFoundException;
 import jass.security.model.*;
-import jass.security.repository.IProjectRepository;
-import jass.security.repository.ISwEngineerProjectStatsRepository;
-import jass.security.repository.ISwEngineerRepository;
+import jass.security.repository.*;
 import jass.security.service.interfaces.IProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
@@ -23,12 +23,16 @@ public class ProjectService implements IProjectService {
 
     private final IProjectRepository _projectRepository;
     private final ISwEngineerRepository _swEngineerRepository;
+    private final IProjectManagerRepository _projectManagerRepository;
     private final ISwEngineerProjectStatsRepository _swEngineerProjectStatsRepository;
+    private final IPrManagerProjectStatsRepository _prManagerProjectStatsRepository;
     @Autowired
-    public ProjectService(IProjectRepository projectRepository, ISwEngineerRepository swEngineerRepository, ISwEngineerProjectStatsRepository swEngineerProjectStatsRepository) {
+    public ProjectService(IProjectRepository projectRepository, ISwEngineerRepository swEngineerRepository, IProjectManagerRepository projectManagerRepository, ISwEngineerProjectStatsRepository swEngineerProjectStatsRepository, IPrManagerProjectStatsRepository prManagerProjectStatsRepository) {
         _projectRepository = projectRepository;
         _swEngineerRepository = swEngineerRepository;
+        _projectManagerRepository = projectManagerRepository;
         _swEngineerProjectStatsRepository = swEngineerProjectStatsRepository;
+        _prManagerProjectStatsRepository = prManagerProjectStatsRepository;
     }
 
     @Override
@@ -71,6 +75,26 @@ public class ProjectService implements IProjectService {
       _swEngineerProjectStatsRepository.save(stats);
   }
 
+    @Override
+    public void AddPrManagerToProject(AddProjectMangerToProjectDto dto, UUID projectId) throws NotFoundException {
+
+        Optional<ProjectManager> projectManager = _projectManagerRepository.findById(dto.getPrManagerId());
+        if(projectManager.isEmpty()){
+            throw new NotFoundException("Project manager not found");
+        }
+
+        Optional<Project> project = _projectRepository.findById(projectId);
+        if(project.isEmpty()){
+            throw new NotFoundException("Project not found");
+        }
+
+
+        PrManagerProjectStatsId statsId = new PrManagerProjectStatsId(dto.getPrManagerId(), projectId);
+        DateRange workingPeriod = new DateRange(new Date(), null);
+        PrManagerProjectStats stats = new PrManagerProjectStats(statsId, workingPeriod, projectManager.get(), project.get());
+        _prManagerProjectStatsRepository.save(stats);
+    }
+
 
     public void DismissSwEngineerFromProject(UUID swEngineerId , UUID projectId) throws NotFoundException{
         SwEngineerProjectStatsId statsId = new SwEngineerProjectStatsId(swEngineerId,projectId);
@@ -85,7 +109,26 @@ public class ProjectService implements IProjectService {
         _swEngineerProjectStatsRepository.save(updatingStats);
     }
 
+    @Override
+    public void DismissPrManagerFromProject(UUID prManagerId, UUID projectId) throws NotFoundException {
+        PrManagerProjectStatsId statsId = new PrManagerProjectStatsId(prManagerId,projectId);
+        var result = _prManagerProjectStatsRepository.findById(statsId);
+        if(result.isEmpty()){
+            throw  new NotFoundException("Project manager project stats not found");
+        }
+
+        var updatingStats = result.get();
+
+        updatingStats.getWorkingPeriod().setEndDate(new Date());
+        _prManagerProjectStatsRepository.save(updatingStats);
+    }
+
     public List<SwEngineerProjectStatsDto> GetSwEngineersOnProject(UUID projectId){
         return _swEngineerProjectStatsRepository.GetSwEngineersOnProject(projectId);
+    }
+
+    @Override
+    public List<PrManagerProjectStatsDto> GetPrManagersOnProject(UUID projectId) {
+        return _prManagerProjectStatsRepository.GetPrManagersOnProject(projectId);
     }
 }

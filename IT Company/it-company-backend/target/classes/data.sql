@@ -15,7 +15,10 @@ values
     ('69111b7d-910d-49a6-8a43-2c28762b1a25', 'getAllProject'),
     ('f60d3289-526a-4aae-b720-5409f472cd2b', 'addSwEngineerToProject'),
     ('da6aaa1b-6e8e-472a-8598-a27edc2be510', 'dismissSwEngineerFromProject'),
-    ('c4640c3d-e9fe-40b3-9158-004fb119b8f6', 'getSwEngineersOnProject');
+    ('c4640c3d-e9fe-40b3-9158-004fb119b8f6', 'getSwEngineersOnProject'),
+    ('250da776-58ea-4889-b777-531f826787b1', 'addPrManagerToProject'),
+    ('dad8fcfd-4422-4a3a-b79d-6db3d25e965e', 'dismissPrManagerFromProject'),
+    ('7facde86-1695-4281-aeb9-34fda5913f05', 'getPrManagersOnProject');
 
 
 
@@ -45,7 +48,10 @@ values
     ('037bbd08-1f2c-4f9d-80af-1710d90efb01', 'f60d3289-526a-4aae-b720-5409f472cd2b'),
     ('037bbd08-1f2c-4f9d-80af-1710d90efb01', 'c4640c3d-e9fe-40b3-9158-004fb119b8f6'),
     -- TODO zasad na adminu, prebaciti na project managera
-    ('037bbd08-1f2c-4f9d-80af-1710d90efb01', 'da6aaa1b-6e8e-472a-8598-a27edc2be510');
+    ('037bbd08-1f2c-4f9d-80af-1710d90efb01', 'da6aaa1b-6e8e-472a-8598-a27edc2be510'),
+    ('037bbd08-1f2c-4f9d-80af-1710d90efb01', '250da776-58ea-4889-b777-531f826787b1'),
+    ('037bbd08-1f2c-4f9d-80af-1710d90efb01', 'dad8fcfd-4422-4a3a-b79d-6db3d25e965e'),
+    ('037bbd08-1f2c-4f9d-80af-1710d90efb01', '7facde86-1695-4281-aeb9-34fda5913f05');
 
 
 
@@ -61,6 +67,10 @@ values
 --TODO OBRISI
 INSERT INTO public.software_engineer ("id", "name", "phone_number", "profession", "surname")
 VALUES('d2cdc04e-a199-46d3-b202-4289c6b1ea3b', 'Marko', '1234567', 'DevOps', 'Markovic' );
+
+INSERT INTO public.project_manager ("id", "name", "phone_number", "profession", "surname")
+VALUES('58b80f2e-23cb-4f3f-abcf-0bc0e4f1746c', 'Smilja', '1234567', 'Professional air consumer', 'Uskokovic' );
+
 
 INSERT INTO public.project (id,start_date,end_date,"name") VALUES
     ('6eeb9244-9c87-4545-a940-fe39bf3a268f','2023-05-25 02:00:00','2023-09-25 02:00:00','Mega projekat');
