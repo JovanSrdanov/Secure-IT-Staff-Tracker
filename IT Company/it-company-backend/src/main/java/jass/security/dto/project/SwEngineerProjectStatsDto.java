@@ -2,7 +2,6 @@ package jass.security.dto.project;
 
 import jass.security.model.DateRange;
 import jass.security.model.SoftwareEngineer;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

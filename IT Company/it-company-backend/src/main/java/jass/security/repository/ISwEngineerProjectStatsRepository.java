@@ -2,6 +2,7 @@ package jass.security.repository;
 
 
 import jass.security.dto.project.SwEngineerProjectStatsDto;
+import jass.security.dto.project.SwEngineerProjectStatsProjectDto;
 import jass.security.model.SoftwareEngineer;
 import jass.security.model.SwEngineerProjectStats;
 import jass.security.model.SwEngineerProjectStatsId;
@@ -21,4 +22,9 @@ public interface ISwEngineerProjectStatsRepository extends JpaRepository<SwEngin
             "on engineer.id = stats.id.swEngineerId " +
             "where stats.id.projectId = :projectId")
     List<SwEngineerProjectStatsDto> GetSwEngineersOnProject(UUID projectId);
+    @Query("select new jass.security.dto.project.SwEngineerProjectStatsProjectDto(project, stats.jobDescription, stats.workingPeriod) " +
+            "from Project project left join SwEngineerProjectStats stats " +
+            "on project.id = stats.id.projectId " +
+            "where stats.id.swEngineerId = :swEngineerId")
+    List<SwEngineerProjectStatsProjectDto> GetSwEngineersProjects(UUID swEngineerId);
 }

@@ -2,14 +2,12 @@ package jass.security.controller;
 
 import jass.security.dto.AccountApprovalDto;
 import jass.security.dto.RegisterEmployeeDto;
-import jass.security.exception.BadRequestException;
 import jass.security.model.Account;
 import jass.security.model.RegistrationRequestStatus;
 import jass.security.service.interfaces.IAccountService;
 import jass.security.utils.ObjectMapperUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
