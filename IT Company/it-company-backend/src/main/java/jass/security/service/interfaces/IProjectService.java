@@ -16,4 +16,6 @@ public interface IProjectService extends ICrudService<Project> {
       List<SwEngineerProjectStatsDto> GetSwEngineersOnProject(UUID projectId);
       List<PrManagerProjectStatsDto> GetPrManagersOnProject(UUID projectId);
       List<PrManagerProjectStatsProjectDto> GetPrManagersProjects(UUID prMangerId);
+      List<SwEngineerProjectStatsProjectDto> GetSwEngineersProjects(UUID swEngineerId);
+      void ChangeSwEngineersJobDescription(UUID projectId, UUID swEngineerId, String newDescription) throws NotFoundException;
 }
