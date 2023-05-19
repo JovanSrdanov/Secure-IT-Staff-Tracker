@@ -1,6 +1,4 @@
 package jass.security.model;
-
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -9,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Set;
 
@@ -25,6 +22,4 @@ public class SoftwareEngineer extends Employee {
     private Set<Skill> skills;
     @OneToOne
     private Cv cv;
-    @OneToMany(mappedBy = "softwareEngineer")
-    private Set<EngineerProjectStats> projectStats;
 }

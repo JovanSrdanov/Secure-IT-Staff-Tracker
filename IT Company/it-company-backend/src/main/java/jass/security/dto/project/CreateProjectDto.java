@@ -1,21 +1,17 @@
-package jass.security.model;
+package jass.security.dto.project;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
+import jass.security.model.DateRange;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Set;
-
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-
-@Entity
-public class ProjectManager extends Employee{
-    @OneToMany
-    private Set<Project> projects;
+public class CreateProjectDto {
+    private  String name;
+    private DateRange duration;
 }

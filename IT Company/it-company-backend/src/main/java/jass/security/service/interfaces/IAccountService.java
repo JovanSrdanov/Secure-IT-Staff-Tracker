@@ -6,9 +6,9 @@ import jass.security.exception.EmailTakenException;
 import jass.security.exception.NotFoundException;
 import jass.security.model.Account;
 import jass.security.model.RegistrationRequestStatus;
-import jass.security.service.implementations.ICrudService;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public interface IAccountService extends ICrudService<Account> {
@@ -18,4 +18,5 @@ public interface IAccountService extends ICrudService<Account> {
     void approveAccount(String email, Boolean approve) throws NotFoundException;
 
     ArrayList<Account> findAllByStatus(RegistrationRequestStatus status);
+
 }

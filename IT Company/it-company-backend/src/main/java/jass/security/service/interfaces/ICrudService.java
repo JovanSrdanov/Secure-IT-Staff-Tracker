@@ -1,4 +1,5 @@
-package jass.security.service.implementations;
+package jass.security.service.interfaces;
+
 
 import java.util.List;
 import java.util.UUID;

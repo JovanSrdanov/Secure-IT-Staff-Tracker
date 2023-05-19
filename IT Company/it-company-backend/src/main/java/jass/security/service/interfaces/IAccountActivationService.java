@@ -3,7 +3,6 @@ package jass.security.service.interfaces;
 import jass.security.exception.EmailActivationExpiredException;
 import jass.security.exception.NotFoundException;
 import jass.security.model.AccountActivation;
-import jass.security.service.implementations.ICrudService;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;

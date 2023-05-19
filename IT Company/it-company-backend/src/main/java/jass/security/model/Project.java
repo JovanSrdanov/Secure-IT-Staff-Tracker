@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -22,6 +22,4 @@ public class Project {
     private String name;
     @Column(nullable = false)
     private DateRange duration;
-    @OneToMany(mappedBy = "project")
-    private ArrayList<EngineerProjectStats> stats;
 }
