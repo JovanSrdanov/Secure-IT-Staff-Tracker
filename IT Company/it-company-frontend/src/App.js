@@ -221,6 +221,8 @@ function App() {
                         <>
                             <Route path="/login" element={<LoginPage/>}/>
                             <Route path="/register" element={<RegisterPage/>}/>
+                            <Route path="/error-page"
+                                   element={<h1>Account not activated, there has been an error</h1>}/>
                             <Route path="/*" element={<Navigate to="/login"/>}/>
                         </>
                     )}

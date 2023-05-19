@@ -53,7 +53,7 @@ interceptor.interceptors.response.use(
                 removeTokens();
             }
         }
-        if (failedRequests > 0) {
+        if (error.response && error.response.status === 401) {
             alert(" You are unauthorized to access data from this url: " + interceptor.getUri(originalRequest))
             failedRequests = 0
         }
