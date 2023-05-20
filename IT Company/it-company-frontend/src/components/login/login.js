@@ -10,9 +10,11 @@ import {Flex} from "reflexbox";
 function Login() {
     const navigate = useNavigate();
     const [email, setEmail] = React.useState("");
+    const [resetPasswordEmail, setResetPasswordEmail] = React.useState("");
     const [emailPasswordLess, setEmailPasswordLess] = React.useState("");
     const [password, setPassword] = React.useState("");
     const [showAlert, setShowAlert] = React.useState(false);
+
 
     const handleEmailChange = (event) => {
         setEmail(event.target.value);
@@ -40,6 +42,7 @@ function Login() {
     const handlePasswordlessEmailChange = (event) => {
         setEmailPasswordLess(event.target.value);
     };
+
     const handlePasswordlessLogin = () => {
         interceptor.post('auth/login-GASCINA', {
             email: emailPasswordLess,
@@ -50,11 +53,18 @@ function Login() {
             setShowAlert(true);
         })
     };
+    const handleresetPasswordEmailChange = (event) => {
+        setResetPasswordEmail(event.target.value);
+    };
+
+    function handleresetPassword() {
+        console.log(resetPasswordEmail)
+    }
+
     return (
         <>
-            <Flex flexDirection="row">
+            <Flex flexDirection="row" justifyContent="center" alignItems="center">
                 <div className="wrapper">
-
                     <TextField
                         fullWidth
                         variant="filled"
@@ -80,23 +90,54 @@ function Login() {
                 </div>
                 <div className="wrapper">
 
-                    <TextField
-                        fullWidth
-                        variant="filled"
-                        label="Email"
-                        type={"email"}
-                        value={emailPasswordLess}
-                        onChange={handlePasswordlessEmailChange}
+                    <div className="wrapper">
+                        <TextField
+                            fullWidth
+                            variant="filled"
+                            label="Email"
+                            type={"email"}
+                            value={emailPasswordLess}
+                            onChange={handlePasswordlessEmailChange}
+                        />
+                        <Button
+                            variant="contained" color="primary" endIcon={<LoginIcon/>}
+                            onClick={handlePasswordlessLogin}
+                        >Passwordless Login
+                        </Button>
+                        <Flex flexDirection="row" justifyContent="center">
+                            Email will be sent to you
+                        </Flex>
+                    </div>
+                    <hr
+                        style={{
+                            width: "100%",
+                            border: "1px solid grey",
+                        }}
                     />
-                    <Button
-                        variant="contained" color="primary" endIcon={<LoginIcon/>}
-                        onClick={handlePasswordlessLogin}
-                    >Passwordless Login
-                    </Button>
-                    <Flex flexDirection="row" justifyContent="center">
-                        Email will be sent to you
-                    </Flex>
+                    <div className="wrapper">
+                        <Flex flexDirection="row" justifyContent="center">
+                            Forgot your password?
+                        </Flex>
+                        <Flex flexDirection="row" justifyContent="center">
+                            Enter your email and we will reset it for you!
+                        </Flex>
+
+                        <TextField
+                            fullWidth
+                            variant="filled"
+                            label="Email"
+                            type={"email"}
+                            value={resetPasswordEmail}
+                            onChange={handleresetPasswordEmailChange}
+                        />
+                        <Button
+                            variant="contained" color="warning" endIcon={<LoginIcon/>}
+                            onClick={handleresetPassword}
+                        >Reset password
+                        </Button>
+                    </div>
                 </div>
+
             </Flex>
             {showAlert && (
                 <Alert sx={{width: "fit-content", margin: "10px auto"}} severity="error" onClose={handleAlertClose}>
