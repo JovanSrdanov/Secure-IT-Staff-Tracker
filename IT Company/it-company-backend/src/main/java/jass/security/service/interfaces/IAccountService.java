@@ -1,5 +1,6 @@
 package jass.security.service.interfaces;
 
+import jass.security.dto.AccountApprovalDto;
 import jass.security.dto.RegisterAccountDto;
 import jass.security.exception.EmailRejectedException;
 import jass.security.exception.EmailTakenException;
@@ -18,5 +19,6 @@ public interface IAccountService extends ICrudService<Account> {
     void approveAccount(String email, Boolean approve) throws NotFoundException;
 
     ArrayList<Account> findAllByStatus(RegistrationRequestStatus status);
+    ArrayList<AccountApprovalDto> findAllByStatusInfo(RegistrationRequestStatus status);
 
 }

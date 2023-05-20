@@ -41,9 +41,7 @@ public class AccountController {
     @GetMapping("/pending")
     @PreAuthorize("hasAuthority('allPendingApproval')")
     public ResponseEntity<?> findAllPendingApproval() {
-        //return ResponseEntity.ok("alo");
-        var res = ObjectMapperUtils.mapAll(_accountService.findAllByStatus(RegistrationRequestStatus.PENDING), AccountApprovalDto.class);
-        return ResponseEntity.ok(res);
+        return ResponseEntity.ok(_accountService.findAllByStatusInfo(RegistrationRequestStatus.PENDING));
     }
 
 
