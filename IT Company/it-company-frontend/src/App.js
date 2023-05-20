@@ -18,6 +18,7 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import Diversity3Icon from '@mui/icons-material/Diversity3';
 import PermissionsPage from "./pages/admin-pages/permissions-page";
 import ProfilePage from "./pages/for-all-pages/profile-page";
+import RegistrationApprovalPage from "./pages/admin-pages/registration-approval-page";
 
 function App() {
     const navigate = useNavigate()
@@ -49,7 +50,6 @@ function App() {
             return null;
         }
 
-        console.log(new Date(jwt_decode(refreshToken).exp))
         if (jwt_decode(refreshToken).exp < currentTime) {
             removeTokens();
             return null;
@@ -189,7 +189,7 @@ function App() {
                     {ROLE === "ROLE_ADMIN" && (
                         <>
                             <Route path="/permissions" element={<PermissionsPage/>}/>
-                            <Route path="/registration-approval" element={<PermissionsPage/>}/>
+                            <Route path="/registration-approval" element={<RegistrationApprovalPage/>}/>
                             <Route path="/search-engineers" element={<PermissionsPage/>}/>
                             <Route path="/employees-and-projects" element={<PermissionsPage/>}/>
                             <Route path="/register-admins" element={<PermissionsPage/>}/>
@@ -221,6 +221,8 @@ function App() {
                         <>
                             <Route path="/login" element={<LoginPage/>}/>
                             <Route path="/register" element={<RegisterPage/>}/>
+                            <Route path="/error-page"
+                                   element={<h1>Account not activated, there has been an error</h1>}/>
                             <Route path="/*" element={<Navigate to="/login"/>}/>
                         </>
                     )}

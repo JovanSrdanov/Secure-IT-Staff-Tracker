@@ -20,9 +20,11 @@ import interceptor from "../../interceptor/interceptor";
 function Register() {
     const navigate = useNavigate();
     const [user, setUser] = useState({
-        username: '',
         password: '',
-        role: 'Guest',
+        profession: '',
+        phoneNumber: '',
+        passwordCheck: '',
+        role: 'softwareEngineer',
         name: '',
         surname: '',
         email: '',
@@ -33,7 +35,7 @@ function Register() {
             streetNumber: ''
         }
     });
-    const [showAlert, setShowAlert] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
     const [isDisabled, setIsDisabled] = useState(true);
     const [usernameTakenDialogShow, setUsernameTakenDialogShow] = useState(false)
@@ -54,29 +56,32 @@ function Register() {
     };
 
     useEffect(() => {
-
         const isValid =
-            user.username !== "" &&
             user.password.length >= 8 &&
+            user.password === user.passwordCheck &&
             user.name !== "" &&
+            user.phoneNumber !== "" &&
+            user.profession !== "" &&
             user.surname !== "" &&
             user.email.match(/^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i) &&
             user.address.country !== "" &&
             user.address.city !== "" &&
             user.address.street !== "" &&
-            user.address.streetNumber !== "";
+            user.address.streetNumber !== "" &&
+            /[A-Z]/.test(user.password) && // At least one uppercase letter
+            /[a-z]/.test(user.password) && // At least one lowercase letter
+            /[!@#$%^&*(),.?":{}|<>]/.test(user.password); // At least one special character
+
         setIsDisabled(!isValid);
     }, [user]);
 
-
     const handleRegisterClick = () => {
-        interceptor
-            .post('/api-2/user', user)
+        interceptor.post('/auth/register', user)
             .then((response) => {
                 navigate('/login');
             })
             .catch((error) => {
-                console.error(error);
+                setErrorMessage(error.response.data)
                 setUsernameTakenDialogShow(true)
             });
     };
@@ -84,7 +89,7 @@ function Register() {
     return (
         <div>
             <Dialog onClose={usernameTakenDialogClose} open={usernameTakenDialogShow}>
-                <DialogTitle>That username is already taken</DialogTitle>
+                <DialogTitle>{errorMessage}</DialogTitle>
                 <DialogActions>
                     <Button onClick={usernameTakenDialogClose}
                             variant="contained"
@@ -97,17 +102,19 @@ function Register() {
 
                 <Flex flexDirection="column">
                     <Flex>
-                        <Box width={1 / 3} m={1}>
+                        <Box width={1 / 4} m={1}>
                             <TextField
                                 fullWidth
                                 variant="filled"
-                                label="Username"
-                                name="username"
-                                value={user.username}
+                                label="E-mail"
+                                type="email"
+                                name="email"
+                                value={user.email}
                                 onChange={handleInputChange}
                             />
                         </Box>
-                        <Box width={1 / 3} m={1}>
+
+                        <Box width={1 / 4} m={1}>
                             <TextField
                                 fullWidth
                                 variant="filled"
@@ -118,7 +125,18 @@ function Register() {
                                 onChange={handleInputChange}
                             />
                         </Box>
-                        <Box width={1 / 3} m={1}>
+                        <Box width={1 / 4} m={1}>
+                            <TextField
+                                fullWidth
+                                variant="filled"
+                                label="Password check"
+                                type="password"
+                                name="passwordCheck"
+                                value={user.passwordCheck}
+                                onChange={handleInputChange}
+                            />
+                        </Box>
+                        <Box width={1 / 4} m={1}>
                             <FormControl variant="filled" fullWidth>
                                 <InputLabel id="role">Role</InputLabel>
                                 <Select
@@ -130,14 +148,16 @@ function Register() {
                                     label="Age"
                                     onChange={handleInputChange}
                                 >
-                                    <MenuItem value="Guest">Guest</MenuItem>
-                                    <MenuItem value="Host">Host</MenuItem>
+                                    <MenuItem value="softwareEngineer">ENGINEER</MenuItem>
+                                    <MenuItem value="projectManager">PROJECT MANAGER</MenuItem>
+                                    <MenuItem value="hrManager">HR MANAGER</MenuItem>
+
                                 </Select>
                             </FormControl>
                         </Box>
                     </Flex>
                     <Flex>
-                        <Box width={1 / 3} m={1}>
+                        <Box width={1 / 4} m={1}>
                             <TextField
                                 fullWidth
                                 variant="filled"
@@ -147,7 +167,7 @@ function Register() {
                                 onChange={handleInputChange}
                             />
                         </Box>
-                        <Box width={1 / 3} m={1}>
+                        <Box width={1 / 4} m={1}>
                             <TextField
                                 fullWidth
                                 variant="filled"
@@ -157,14 +177,23 @@ function Register() {
                                 onChange={handleInputChange}
                             />
                         </Box>
-                        <Box width={1 / 3} m={1}>
+                        <Box width={1 / 4} m={1}>
                             <TextField
                                 fullWidth
                                 variant="filled"
-                                label="E-mail"
-                                type="email"
-                                name="email"
-                                value={user.email}
+                                label="Phone number"
+                                name="phoneNumber"
+                                value={user.phoneNumber}
+                                onChange={handleInputChange}
+                            />
+                        </Box>
+                        <Box width={1 / 4} m={1}>
+                            <TextField
+                                fullWidth
+                                variant="filled"
+                                label="Profession"
+                                name="profession"
+                                value={user.profession}
                                 onChange={handleInputChange}
                             />
                         </Box>
@@ -212,12 +241,18 @@ function Register() {
                         </Box>
 
                     </Flex>
-                    <Flex flexDirection="row" justifyContent="center">
+                    <Flex flexDirection="column" justifyContent="center" alignItems="center">
+                        <Box>
+                            <p>All fields must be filled and email must be
+                                in
+                                valid
+                                form</p>
+                        </Box>
+                        <Box>
+                            <p>Password must contain one uppercase letter, one lowercase letter, one special character
+                                and minimum 8 characters</p>
 
-                        <p>All fields must be filled, password must be 8 characters or longer and email must be
-                            in
-                            valid
-                            form</p>
+                        </Box>
 
                     </Flex>
                 </Flex>
