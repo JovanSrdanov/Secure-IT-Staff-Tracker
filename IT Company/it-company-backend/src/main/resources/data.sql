@@ -17,13 +17,13 @@ VALUES ('c390e0cf-9c9d-41b7-80f9-b55939cc11e8', 'Petar', '123456', '.Net Senior'
 INSERT INTO public.account
     (id, email, employee_id, "password", salt, status, is_activated)
 values ('c46b1a28-fe30-4f6b-834c-72fe7de6ee7f', 'user', 'aafbd593-de86-4510-8c63-0d912e95b3b6',
-        '$2y$10$.MBsfYd7UyNHzszZPlzvn.JN4WOdAcnwyBUvsBAmi4u/.4MZTjA5W', 'a', 1, true),
+        '$2y$10$lFp.7xd3uHzrVnftpUcCFOPlEdsU8n76eUy4A/e8c0Eg/.AAc9M8y', 'a', 1, true),
        ('9d0dc40b-a0c6-4610-ac51-23ed75b94a9a', 'admin', '6b977f75-db33-44fd-8b8f-19bf87d82c65',
-        '$2y$10$.MBsfYd7UyNHzszZPlzvn.JN4WOdAcnwyBUvsBAmi4u/.4MZTjA5W', 'a', 1, true),
+        '$2y$10$lFp.7xd3uHzrVnftpUcCFOPlEdsU8n76eUy4A/e8c0Eg/.AAc9M8y', 'a', 1, true),
        ('be256f3c-48a3-449d-86e5-4bb1165122b3', 'pmanager', 'cf11ba92-dea3-4d80-b2f0-8187060cb831',
-        '$2a$10$0novzsHN77x0.ks6uCT2SuyXnkH2xnVZ12e5GcYTakKDuXAWbCViG', '8AajvCjO', 1, true),
+        '$2y$10$lFp.7xd3uHzrVnftpUcCFOPlEdsU8n76eUy4A/e8c0Eg/.AAc9M8y', 'a', 1, true),
        ('a7c0173e-0bcc-4df7-96b4-481d582dea60', 'swengineer', 'c390e0cf-9c9d-41b7-80f9-b55939cc11e8',
-        '$2a$10$ImHH2oQ53P/6W0ShDKNkV.j1fQWTLCVw1UCAwhdsSjOk6DJ82aEkS', 'I3VqINRy', 1, true);
+        '$2y$10$lFp.7xd3uHzrVnftpUcCFOPlEdsU8n76eUy4A/e8c0Eg/.AAc9M8y', 'a', 1, true);
 
 
 INSERT INTO public.privilege
