@@ -2,6 +2,7 @@ package jass.security.controller;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import jass.security.dto.*;
 import jass.security.exception.*;
 import jass.security.model.Account;
@@ -116,7 +117,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerNewAccount(@RequestBody RegisterAccountDto dto) {
+    public ResponseEntity<?> registerNewAccount(@Valid @RequestBody RegisterAccountDto dto) {
         try {
             accountService.registerAccount(dto);
             return ResponseEntity.ok("Account created, waiting admin approval");
