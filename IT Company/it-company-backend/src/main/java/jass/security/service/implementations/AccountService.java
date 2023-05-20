@@ -1,5 +1,6 @@
 package jass.security.service.implementations;
 
+import jass.security.dto.AccountApprovalDto;
 import jass.security.dto.AddressDto;
 import jass.security.dto.RegisterAccountDto;
 import jass.security.exception.EmailRejectedException;
@@ -261,6 +262,49 @@ public class AccountService implements IAccountService {
     public ArrayList<Account> findAllByStatus(RegistrationRequestStatus status) {
         var accs = _accountRepository.findAllByStatus(status);
         return accs;
+    }
+
+    @Override
+    public ArrayList<AccountApprovalDto> findAllByStatusInfo(RegistrationRequestStatus status) {
+        var accs = findAllByStatus(status);
+        ArrayList<AccountApprovalDto> infos = new ArrayList<>();
+
+        for(var acc : accs) {
+            AccountApprovalDto info = new AccountApprovalDto();
+
+            if(hrManagerRepository.findById(acc.getEmployeeId()).isPresent()) {
+                var employee = hrManagerRepository.findById(acc.getEmployeeId()).get();
+
+                info.setEmail(acc.getEmail());
+                info.setName(employee.getName());
+                info.setSurname(employee.getSurname());
+                info.setAddress(ObjectMapperUtils.map(employee.getAddress(), AddressDto.class));
+                info.setPhoneNumber(employee.getPhoneNumber());
+                info.setProfession(employee.getProfession());
+
+            } else if(projectManagerRepository.findById(acc.getEmployeeId()).isPresent()) {
+                var employee = projectManagerRepository.findById(acc.getEmployeeId()).get();
+
+                info.setEmail(acc.getEmail());
+                info.setName(employee.getName());
+                info.setSurname(employee.getSurname());
+                info.setAddress(ObjectMapperUtils.map(employee.getAddress(), AddressDto.class));
+                info.setPhoneNumber(employee.getPhoneNumber());
+                info.setProfession(employee.getProfession());
+            } else if(softwareEngineerRepository.findById(acc.getEmployeeId()).isPresent()) {
+                var employee = softwareEngineerRepository.findById(acc.getEmployeeId()).get();
+
+                info.setEmail(acc.getEmail());
+                info.setName(employee.getName());
+                info.setSurname(employee.getSurname());
+                info.setAddress(ObjectMapperUtils.map(employee.getAddress(), AddressDto.class));
+                info.setPhoneNumber(employee.getPhoneNumber());
+                info.setProfession(employee.getProfession());
+            }
+
+            infos.add(info);
+        }
+        return infos;
     }
 
     private String genereteSalt() {
