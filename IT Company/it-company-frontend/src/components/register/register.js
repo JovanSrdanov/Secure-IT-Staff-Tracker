@@ -60,7 +60,7 @@ function Register() {
             user.password.length >= 8 &&
             user.password === user.passwordCheck &&
             user.name !== "" &&
-            user.phoneNumber !== "" &&
+            /^[+]?[\d\s.-](?:\/?[\d\s.-]){0,}$/.test(user.phoneNumber) &&
             user.profession !== "" &&
             user.surname !== "" &&
             user.email.match(/^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i) &&
@@ -70,6 +70,7 @@ function Register() {
             user.address.streetNumber !== "" &&
             /[A-Z]/.test(user.password) && // At least one uppercase letter
             /[a-z]/.test(user.password) && // At least one lowercase letter
+            !/\d/.test(user.password) &&
             /[!@#$%^&*(),.?":{}|<>]/.test(user.password); // At least one special character
 
         setIsDisabled(!isValid);
@@ -243,7 +244,7 @@ function Register() {
                     </Flex>
                     <Flex flexDirection="column" justifyContent="center" alignItems="center">
                         <Box>
-                            <p>All fields must be filled and email must be
+                            <p>All fields must be filled and email and phone number must be
                                 in
                                 valid
                                 form</p>
