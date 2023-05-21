@@ -96,7 +96,7 @@ public class AccountActivationService implements IAccountActivationService {
         accountActivation.setEmail(email);
         accountActivation.setExpireyDate(DateUtils.addHoursToDate(new Date(), 5));
 
-        String hash = HashUtils.hmacWithJava("HmacSHA256", accountActivation.getId().toString(), "ses");
+        String hash = HashUtils.hmacWithJava("HmacSHA256", accountActivation.getId().toString(), hmacSecret);
         accountActivation.setToken(hash);
 
         save(accountActivation);
