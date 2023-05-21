@@ -7,10 +7,13 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.servlet.http.HttpServletRequest;
 import jass.security.exception.TokenExpiredException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.List;
 
 // Utility klasa za rad sa JSON Web Tokenima
 @Component
@@ -311,5 +314,14 @@ public class TokenUtils {
      */
     public String getAuthHeaderFromHeader(HttpServletRequest request) {
         return request.getHeader(AUTH_HEADER);
+    }
+
+    public static String extractRoleFromAuthenticationHeader(Authentication principal) {
+        List<String> authorities = principal.getAuthorities()
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
+
+        return authorities.get(0);
     }
 }

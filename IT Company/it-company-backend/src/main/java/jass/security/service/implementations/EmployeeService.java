@@ -1,6 +1,9 @@
 package jass.security.service.implementations;
 
 import jass.security.dto.employee.EmployeeInfoDto;
+import jass.security.dto.employee.EmployeeProfileInfoDto;
+import jass.security.exception.NotFoundException;
+import jass.security.model.Employee;
 import jass.security.repository.IEmployeeRepository;
 import jass.security.service.interfaces.IEmployeeService;
 import org.springframework.context.annotation.Primary;

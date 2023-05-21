@@ -1,7 +1,9 @@
 package jass.security.service.implementations;
 
+import jass.security.dto.employee.EmployeeProfileInfoDto;
 import jass.security.dto.swengineer.SkillDto;
 import jass.security.exception.NotFoundException;
+import jass.security.model.Employee;
 import jass.security.model.Skill;
 import jass.security.model.SoftwareEngineer;
 import jass.security.repository.ISkillRepository;
@@ -34,8 +36,12 @@ public class SoftwareEngineerService implements ISoftwareEngineerService {
     }
 
     @Override
-    public SoftwareEngineer findById(UUID id) {
-        return _softwareEngineerRepository.findById(id).get();
+    public SoftwareEngineer findById(UUID id) throws NotFoundException {
+        var engineer = _softwareEngineerRepository.findById(id);
+        if (engineer.isEmpty()) {
+            throw new NotFoundException("engineer not found");
+        }
+        return engineer.get();
     }
 
     @Override
@@ -72,5 +78,13 @@ public class SoftwareEngineerService implements ISoftwareEngineerService {
     @Transactional
     public void RemoveSkill(UUID swEngineerId, UUID skillId) throws NotFoundException {
         _skillRepository.deleteBySwEngineerId(skillId, swEngineerId);
+    }
+
+    @Override
+    public SoftwareEngineer update(UUID id, EmployeeProfileInfoDto dto) throws NotFoundException {
+        var oldEmployee = findById(id);
+        oldEmployee.update(dto);
+
+        return _softwareEngineerRepository.save(oldEmployee);
     }
 }

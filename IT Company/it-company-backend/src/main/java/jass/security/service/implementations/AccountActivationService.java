@@ -11,6 +11,7 @@ import jass.security.service.interfaces.IAccountService;
 import jass.security.utils.DateUtils;
 import jass.security.utils.HashUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,9 @@ public class AccountActivationService implements IAccountActivationService {
     private final IAccountActivationRepository accountActivationRepository;
 
     private final IAccountService accountService;
+
+    @Value("${hmacSecret}")
+    private String hmacSecret;
 
     @Autowired
     public AccountActivationService(IAccountActivationRepository accountActivationRepository, IAccountService accountRepository) {
@@ -92,7 +96,7 @@ public class AccountActivationService implements IAccountActivationService {
         accountActivation.setEmail(email);
         accountActivation.setExpireyDate(DateUtils.addHoursToDate(new Date(), 5));
 
-        String hash = HashUtils.hmacWithJava("HmacSHA256", accountActivation.getId().toString(), "ses");
+        String hash = HashUtils.hmacWithJava("HmacSHA256", accountActivation.getId().toString(), hmacSecret);
         accountActivation.setToken(hash);
 
         save(accountActivation);

@@ -26,7 +26,8 @@ public class SoftwareEngineerController {
     private final ISoftwareEngineerService _softwareEngineerService;
 
     @Autowired
-    public SoftwareEngineerController(IAccountService _accountService, ISoftwareEngineerService softwareEngineerService) {
+    public SoftwareEngineerController(IAccountService _accountService,
+                                      ISoftwareEngineerService softwareEngineerService) {
         this._accountService = _accountService;
         _softwareEngineerService = softwareEngineerService;
     }
