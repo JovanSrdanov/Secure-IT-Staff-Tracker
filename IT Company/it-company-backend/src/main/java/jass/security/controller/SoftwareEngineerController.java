@@ -1,9 +1,11 @@
 package jass.security.controller;
 
 import jass.security.dto.swengineer.AddSkillDto;
+import jass.security.dto.swengineer.SeniorityDTO;
 import jass.security.exception.NotFoundException;
 import jass.security.model.Account;
 import jass.security.model.Skill;
+import jass.security.model.SoftwareEngineer;
 import jass.security.service.interfaces.IAccountService;
 import jass.security.service.interfaces.ISoftwareEngineerService;
 import jass.security.utils.ObjectMapperUtils;
@@ -31,7 +33,7 @@ public class SoftwareEngineerController {
 
     @GetMapping("skill")
     @PreAuthorize("hasAuthority('getAllSkillSwEngineer')")
-    public ResponseEntity<?> GetAllSkills(Principal principal){
+    public ResponseEntity<?> GetAllSkills(Principal principal) {
         String swEngineerEmail = principal.getName();
         Account swEngineer = _accountService.findByEmail(swEngineerEmail);
 
@@ -41,7 +43,7 @@ public class SoftwareEngineerController {
 
     @PostMapping("skill")
     @PreAuthorize("hasAuthority('addSkillSwEngineer')")
-    public ResponseEntity<?> AddSkill(@RequestBody AddSkillDto dto, Principal principal){
+    public ResponseEntity<?> AddSkill(@RequestBody AddSkillDto dto, Principal principal) {
         String swEngineerEmail = principal.getName();
         Account swEngineer = _accountService.findByEmail(swEngineerEmail);
 
@@ -55,7 +57,7 @@ public class SoftwareEngineerController {
 
     @DeleteMapping("skill/{id}")
     @PreAuthorize("hasAuthority('removeSkillSwEngineer')")
-    public ResponseEntity<?> RemoveSkill(@PathVariable("id") UUID skillId, Principal principal){
+    public ResponseEntity<?> RemoveSkill(@PathVariable("id") UUID skillId, Principal principal) {
         String swEngineerEmail = principal.getName();
         Account swEngineer = _accountService.findByEmail(swEngineerEmail);
 
@@ -66,4 +68,19 @@ public class SoftwareEngineerController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
+    @GetMapping("seniority")
+    @PreAuthorize("hasAuthority('getMySeniority')")
+    public ResponseEntity<?> GetMySeniority(Principal principal) {
+        try {
+            String swEngineerEmail = principal.getName();
+            Account acc = _accountService.findByEmail(swEngineerEmail);
+            SoftwareEngineer softwareEngineer = _softwareEngineerService.findById(acc.getEmployeeId());
+
+            return new ResponseEntity<>(new SeniorityDTO(softwareEngineer.getDateOfEmployment()), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
 }

@@ -37,7 +37,7 @@ const StyledTableRow = styled(TableRow)(({theme}) => ({
 
 function Skills(props) {
     const [mySkills, setMySkills] = React.useState(null);
-    const [seniority, setSeniority] = React.useState({seniority: "Junior", dateOfEmployment: new Date()});
+    const [seniority, setSeniority] = React.useState(null);
 
     const [showAddNewSkillDialog, setShowAddNewSkillDialog] = React.useState(false);
     const [skillName, setSkillName] = React.useState("");
@@ -60,8 +60,19 @@ function Skills(props) {
     }
 
 
+    const getMySeniority = () => {
+        interceptor.get("sw-engineer/seniority").then(res => {
+            console.log(res.data)
+            setSeniority(res.data)
+
+        }).catch(err => {
+            console.log(err)
+        })
+    };
     useEffect(() => {
         getMySkills();
+
+        getMySeniority();
     }, []);
 
 
@@ -135,13 +146,19 @@ function Skills(props) {
 
             <div className="wrapper">
                 <Flex flexDirection="column" justifyContent="center" alignItems="center">
-                    <Box m={1}>
-                        Seniority: {seniority.seniority}
-                    </Box>
-                    <Box m={1}>
-                        Date Of
-                        Employment: {seniority.dateOfEmployment.toLocaleTimeString("en-GB")} {seniority.dateOfEmployment.toLocaleDateString("en-GB")}
-                    </Box>
+                    {seniority != null && (
+                        <>
+                            <Box m={1}>
+                                Seniority: {seniority.seniority}
+                            </Box>
+
+                            <Box m={1}>
+                                Date Of
+                                Employment: {new Date(seniority.dateOfEmployment).toLocaleString('en-US', {hour12: false})}
+                            </Box>
+                        </>
+                    )}
+
                 </Flex>
                 {mySkills != null && mySkills.length > 0 && (
                     <TableContainer component={Paper}

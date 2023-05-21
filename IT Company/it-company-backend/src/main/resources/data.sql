@@ -10,8 +10,9 @@ VALUES ('cf11ba92-dea3-4d80-b2f0-8187060cb831', 'Smilja', '123456', 'Proffession
 
 INSERT INTO public.software_engineer (id, name, phone_number, profession, surname, date_of_employment, address_id,
                                       cv_id)
-VALUES ('c390e0cf-9c9d-41b7-80f9-b55939cc11e8', 'Petar', '123456', '.Net Senior', 'Popovic', NULL,
-        '85015489-7336-4636-b6e1-68343be88f09', NULL);
+VALUES ('c390e0cf-9c9d-41b7-80f9-b55939cc11e8', 'Petar', '123456', '.Net Senior', 'Popovic',
+        TIMESTAMP '2005-11-25 23:56:00', '85015489-7336-4636-b6e1-68343be88f09', NULL);
+
 
 
 INSERT INTO public.account
@@ -47,9 +48,10 @@ values ('fc784caa-1a09-459f-9fef-d2ce4b1b89e6', 'changeAccStatusAccept'),
        ('fc797a4e-009a-44de-aec0-d7ca52c64609', 'getRoles'),
        ('d270db68-12fb-4dce-a9f0-7ef64d091731', 'adminPasswordChange'),
        ('b7b7775c-e81a-4ec7-bfbf-81bdd3c15100', 'removeSkillSwEngineer'),
-        ('44c764a7-fa8e-4820-8c31-5d882514f65c', 'getAllEmployee'),
-        ('aaf59fa1-4d0f-49ef-bd45-755a5985f61d', 'getAllUnemployedOnProjectEmployee'),
-        ('a8bc9435-22b3-45d0-8d74-a28f64f388da', 'getAllSkillSwEngineer');
+       ('44c764a7-fa8e-4820-8c31-5d882514f65c', 'getAllEmployee'),
+       ('aaf59fa1-4d0f-49ef-bd45-755a5985f61d', 'getAllUnemployedOnProjectEmployee'),
+       ('602a2482-a824-4b52-91e1-a30b3c0e710d', 'getMySeniority'),
+       ('a8bc9435-22b3-45d0-8d74-a28f64f388da', 'getAllSkillSwEngineer');
 
 
 
@@ -96,6 +98,7 @@ values
 ('79113e08-0b50-41ee-a8ea-42559259d44e', 'c7877299-353d-4938-95da-0e6b97aadd6f'),
 ('79113e08-0b50-41ee-a8ea-42559259d44e', 'b7b7775c-e81a-4ec7-bfbf-81bdd3c15100'),
 ('79113e08-0b50-41ee-a8ea-42559259d44e', 'a8bc9435-22b3-45d0-8d74-a28f64f388da'),
+('79113e08-0b50-41ee-a8ea-42559259d44e', '602a2482-a824-4b52-91e1-a30b3c0e710d'),
 -- ADMIN_PASSWORD_CHANGE
 ('153c2366-eb2d-4ce2-b55e-42c83609da8a', 'd270db68-12fb-4dce-a9f0-7ef64d091731');
 
