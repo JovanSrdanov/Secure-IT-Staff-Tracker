@@ -62,16 +62,13 @@ function Skills(props) {
 
     const getMySeniority = () => {
         interceptor.get("sw-engineer/seniority").then(res => {
-            console.log(res.data)
             setSeniority(res.data)
-
         }).catch(err => {
             console.log(err)
         })
     };
     useEffect(() => {
         getMySkills();
-
         getMySeniority();
     }, []);
 
