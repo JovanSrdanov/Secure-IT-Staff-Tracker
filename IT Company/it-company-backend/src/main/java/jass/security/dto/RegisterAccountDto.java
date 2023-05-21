@@ -30,6 +30,6 @@ public class RegisterAccountDto {
     AddressDto address;
     @NotBlank(message = "The address is required.")
     String phoneNumber;
-    @NotBlank(message = "The proffesion is required.")
+    @NotBlank(message = "The profession is required.")
     String profession;
 }

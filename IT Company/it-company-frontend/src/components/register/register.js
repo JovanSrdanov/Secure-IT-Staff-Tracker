@@ -43,7 +43,6 @@ function Register() {
         setUsernameTakenDialogShow(false)
     };
     const handleInputChange = (event) => {
-
         const {name, value} = event.target;
         if (name.startsWith("address.")) {
             setUser((prevState) => {
@@ -56,24 +55,48 @@ function Register() {
     };
 
     useEffect(() => {
+
         const isValid =
-            user.password.length >= 8 &&
-            user.password === user.passwordCheck &&
+            user.name.length <= 255 &&
             user.name !== "" &&
-            user.phoneNumber !== "" &&
-            user.profession !== "" &&
+
+            user.surname.length <= 255 &&
             user.surname !== "" &&
+
+            user.profession.length <= 255 &&
+            user.profession !== "" &&
+
+            user.phoneNumber !== "" &&
+            /^[+]?[\d\s.-](?:\/?[\d\s.-]){0,}$/.test(user.phoneNumber) &&
+            user.phoneNumber.length <= 255 &&
+
+            user.email !== "" &&
             user.email.match(/^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i) &&
+            user.email.length <= 255 &&
+
+            user.address.country.length <= 255 &&
             user.address.country !== "" &&
+
+            user.address.city.length <= 255 &&
             user.address.city !== "" &&
+
+            user.address.street.length <= 255 &&
             user.address.street !== "" &&
+
+            user.address.streetNumber.length <= 255 &&
             user.address.streetNumber !== "" &&
-            /[A-Z]/.test(user.password) && // At least one uppercase letter
-            /[a-z]/.test(user.password) && // At least one lowercase letter
-            /[!@#$%^&*(),.?":{}|<>]/.test(user.password); // At least one special character
+
+            user.password.length >= 8 &&
+            user.password.length <= 255 &&
+            user.password === user.passwordCheck &&
+            /[A-Z]/.test(user.password) &&
+            /[a-z]/.test(user.password) &&
+            /\d/.test(user.password) &&
+            /[!@#$%^&*(),.?":{}|<>]/.test(user.password);
 
         setIsDisabled(!isValid);
     }, [user]);
+
 
     const handleRegisterClick = () => {
         interceptor.post('/auth/register', user)
@@ -243,7 +266,7 @@ function Register() {
                     </Flex>
                     <Flex flexDirection="column" justifyContent="center" alignItems="center">
                         <Box>
-                            <p>All fields must be filled and email must be
+                            <p>All fields must be filled and email and phone number must be
                                 in
                                 valid
                                 form</p>

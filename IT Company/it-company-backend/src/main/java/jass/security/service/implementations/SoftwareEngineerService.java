@@ -55,7 +55,7 @@ public class SoftwareEngineerService implements ISoftwareEngineerService {
     }
 
     @Override
-    public List<SkillDto> GetAllSkills(UUID swEngineerId){
+    public List<SkillDto> GetAllSkills(UUID swEngineerId) {
         return _skillRepository.findBySoftwareEngineerId(swEngineerId);
     }
 
@@ -63,7 +63,7 @@ public class SoftwareEngineerService implements ISoftwareEngineerService {
     public SkillDto AddSkill(UUID swEngineerId, Skill skill) throws NotFoundException {
         var swEngineer = _softwareEngineerRepository.findById(swEngineerId);
 
-        if(swEngineer.isEmpty()){
+        if (swEngineer.isEmpty()) {
             throw new NotFoundException("Software engineer not found");
         }
 

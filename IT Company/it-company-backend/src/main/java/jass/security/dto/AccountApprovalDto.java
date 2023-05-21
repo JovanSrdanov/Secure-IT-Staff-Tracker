@@ -1,10 +1,5 @@
 package jass.security.dto;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.ManyToOne;
-import jass.security.model.Address;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,4 +16,5 @@ public class AccountApprovalDto {
     private AddressDto address;
     private String phoneNumber;
     private String profession;
+    private String role;
 }

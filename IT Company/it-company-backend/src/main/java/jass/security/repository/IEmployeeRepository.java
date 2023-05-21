@@ -35,41 +35,39 @@ public interface IEmployeeRepository extends JpaRepository<Employee, UUID> {
             "from HrManager hrManager left join Account account " +
             "on hrManager.id = account.employeeId")
     List<EmployeeInfoDto> getAll();
-    @Query( "select engineer.id " +
+
+    @Query("select engineer.id " +
             "from SoftwareEngineer engineer left join " +
             "SwEngineerProjectStats stats " +
             "on engineer.id = stats.id.swEngineerId " +
-            "where stats.id.projectId = :projectId and stats.workingPeriod.endDate is null " +
+            "where stats.id.projectId = :projectId and stats.workingPeriod.endDate is null ")
+    List<UUID> getAllEmployedEngineerOnProjectId(UUID projectId);
 
-            "union " +
-
-            "select manager.id " +
+    @Query("select manager.id " +
             "from ProjectManager manager left join " +
             "PrManagerProjectStats stats " +
             "on manager.id = stats.id.prManagerId " +
             "where stats.id.projectId = :projectId and stats.workingPeriod.endDate is null")
-    List<UUID> getAllEmployedOnProjectId(UUID projectId);
+    List<UUID> getAllEmployedPrManagerOnProjectId(UUID projectId);
 
 
-
-
-    @Query( "select new jass.security.dto.employee.EmployeeInfoDto(engineer.id, account.email,  'Software engineer'," +
+    @Query("select new jass.security.dto.employee.EmployeeInfoDto(engineer.id, account.email,  'Software engineer'," +
             " engineer.address.country, engineer.address.city," +
             "engineer.address.street, engineer.address.streetNumber, engineer.name, engineer.phoneNumber," +
             " engineer.profession, engineer.surname) " +
             "from SoftwareEngineer engineer left join Account account " +
             "on engineer.id = account.employeeId " +
-            "where engineer.id not in :employeeIds " +
+            "where engineer.id not in :employeeIds ")
+    List<EmployeeInfoDto> getOppositeEmployeeEngineerGroup(@Param("employeeIds") List<UUID> employeeIds);
 
-            "union " +
 
-            "select new jass.security.dto.employee.EmployeeInfoDto(prManager.id, account.email,  'Project manager'," +
+    @Query("select new jass.security.dto.employee.EmployeeInfoDto(prManager.id, account.email,  'Project manager'," +
             " prManager.address.country, prManager.address.city," +
             "prManager.address.street, prManager.address.streetNumber, prManager.name, prManager.phoneNumber," +
             " prManager.profession, prManager.surname) " +
             "from ProjectManager prManager left join Account account " +
             "on prManager.id = account.employeeId " +
             "where prManager.id not in :employeeIds ")
-    List<EmployeeInfoDto> getOppositeEmployeeGroup(@Param("employeeIds") List<UUID> employeeIds);
+    List<EmployeeInfoDto> getOppositeEmployeePrManagerGroup(@Param("employeeIds") List<UUID> employeeIds);
 
 }

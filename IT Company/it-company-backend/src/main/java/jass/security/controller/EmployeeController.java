@@ -48,16 +48,25 @@ public class EmployeeController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('getAllEmployee')")
-    public ResponseEntity<?> getAll(){
-       var employees = _employeeService.getAll();
-       return new ResponseEntity(employees, HttpStatus.OK);
-    }
-    @GetMapping("/unemployed/{id}")
-    @PreAuthorize("hasAuthority('getAllUnemployedOnProjectEmployee')")
-    public ResponseEntity<?> getAllUnemployedOnProject(@PathVariable("id") UUID projectId){
-        var employees = _employeeService.getAllUnemployedOnProject(projectId);
+    public ResponseEntity<?> getAll() {
+        var employees = _employeeService.getAll();
         return new ResponseEntity(employees, HttpStatus.OK);
     }
+
+    @GetMapping("/unemployed-engineer/{id}")
+    @PreAuthorize("hasAuthority('getAllUnemployedOnProjectEngineer')")
+    public ResponseEntity<?> getAllUnemployedOnProjectEngineer(@PathVariable("id") UUID projectId) {
+        var employees = _employeeService.getAllUnemployedEngineerOnProject(projectId);
+        return new ResponseEntity(employees, HttpStatus.OK);
+    }
+
+    @GetMapping("/unemployed-pr-manager/{id}")
+    @PreAuthorize("hasAuthority('getAllUnemployedOnProjectPRManager')")
+    public ResponseEntity<?> getAllUnemployedOnProjectPrManager(@PathVariable("id") UUID projectId) {
+        var employees = _employeeService.getAllUnemployedEngineerPRManager(projectId);
+        return new ResponseEntity(employees, HttpStatus.OK);
+    }
+
 
     @GetMapping("/logged-in-info")
     @PreAuthorize("hasAuthority('getLoggedInInfo')")

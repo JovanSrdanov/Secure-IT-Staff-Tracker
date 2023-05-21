@@ -23,6 +23,7 @@ public class ProjectService implements IProjectService {
     private final IProjectManagerRepository _projectManagerRepository;
     private final ISwEngineerProjectStatsRepository _swEngineerProjectStatsRepository;
     private final IPrManagerProjectStatsRepository _prManagerProjectStatsRepository;
+
     @Autowired
     public ProjectService(IProjectRepository projectRepository, ISwEngineerRepository swEngineerRepository, IProjectManagerRepository projectManagerRepository, ISwEngineerProjectStatsRepository swEngineerProjectStatsRepository, IPrManagerProjectStatsRepository prManagerProjectStatsRepository) {
         _projectRepository = projectRepository;
@@ -53,35 +54,35 @@ public class ProjectService implements IProjectService {
 
     }
 
-  public void AddSwEngineerToProject(AddSwEngineerToProjectDto dto, UUID projectId) throws NotFoundException {
+    public void AddSwEngineerToProject(AddSwEngineerToProjectDto dto, UUID projectId) throws NotFoundException {
 
-      Optional<SoftwareEngineer> swEngineer = _swEngineerRepository.findById(dto.getSwEngineerId());
-      if(swEngineer.isEmpty()){
-          throw new NotFoundException("Software engineer not found");
-      }
+        Optional<SoftwareEngineer> swEngineer = _swEngineerRepository.findById(dto.getSwEngineerId());
+        if (swEngineer.isEmpty()) {
+            throw new NotFoundException("Software engineer not found");
+        }
 
-      Optional<Project> project = _projectRepository.findById(projectId);
-      if(project.isEmpty()){
-          throw new NotFoundException("Project not found");
-      }
+        Optional<Project> project = _projectRepository.findById(projectId);
+        if (project.isEmpty()) {
+            throw new NotFoundException("Project not found");
+        }
 
 
-      SwEngineerProjectStatsId statsId = new SwEngineerProjectStatsId(dto.getSwEngineerId(), projectId);
-      DateRange workingPeriod = new DateRange(new Date(), null);
-      SwEngineerProjectStats stats = new SwEngineerProjectStats(statsId, dto.getJobDescription(), workingPeriod, swEngineer.get(), project.get());
-      _swEngineerProjectStatsRepository.save(stats);
-  }
+        SwEngineerProjectStatsId statsId = new SwEngineerProjectStatsId(dto.getSwEngineerId(), projectId);
+        DateRange workingPeriod = new DateRange(new Date(), null);
+        SwEngineerProjectStats stats = new SwEngineerProjectStats(statsId, dto.getJobDescription(), workingPeriod, swEngineer.get(), project.get());
+        _swEngineerProjectStatsRepository.save(stats);
+    }
 
     @Override
     public void AddPrManagerToProject(AddProjectMangerToProjectDto dto, UUID projectId) throws NotFoundException {
 
         Optional<ProjectManager> projectManager = _projectManagerRepository.findById(dto.getPrManagerId());
-        if(projectManager.isEmpty()){
+        if (projectManager.isEmpty()) {
             throw new NotFoundException("Project manager not found");
         }
 
         Optional<Project> project = _projectRepository.findById(projectId);
-        if(project.isEmpty()){
+        if (project.isEmpty()) {
             throw new NotFoundException("Project not found");
         }
 
@@ -93,11 +94,11 @@ public class ProjectService implements IProjectService {
     }
 
 
-    public void DismissSwEngineerFromProject(UUID swEngineerId , UUID projectId) throws NotFoundException{
-        SwEngineerProjectStatsId statsId = new SwEngineerProjectStatsId(swEngineerId,projectId);
+    public void DismissSwEngineerFromProject(UUID swEngineerId, UUID projectId) throws NotFoundException {
+        SwEngineerProjectStatsId statsId = new SwEngineerProjectStatsId(swEngineerId, projectId);
         var result = _swEngineerProjectStatsRepository.findById(statsId);
-        if(result.isEmpty()){
-            throw  new NotFoundException("Software engineer project stats not found");
+        if (result.isEmpty()) {
+            throw new NotFoundException("Software engineer project stats not found");
         }
 
         var updatingStats = result.get();
@@ -108,19 +109,17 @@ public class ProjectService implements IProjectService {
 
     @Override
     public void DismissPrManagerFromProject(UUID prManagerId, UUID projectId) throws NotFoundException {
-        PrManagerProjectStatsId statsId = new PrManagerProjectStatsId(prManagerId,projectId);
+        PrManagerProjectStatsId statsId = new PrManagerProjectStatsId(prManagerId, projectId);
         var result = _prManagerProjectStatsRepository.findById(statsId);
-        if(result.isEmpty()){
-            throw  new NotFoundException("Project manager project stats not found");
+        if (result.isEmpty()) {
+            throw new NotFoundException("Project manager project stats not found");
         }
-
         var updatingStats = result.get();
-
         updatingStats.getWorkingPeriod().setEndDate(new Date());
         _prManagerProjectStatsRepository.save(updatingStats);
     }
 
-    public List<SwEngineerProjectStatsDto> GetSwEngineersOnProject(UUID projectId){
+    public List<SwEngineerProjectStatsDto> GetSwEngineersOnProject(UUID projectId) {
         return _swEngineerProjectStatsRepository.GetSwEngineersOnProject(projectId);
     }
 
@@ -141,11 +140,11 @@ public class ProjectService implements IProjectService {
 
     @Override
     public void ChangeSwEngineersJobDescription(UUID projectId, UUID swEngineerId, String newJobDescription) throws NotFoundException {
-        SwEngineerProjectStatsId statsId = new SwEngineerProjectStatsId(swEngineerId,projectId);
+        SwEngineerProjectStatsId statsId = new SwEngineerProjectStatsId(swEngineerId, projectId);
         var stats = _swEngineerProjectStatsRepository.findById(statsId);
 
-        if(stats.isEmpty()){
-            throw  new NotFoundException("Software engineer project stats not found");
+        if (stats.isEmpty()) {
+            throw new NotFoundException("Software engineer project stats not found");
         }
 
         var newStats = stats.get();

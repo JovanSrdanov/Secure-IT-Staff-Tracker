@@ -10,5 +10,8 @@ import java.util.UUID;
 
 public interface IEmployeeService {
     List<EmployeeInfoDto> getAll();
-    List<EmployeeInfoDto> getAllUnemployedOnProject(UUID projectId);
+
+    List<EmployeeInfoDto> getAllUnemployedEngineerOnProject(UUID projectId);
+
+    List<EmployeeInfoDto> getAllUnemployedEngineerPRManager(UUID projectId);
 }
