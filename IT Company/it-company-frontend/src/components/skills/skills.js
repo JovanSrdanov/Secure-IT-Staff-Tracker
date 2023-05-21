@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {
     Box,
     Button,
@@ -36,7 +36,7 @@ const StyledTableRow = styled(TableRow)(({theme}) => ({
 }));
 
 function Skills(props) {
-    const [mySkills, setMySkills] = React.useState([{id: ""}]);
+    const [mySkills, setMySkills] = React.useState(null);
     const [seniority, setSeniority] = React.useState({seniority: "Junior", dateOfEmployment: new Date()});
 
     const [showAddNewSkillDialog, setShowAddNewSkillDialog] = React.useState(false);
@@ -49,16 +49,40 @@ function Skills(props) {
         setSkillLevel(1)
     };
 
+    const getMySkills = () => {
+        interceptor.get("sw-engineer/skill").then(res => {
+            setMySkills(res.data)
+
+        }).catch(err => {
+            console.log(err)
+        })
+
+    }
+
+
+    useEffect(() => {
+        getMySkills();
+    }, []);
+
 
     const handleAddingSkill = () => {
         interceptor.post("sw-engineer/skill", {name: skillName, level: parseInt(skillLevel)}).then((res) => {
-            console.log(res.data)
+            getMySkills();
+            handleCloseAddNewSkillsDialog();
 
         }).catch((err) => {
             console.log(err)
         })
 
 
+    };
+    const handleRemoveSkill = (id) => {
+        interceptor.delete("sw-engineer/skill/" + id).then((res) => {
+            getMySkills();
+
+        }).catch((err) => {
+            console.log(err)
+        })
     };
     return (
         <>
@@ -134,13 +158,17 @@ function Skills(props) {
                                                     overflowX: 'auto',
                                                     overflowy: 'auto'
                                                 }}>
-                                                    <li>Skill:</li>
-                                                    <li>Grade:</li>
+                                                    <li>Skill name: {item.name}</li>
+                                                    <li>Level: {item.level}</li>
                                                 </Box>
                                             </StyledTableCell>
                                             <StyledTableCell>
                                                 <Button fullWidth variant="outlined"
                                                         color="error"
+                                                        onClick={() => {
+                                                            handleRemoveSkill(item.id)
+                                                        }}
+
                                                 >Remove skill
                                                 </Button>
                                             </StyledTableCell>
