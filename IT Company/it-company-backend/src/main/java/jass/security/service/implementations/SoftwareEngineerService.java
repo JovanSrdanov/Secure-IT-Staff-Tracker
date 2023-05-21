@@ -1,5 +1,6 @@
 package jass.security.service.implementations;
 
+import jass.security.dto.swengineer.SkillDto;
 import jass.security.exception.NotFoundException;
 import jass.security.model.Skill;
 import jass.security.model.SoftwareEngineer;
@@ -9,6 +10,7 @@ import jass.security.service.interfaces.ISoftwareEngineerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -47,32 +49,28 @@ public class SoftwareEngineerService implements ISoftwareEngineerService {
     }
 
     @Override
-    public Skill AddSkill(UUID swEngineerId, Skill skill) throws NotFoundException {
-        var swEngineer = _softwareEngineerRepository.findById(swEngineerId);
-
-        if(swEngineer.isEmpty()){
-            throw new NotFoundException("Software engineer not found");
-        }
-
-        var updatedSwEngineer = swEngineer.get();
-        skill.setId(UUID.randomUUID());
-        updatedSwEngineer.getSkills().add(skill);
-        _softwareEngineerRepository.save(updatedSwEngineer);
-        return skill;
+    public List<SkillDto> GetAllSkills(UUID swEngineerId){
+        return _skillRepository.findBySoftwareEngineerId(swEngineerId);
     }
 
     @Override
-    public void RemoveSkill(UUID swEngineerId, UUID skillId) throws NotFoundException {
+    public SkillDto AddSkill(UUID swEngineerId, Skill skill) throws NotFoundException {
         var swEngineer = _softwareEngineerRepository.findById(swEngineerId);
 
         if(swEngineer.isEmpty()){
             throw new NotFoundException("Software engineer not found");
         }
 
-        var updatedSwEngineer = swEngineer.get();
-        updatedSwEngineer.getSkills().removeIf(skill -> skill.getId().equals(skillId));
+        skill.setId(UUID.randomUUID());
+        skill.setSwEngineer(swEngineer.get());
 
-        _softwareEngineerRepository.save(updatedSwEngineer);
-        _skillRepository.deleteById(skillId);
+        _skillRepository.save(skill);
+        return new SkillDto(skill);
+    }
+
+    @Override
+    @Transactional
+    public void RemoveSkill(UUID swEngineerId, UUID skillId) throws NotFoundException {
+        _skillRepository.deleteBySwEngineerId(skillId, swEngineerId);
     }
 }

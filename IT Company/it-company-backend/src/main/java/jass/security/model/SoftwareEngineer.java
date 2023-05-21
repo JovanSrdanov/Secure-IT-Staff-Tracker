@@ -19,7 +19,7 @@ import java.util.Set;
 @Entity
 public class SoftwareEngineer extends Employee {
     private Date dateOfEmployment;
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "swEngineer")
     private Set<Skill> skills;
     @OneToOne
     private Cv cv;
