@@ -1,9 +1,7 @@
 package jass.security.model;
 
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,4 +22,6 @@ public class Skill {
     private String name;
     @Column(nullable = false)
     private int level;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private SoftwareEngineer swEngineer;
 }

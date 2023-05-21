@@ -29,6 +29,16 @@ public class SoftwareEngineerController {
         _softwareEngineerService = softwareEngineerService;
     }
 
+    @GetMapping("skill")
+    @PreAuthorize("hasAuthority('getAllSkillSwEngineer')")
+    public ResponseEntity<?> GetAllSkills(Principal principal){
+        String swEngineerEmail = principal.getName();
+        Account swEngineer = _accountService.findByEmail(swEngineerEmail);
+
+        var skills = _softwareEngineerService.GetAllSkills(swEngineer.getEmployeeId());
+        return new ResponseEntity<>(skills, HttpStatus.OK);
+    }
+
     @PostMapping("skill")
     @PreAuthorize("hasAuthority('addSkillSwEngineer')")
     public ResponseEntity<?> AddSkill(@RequestBody AddSkillDto dto, Principal principal){
