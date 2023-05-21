@@ -203,13 +203,13 @@ function Projects(props) {
                                             <StyledTableCell>
                                                 <Box m={1}>
                                                     <Box m={1}>
-                                                        <Button fullWidth variant="contained"
-                                                                color="primary"
+                                                        <Button fullWidth variant="outlined"
+                                                                color="info"
                                                         >View project managers
                                                         </Button>
                                                     </Box>
                                                     <Box m={1}>
-                                                        <Button fullWidth variant="contained"
+                                                        <Button fullWidth variant="outlined"
                                                                 color="info"
                                                         >View engineers
                                                         </Button>
@@ -221,14 +221,13 @@ function Projects(props) {
 
                                                     <Box m={1}>
                                                         <Button fullWidth variant="contained"
-                                                                color="primary"
+                                                                color="success"
                                                         >Add project managers
                                                         </Button>
                                                     </Box>
                                                     <Box m={1}>
                                                         <Button fullWidth variant="contained"
-
-                                                                color="info"
+                                                                color="success"
                                                         >Add engineers
                                                         </Button>
                                                     </Box>
