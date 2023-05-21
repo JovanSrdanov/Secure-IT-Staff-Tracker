@@ -103,17 +103,15 @@ values
 ('037bbd08-1f2c-4f9d-80af-1710d90efb01', 'aaf59fa1-4d0f-49ef-bd45-755a5985f61d'),
 ('037bbd08-1f2c-4f9d-80af-1710d90efb01', '931fcaa3-e336-4ba7-b5ba-c136c440bfc2'),
 ('037bbd08-1f2c-4f9d-80af-1710d90efb01', 'da6aaa1b-6e8e-472a-8598-a27edc2be510'),
+('037bbd08-1f2c-4f9d-80af-1710d90efb01', 'ab494841-f5aa-4e4e-b6e2-5d8c1085eb3f'),
+('037bbd08-1f2c-4f9d-80af-1710d90efb01', '85deb19a-6bbb-4a97-93f1-7d118f17c014'),
+('037bbd08-1f2c-4f9d-80af-1710d90efb01', 'b3adb8f2-4ea3-41c2-a3e1-709b9e7ba7a8'),
 -- PR MANAGER
-('2cdfba8e-78a3-46a9-b414-96a41d1a5c62', 'da6aaa1b-6e8e-472a-8598-a27edc2be510'),
+
 ('2cdfba8e-78a3-46a9-b414-96a41d1a5c62', 'b3adb8f2-4ea3-41c2-a3e1-709b9e7ba7a8'),
 ('2cdfba8e-78a3-46a9-b414-96a41d1a5c62', 'aaf59fa1-4d0f-49ef-bd45-755a5985f61d'),
 ('2cdfba8e-78a3-46a9-b414-96a41d1a5c62', 'f60d3289-526a-4aae-b720-5409f472cd2b'),
-
-('037bbd08-1f2c-4f9d-80af-1710d90efb01', '85deb19a-6bbb-4a97-93f1-7d118f17c014'),
-('037bbd08-1f2c-4f9d-80af-1710d90efb01', 'ab494841-f5aa-4e4e-b6e2-5d8c1085eb3f'),
--- PR MANAGER
 ('2cdfba8e-78a3-46a9-b414-96a41d1a5c62', 'da6aaa1b-6e8e-472a-8598-a27edc2be510'),
-('2cdfba8e-78a3-46a9-b414-96a41d1a5c62', 'b3adb8f2-4ea3-41c2-a3e1-709b9e7ba7a8'),
 ('2cdfba8e-78a3-46a9-b414-96a41d1a5c62', '85deb19a-6bbb-4a97-93f1-7d118f17c014'),
 ('2cdfba8e-78a3-46a9-b414-96a41d1a5c62', 'ab494841-f5aa-4e4e-b6e2-5d8c1085eb3f'),
 -- SOFTWARE ENGINEER

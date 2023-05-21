@@ -254,15 +254,15 @@ function Projects(props) {
 
 
     const removeEngineerFromProject = (item) => {
-        console.log(item.swEngineer.id);
+
 
         interceptor.patch("project/" + selectedProject.id + "/dismiss-sw-engineer", {workerId: item.swEngineer.id})
             .then((res) => {
-                // interceptor.get("project/" + selectedProject.id + "/sw-engineers").then((res) => {
-                //     setAllEngineers(res.data)
-                // }).catch((err) => {
-                //     console.log(err)
-                // })
+                interceptor.get("project/" + selectedProject.id + "/sw-engineers").then((res) => {
+                    setAllEngineers(res.data)
+                }).catch((err) => {
+                    console.log(err)
+                })
             }).catch((err) => {
             console.log(err)
         })

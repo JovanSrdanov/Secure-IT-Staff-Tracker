@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField} from "@mui/material";
 import {Flex} from 'reflexbox'
 import PublishedWithChangesIcon from '@mui/icons-material/PublishedWithChanges';
+import interceptor from "../../interceptor/interceptor";
 
 function Profile() {
     const [user, setUser] = useState({
@@ -35,6 +36,18 @@ function Profile() {
 
     useEffect(() => {
         const isValid =
+            user.name.length <= 255 &&
+            user.surname.length <= 255 &&
+            user.profession.length <= 255 &&
+            user.phoneNumber.length <= 255 &&
+
+
+            user.address.country.length <= 255 &&
+            user.address.city.length <= 255 &&
+            user.address.street.length <= 255 &&
+            user.address.streetNumber.length <= 255 &&
+       
+
             user.name !== "" &&
             user.phoneNumber !== "" &&
             /^[+]?[\d\s.-](?:\/?[\d\s.-]){0,}$/.test(user.phoneNumber) &&
@@ -65,7 +78,6 @@ function Profile() {
 
         console.log({oldPassword, newPassword})
 
-
         // interceptor.put('api-1/account-credentials/change-password', {oldPassword, newPassword})
         //     .then((response) => {
         //         setOldPassword("");
@@ -78,16 +90,39 @@ function Profile() {
         //         setPasswordDialogShow(false);
         //     });
 
-
     };
     const handleErrorClose = () => {
         setErrorDialogShow(false)
     };
 
     const handleUpdate = () => {
-        setSuccessDialogShow(true)
-        console.log(user)
+        interceptor.put("employee/logged-in-info", user).then((res) => {
+            setSuccessDialogShow(true)
+        }).catch((err) => {
+            console.log(err)
+        })
+
+
     };
+
+    const getMyInfo = () => {
+        interceptor.get("employee/logged-in-info").then((res) => {
+            setUser(res.data)
+
+        }).catch((err) => {
+            console.log(err)
+        })
+
+    }
+
+    useEffect(() => {
+        getMyInfo()
+    }, []);
+
+    const handleClose = () => {
+        setSuccessDialogShow(false)
+    };
+
     return (
         <>
             <Dialog open={passwordDialogShow} onClose={() => setPasswordDialogShow(false)}>
@@ -145,6 +180,17 @@ function Profile() {
                         variant="contained"
                     >
                         Change password
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            <Dialog onClose={handleClose} open={successDialogShow}>
+                <DialogTitle>Update Successful!</DialogTitle>
+                <DialogActions>
+                    <Button onClick={handleClose}
+                            variant="contained"
+                    >
+                        Close
                     </Button>
                 </DialogActions>
             </Dialog>

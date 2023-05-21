@@ -60,7 +60,7 @@ function App() {
             return null;
         }
         const decodedToken = jwt_decode(token);
-        console.log(decodedToken.role)
+      
         return decodedToken.role;
     }
 
