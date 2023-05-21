@@ -1,14 +1,12 @@
 package jass.security.controller;
 
 import jass.security.dto.employee.EmployeeProfileInfoDto;
-import jass.security.dto.swengineer.AddSkillDto;
 import jass.security.exception.NotFoundException;
 import jass.security.model.Account;
-import jass.security.model.Skill;
+import jass.security.model.HrManager;
 import jass.security.model.SoftwareEngineer;
 import jass.security.service.interfaces.IAccountService;
-import jass.security.service.interfaces.IEmployeeService;
-import jass.security.service.interfaces.ISoftwareEngineerService;
+import jass.security.service.interfaces.IHumanResourcesManagerService;
 import jass.security.utils.ObjectMapperUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -18,20 +16,17 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.UUID;
 
 @RestController
-@RequestMapping("sw-engineer")
-public class SoftwareEngineerController {
-
+@RequestMapping("hr-manager")
+public class HumanResourcesManagerController {
     private final IAccountService _accountService;
-    private final ISoftwareEngineerService _softwareEngineerService;
+    private final IHumanResourcesManagerService _humanResourcesManagerService;
 
     @Autowired
-    public SoftwareEngineerController(IAccountService _accountService,
-                                      ISoftwareEngineerService softwareEngineerService) {
-        this._accountService = _accountService;
-        _softwareEngineerService = softwareEngineerService;
+    public HumanResourcesManagerController(IAccountService accountService, IHumanResourcesManagerService humanResourcesManagerService) {
+        _accountService = accountService;
+        _humanResourcesManagerService = humanResourcesManagerService;
     }
 
     @GetMapping("/logged-in-info")
@@ -41,14 +36,14 @@ public class SoftwareEngineerController {
         Account employeeCredentials = _accountService.findByEmail(employeeEmail);
 
         try {
-            SoftwareEngineer employeeInfo = _softwareEngineerService.findById(employeeCredentials.getEmployeeId());
+            HrManager employeeInfo = _humanResourcesManagerService.findById(employeeCredentials.getEmployeeId());
             return new ResponseEntity<>(
                     ObjectMapperUtils.map(employeeInfo, EmployeeProfileInfoDto.class),
                     HttpStatus.OK
             );
         } catch (NotFoundException e) {
             return new ResponseEntity<>(
-                    "engineer not found",
+                    "hr manager not found",
                     HttpStatus.NOT_FOUND
             );
         }
@@ -61,7 +56,7 @@ public class SoftwareEngineerController {
         Account employeeCredentials = _accountService.findByEmail(employeeEmail);
 
         try {
-            var updatedInfo = _softwareEngineerService.update(employeeCredentials.getEmployeeId(), dto);
+            var updatedInfo = _humanResourcesManagerService.update(employeeCredentials.getEmployeeId(), dto);
             return new ResponseEntity<>(
                     ObjectMapperUtils.map(updatedInfo, EmployeeProfileInfoDto.class),
                     HttpStatus.OK
@@ -81,44 +76,6 @@ public class SoftwareEngineerController {
                     "failed to update info due to optimistic locking",
                     HttpStatus.INTERNAL_SERVER_ERROR
             );
-        }
-    }
-
-    @GetMapping("skill")
-    @PreAuthorize("hasAuthority('getAllSkillSwEngineer')")
-    public ResponseEntity<?> GetAllSkills(Principal principal){
-        String swEngineerEmail = principal.getName();
-        Account swEngineer = _accountService.findByEmail(swEngineerEmail);
-
-        var skills = _softwareEngineerService.GetAllSkills(swEngineer.getEmployeeId());
-        return new ResponseEntity<>(skills, HttpStatus.OK);
-    }
-
-    @PostMapping("skill")
-    @PreAuthorize("hasAuthority('addSkillSwEngineer')")
-    public ResponseEntity<?> AddSkill(@RequestBody AddSkillDto dto, Principal principal){
-        String swEngineerEmail = principal.getName();
-        Account swEngineer = _accountService.findByEmail(swEngineerEmail);
-
-        try {
-            var skill = _softwareEngineerService.AddSkill(swEngineer.getEmployeeId(), ObjectMapperUtils.map(dto, Skill.class));
-            return new ResponseEntity<>(skill, HttpStatus.CREATED);
-        } catch (NotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
-
-    @DeleteMapping("skill/{id}")
-    @PreAuthorize("hasAuthority('removeSkillSwEngineer')")
-    public ResponseEntity<?> RemoveSkill(@PathVariable("id") UUID skillId, Principal principal){
-        String swEngineerEmail = principal.getName();
-        Account swEngineer = _accountService.findByEmail(swEngineerEmail);
-
-        try {
-            _softwareEngineerService.RemoveSkill(swEngineer.getEmployeeId(), skillId);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (NotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 }

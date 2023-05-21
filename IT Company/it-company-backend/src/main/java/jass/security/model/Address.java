@@ -3,6 +3,7 @@ package jass.security.model;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jass.security.dto.AddressDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,4 +28,11 @@ public class Address {
     private String street;
     @Column(nullable = false)
     private String streetNumber;
+
+    public void update(AddressDto dto) {
+        setCity(dto.getCity());
+        setStreetNumber(dto.getStreetNumber());
+        setCountry(dto.getCountry());
+        setStreet(dto.getStreet());
+    }
 }
