@@ -63,7 +63,7 @@ public class AccountService implements IAccountService {
 
     @Override
     public Account save(Account entity) {
-        if( entity.getId() == null) {
+        if (entity.getId() == null) {
             entity.setId(UUID.randomUUID());
         }
         return _accountRepository.save(entity);
@@ -80,10 +80,10 @@ public class AccountService implements IAccountService {
     }
 
     @Override
-    @Transactional(rollbackFor = { Exception.class })
+    @Transactional(rollbackFor = {Exception.class})
     public UUID registerAccount(RegisterAccountDto dto) throws EmailTakenException, NotFoundException, EmailRejectedException {
         //Check if mail is not rejected
-        if(rejectedMailService.isMailRejected(dto.getEmail())) {
+        if (rejectedMailService.isMailRejected(dto.getEmail())) {
             throw new EmailRejectedException();
         }
 
@@ -96,21 +96,21 @@ public class AccountService implements IAccountService {
 
         addressRepository.save(address);
 
-        if(dto.getRole().equals("hrManager")) {
+        if (dto.getRole().equals("hrManager")) {
 
             var employee = makeHrManager(dto, address);
             employeeId = employee.getId();
             role = _roleRespository.findByName("ROLE_HR_MANAGER");
             hrManagerRepository.save(employee);
 
-        } else if(dto.getRole().equals("projectManager")) {
+        } else if (dto.getRole().equals("projectManager")) {
 
             var employee = makeProjectManager(dto, address);
             employeeId = employee.getId();
             role = _roleRespository.findByName("ROLE_PROJECT_MANAGER");
             projectManagerRepository.save(employee);
 
-        } else if(dto.getRole().equals("softwareEngineer")) {
+        } else if (dto.getRole().equals("softwareEngineer")) {
 
             var employee = makeSoftwareEngineer(dto, address);
             employeeId = employee.getId();
@@ -190,7 +190,7 @@ public class AccountService implements IAccountService {
     }
 
     private Account makeAccount(RegisterAccountDto dto, UUID employeeId) throws EmailTakenException {
-        if(findByEmail(dto.getEmail()) != null) {
+        if (findByEmail(dto.getEmail()) != null) {
             throw new EmailTakenException();
         }
 
@@ -213,14 +213,14 @@ public class AccountService implements IAccountService {
     @Transactional(rollbackFor = Exception.class)
     public void approveAccount(String email, Boolean approve) throws NotFoundException {
         Account account = findByEmail(email);
-        if(account == null) {
+        if (account == null) {
             throw new NotFoundException("Account not found");
         }
-        if(approve) {
+        if (approve) {
             account.setStatus(RegistrationRequestStatus.APPROVED);
 
             var softwareEngineer = softwareEngineerRepository.findById(account.getEmployeeId());
-            if(softwareEngineer.isPresent()) {
+            if (softwareEngineer.isPresent()) {
                 softwareEngineer.get().setDateOfEmployment(new Date());
                 softwareEngineerRepository.save(softwareEngineer.get());
             }
@@ -234,15 +234,15 @@ public class AccountService implements IAccountService {
             _accountRepository.deleteById(acc.getId());
             //Del employee
             UUID addressId = UUID.randomUUID();
-            if(hrManagerRepository.findById(acc.getEmployeeId()).isPresent()) {
+            if (hrManagerRepository.findById(acc.getEmployeeId()).isPresent()) {
                 var employee = hrManagerRepository.findById(acc.getEmployeeId()).get();
                 addressId = employee.getAddress().getId();
                 hrManagerRepository.deleteById(employee.getId());
-            } else if(projectManagerRepository.findById(acc.getEmployeeId()).isPresent()) {
+            } else if (projectManagerRepository.findById(acc.getEmployeeId()).isPresent()) {
                 var employee = projectManagerRepository.findById(acc.getEmployeeId()).get();
                 addressId = employee.getAddress().getId();
                 projectManagerRepository.deleteById(employee.getId());
-            } else if(softwareEngineerRepository.findById(acc.getEmployeeId()).isPresent()) {
+            } else if (softwareEngineerRepository.findById(acc.getEmployeeId()).isPresent()) {
                 var employee = softwareEngineerRepository.findById(acc.getEmployeeId()).get();
                 addressId = employee.getAddress().getId();
                 softwareEngineerRepository.deleteById(employee.getId());
@@ -269,10 +269,10 @@ public class AccountService implements IAccountService {
         var accs = findAllByStatus(status);
         ArrayList<AccountApprovalDto> infos = new ArrayList<>();
 
-        for(var acc : accs) {
+        for (var acc : accs) {
             AccountApprovalDto info = new AccountApprovalDto();
 
-            if(hrManagerRepository.findById(acc.getEmployeeId()).isPresent()) {
+            if (hrManagerRepository.findById(acc.getEmployeeId()).isPresent()) {
                 var employee = hrManagerRepository.findById(acc.getEmployeeId()).get();
 
                 info.setEmail(acc.getEmail());
@@ -281,8 +281,10 @@ public class AccountService implements IAccountService {
                 info.setAddress(ObjectMapperUtils.map(employee.getAddress(), AddressDto.class));
                 info.setPhoneNumber(employee.getPhoneNumber());
                 info.setProfession(employee.getProfession());
+                var roles = new ArrayList<Role>(acc.getRoles());
+                info.setRole(roles.get(0).getName());
 
-            } else if(projectManagerRepository.findById(acc.getEmployeeId()).isPresent()) {
+            } else if (projectManagerRepository.findById(acc.getEmployeeId()).isPresent()) {
                 var employee = projectManagerRepository.findById(acc.getEmployeeId()).get();
 
                 info.setEmail(acc.getEmail());
@@ -291,7 +293,9 @@ public class AccountService implements IAccountService {
                 info.setAddress(ObjectMapperUtils.map(employee.getAddress(), AddressDto.class));
                 info.setPhoneNumber(employee.getPhoneNumber());
                 info.setProfession(employee.getProfession());
-            } else if(softwareEngineerRepository.findById(acc.getEmployeeId()).isPresent()) {
+                var roles = new ArrayList<Role>(acc.getRoles());
+                info.setRole(roles.get(0).getName());
+            } else if (softwareEngineerRepository.findById(acc.getEmployeeId()).isPresent()) {
                 var employee = softwareEngineerRepository.findById(acc.getEmployeeId()).get();
 
                 info.setEmail(acc.getEmail());
@@ -300,6 +304,8 @@ public class AccountService implements IAccountService {
                 info.setAddress(ObjectMapperUtils.map(employee.getAddress(), AddressDto.class));
                 info.setPhoneNumber(employee.getPhoneNumber());
                 info.setProfession(employee.getProfession());
+                var roles = new ArrayList<Role>(acc.getRoles());
+                info.setRole(roles.get(0).getName());
             }
 
             infos.add(info);

@@ -15,7 +15,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RegisterAccountDto {
-    @Pattern(regexp = "^[\\w.-]+@[a-zA-Z_-]+?\\.[a-zA-Z]{2,3}$", message = "Not a valid email address")
+    @Email
     String email;
     @Pattern(regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*])[A-Za-z\\d!@#$%^&*]{8,}$", message = "Password must contain at least: minimum 8 charachters, one uppercase letter, one lowercase letter, one special charachter and one number")
     String password;
@@ -30,6 +30,6 @@ public class RegisterAccountDto {
     AddressDto address;
     @NotBlank(message = "The address is required.")
     String phoneNumber;
-    @NotBlank(message = "The proffesion is required.")
+    @NotBlank(message = "The profession is required.")
     String profession;
 }

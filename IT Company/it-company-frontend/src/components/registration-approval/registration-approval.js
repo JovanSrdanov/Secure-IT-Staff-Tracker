@@ -135,36 +135,71 @@ function RegistrationApproval(props) {
 
             <div className="wrapper">
                 {pendingAccounts != null && pendingAccounts.length > 0 && (
-                    <TableContainer component={Paper} sx={{maxHeight: 500, height: 500, overflowY: 'scroll'}}>
+                    <TableContainer component={Paper}
+                                    sx={{maxHeight: 500, height: 500, overflowY: 'scroll'}}>
                         <Table>
                             <TableBody>
                                 {pendingAccounts.map((item) => (
                                     <React.Fragment key={`${item.email}-row`}>
                                         <StyledTableRow>
                                             <StyledTableCell>
-                                                <Box m={1}>
+                                                <Box m={1} sx={{
+                                                    overflowX: 'auto',
+                                                    width: 300,
+                                                    height: 100,
+                                                    overflowy: 'auto'
+                                                }}>
                                                     <li>Email: {item.email}</li>
+                                                    <li>Role: {item.role.replace(/^ROLE_/, '').replace(/_/g, ' ')}</li>
+                                                </Box>
+                                            </StyledTableCell>
+                                            <StyledTableCell>
+                                                <Box m={1} sx={{
+                                                    overflowX: 'auto',
+                                                    width: 300,
+                                                    height: 100,
+                                                    overflowy: 'auto'
+                                                }}>
+                                                    <li>Name: {item.name}</li>
+                                                    <li>Surname: {item.surname}</li>
+                                                    <li>Phone number: {item.phoneNumber}</li>
+                                                    <li>Profession: {item.profession}</li>
+                                                </Box>
+                                            </StyledTableCell>
+                                            <StyledTableCell>
+                                                <Box m={1} sx={{
+                                                    overflowX: 'auto',
+                                                    width: 300,
+                                                    height: 100,
+                                                    overflowy: 'auto'
+                                                }}>
+                                                    <li>Address:</li>
+                                                    <li>{item.address.city}, {item.address.country}</li>
+                                                    <li>{item.address.street}, {item.address.streetNumber}</li>
                                                 </Box>
                                             </StyledTableCell>
                                             <StyledTableCell>
                                                 <Box m={1}>
-                                                    <Button fullWidth variant="contained"
-                                                            color="success"
-                                                            onClick={() => {
-                                                                handleAccept(item.email)
-                                                            }}
 
-                                                    >Accept
-                                                    </Button>
-                                                </Box>
-                                                <Box m={1}>
-                                                    <Button fullWidth variant="outlined"
-                                                            onClick={() => {
-                                                                handleReject(item.email)
-                                                            }}
-                                                            color="error"
-                                                    >Reject
-                                                    </Button>
+                                                    <Box m={1}>
+                                                        <Button fullWidth variant="contained"
+                                                                color="success"
+                                                                onClick={() => {
+                                                                    handleAccept(item.email)
+                                                                }}
+
+                                                        >Accept
+                                                        </Button>
+                                                    </Box>
+                                                    <Box m={1}>
+                                                        <Button fullWidth variant="outlined"
+                                                                onClick={() => {
+                                                                    handleReject(item.email)
+                                                                }}
+                                                                color="error"
+                                                        >Reject
+                                                        </Button>
+                                                    </Box>
                                                 </Box>
                                             </StyledTableCell>
                                         </StyledTableRow>
