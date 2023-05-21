@@ -1,14 +1,19 @@
 package jass.security.controller;
 
+import jass.security.dto.employee.EmployeeProfileInfoDto;
+import jass.security.exception.NotFoundException;
+import jass.security.model.Account;
+import jass.security.service.interfaces.IAccountService;
 import jass.security.service.interfaces.IEmployeeService;
+import jass.security.utils.ObjectMapperUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.UUID;
 
 @RestController
@@ -17,6 +22,7 @@ public class EmployeeController {
 
     private final IEmployeeService _employeeService;
 
+    @Autowired
     public EmployeeController(IEmployeeService employeeService) {
         _employeeService = employeeService;
     }

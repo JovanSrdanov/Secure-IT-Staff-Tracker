@@ -1,6 +1,7 @@
 package jass.security.model;
 
 import jakarta.persistence.*;
+import jass.security.dto.employee.EmployeeProfileInfoDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,6 +29,14 @@ public class Employee {
     private String phoneNumber;
     @Column(nullable = false)
     private String profession; //zvanje
+
+    public void update(EmployeeProfileInfoDto dto) {
+        setName(dto.getName());
+        setSurname(dto.getSurname());
+        setPhoneNumber(dto.getPhoneNumber());
+        setProfession(dto.getProfession());
+        this.address.update(dto.getAddress());
+    }
 }
 
 
