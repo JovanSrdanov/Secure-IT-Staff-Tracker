@@ -152,6 +152,7 @@ function WorkedOnProjects(props) {
                                                 <Box m={1}>
                                                     <Box m={1}>
                                                         <Button fullWidth variant="outlined" color="info"
+                                                                disabled={item.workingPeriod.endDate !== null}
                                                                 onClick={() => changeDescriptionDialogHandler(item)}>
                                                             Change description
                                                         </Button>
