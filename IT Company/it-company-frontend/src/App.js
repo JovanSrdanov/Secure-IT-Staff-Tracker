@@ -25,6 +25,9 @@ import SkillsPage from "./pages/engineer-pages/skills-page";
 import BarChartIcon from '@mui/icons-material/BarChart';
 import ProjectsPage from "./pages/admin-pages/projects-page";
 import EmployeesPage from "./pages/admin-pages/employees-page";
+import RegisterAdminsPage from "./pages/admin-pages/register-admins-page";
+import ManageMyProjectsPage from "./pages/project-manager-pages/manage-my-projects-page";
+import WorkedOnProjectsPage from "./pages/engineer-pages/worked-on-projects-page";
 
 function App() {
     const navigate = useNavigate()
@@ -135,7 +138,7 @@ function App() {
                                     <Button startIcon={<BarChartIcon/>}
                                             sx={{color: 'inherit'}}
                                             onClick={() => {
-                                                navigate('/projects');
+                                                navigate('/all-projects');
                                             }}
                                     >
                                         Projects
@@ -169,7 +172,7 @@ function App() {
                                     <Button startIcon={<WorkIcon/>}
                                             sx={{color: 'inherit'}}
                                             onClick={() => {
-                                                navigate('/register-admins');
+                                                navigate('/worked-on-projects-page');
                                             }}
                                     >
                                         Projects
@@ -180,6 +183,17 @@ function App() {
                             </>)}
                         {ROLE === "ROLE_PROJECT_MANAGER" && (
                             <>
+                                <Tooltip title="My projects" arrow>
+                                    <Button startIcon={<WorkIcon/>}
+                                            sx={{color: 'inherit'}}
+                                            onClick={() => {
+                                                navigate('/manage-my-projects');
+                                            }}
+                                    >
+                                        Manage my Projects
+                                    </Button>
+                                </Tooltip>
+
                             </>)}
                         {ROLE === "ROLE_HR_MANAGER" && (
                             <>
@@ -232,8 +246,8 @@ function App() {
                             <Route path="/registration-approval" element={<RegistrationApprovalPage/>}/>
                             <Route path="/search-engineers" element={<PermissionsPage/>}/>
                             <Route path="/employees" element={<EmployeesPage/>}/>
-                            <Route path="/projects" element={<ProjectsPage/>}/>
-                            <Route path="/register-admins" element={<PermissionsPage/>}/>
+                            <Route path="/all-projects" element={<ProjectsPage/>}/>
+                            <Route path="/register-admins" element={<RegisterAdminsPage/>}/>
                             <Route path="/profile" element={<ProfilePage/>}/>
                             <Route path="/*" element={<Navigate to="/profile"/>}/>
                         </>
@@ -242,6 +256,7 @@ function App() {
                         <>
                             <Route path="/profile" element={<ProfilePage/>}/>
                             <Route path="/skills" element={<SkillsPage/>}/>
+                            <Route path="/worked-on-projects-page" element={<WorkedOnProjectsPage/>}/>
                             <Route path="/*" element={<Navigate to="/profile"/>}/>
                         </>
                     )}
@@ -249,6 +264,7 @@ function App() {
                     {ROLE === "ROLE_PROJECT_MANAGER" && (
                         <>
                             <Route path="/profile" element={<ProfilePage/>}/>
+                            <Route path="/manage-my-projects" element={<ManageMyProjectsPage/>}/>
                             <Route path="/*" element={<Navigate to="/profile"/>}/>
                         </>
                     )}

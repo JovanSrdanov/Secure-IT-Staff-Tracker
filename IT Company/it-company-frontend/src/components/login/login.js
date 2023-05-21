@@ -82,6 +82,7 @@ function Login() {
                         onChange={handlePasswordChange}
                     />
                     <Button
+                        disabled={!email.match(/^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i) || email.length >= 255 || password.length >= 255 || password === "|"}
                         variant="contained" color="primary" endIcon={<LoginIcon/>}
                         onClick={handleLogin}
                     >Regular LOGIN
@@ -101,6 +102,7 @@ function Login() {
                         />
                         <Button
                             variant="contained" color="primary" endIcon={<LoginIcon/>}
+                            disabled={!emailPasswordLess.match(/^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i) || emailPasswordLess.length >= 255}
                             onClick={handlePasswordlessLogin}
                         >Passwordless Login
                         </Button>
@@ -131,7 +133,7 @@ function Login() {
                             onChange={handleresetPasswordEmailChange}
                         />
                         <Button
-                            variant="contained" color="warning" endIcon={<LoginIcon/>}
+                            variant="contained" color="warning"
                             onClick={handleresetPassword}
                         >Reset password
                         </Button>
