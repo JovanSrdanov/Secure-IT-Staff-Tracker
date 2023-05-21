@@ -296,7 +296,7 @@ function Projects(props) {
                         <Box m={1}>
                             <Button
                                 onClick={addWithDescription}
-                                disabled={workDescirption === ""}
+                                disabled={workDescirption === "" || workDescirption.length >= 255}
                                 variant="contained" color="success">Add</Button>
                         </Box>
                     </Flex>
@@ -549,7 +549,7 @@ function Projects(props) {
                         </Button>
                         <Box m={1}>
                             <Button
-                                disabled={newProject.name === ""}
+                                disabled={newProject.name === "" || newProject.name.length >= 255}
                                 variant="contained" color="success"
                                 onClick={handleCreateNewProject}
                             >Create project</Button>

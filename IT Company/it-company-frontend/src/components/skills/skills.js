@@ -128,7 +128,7 @@ function Skills(props) {
 
                         <Box m={1}>
                             <Button
-                                disabled={skillName === ""}
+                                disabled={skillName === "" || skillName.length >= 255}
                                 variant="contained" color="error"
                                 onClick={handleAddingSkill}
 

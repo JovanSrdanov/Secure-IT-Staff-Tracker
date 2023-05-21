@@ -124,12 +124,10 @@ function RegistrationApproval(props) {
                         <Box m={1}>
                             <Button
                                 onClick={rejectAccount}
-                                disabled={rejectionText === ""}
+                                disabled={rejectionText === "" || rejectionText.length >= 255}
                                 variant="contained" color="error">Reject</Button>
                         </Box>
                     </Flex>
-
-
                 </DialogActions>
             </Dialog>
 
