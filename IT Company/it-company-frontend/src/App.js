@@ -24,6 +24,7 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import SkillsPage from "./pages/engineer-pages/skills-page";
 import BarChartIcon from '@mui/icons-material/BarChart';
 import ProjectsPage from "./pages/admin-pages/projects-page";
+import EmployeesPage from "./pages/admin-pages/employees-page";
 
 function App() {
     const navigate = useNavigate()
@@ -60,7 +61,7 @@ function App() {
             return null;
         }
         const decodedToken = jwt_decode(token);
-      
+
         return decodedToken.role;
     }
 
@@ -124,7 +125,7 @@ function App() {
                                     <Button startIcon={<Diversity3Icon/>}
                                             sx={{color: 'inherit'}}
                                             onClick={() => {
-                                                navigate('/employees-and-projects');
+                                                navigate('/employees');
                                             }}
                                     >
                                         Employees
@@ -230,7 +231,7 @@ function App() {
                             <Route path="/permissions" element={<PermissionsPage/>}/>
                             <Route path="/registration-approval" element={<RegistrationApprovalPage/>}/>
                             <Route path="/search-engineers" element={<PermissionsPage/>}/>
-                            <Route path="/employees" element={<PermissionsPage/>}/>
+                            <Route path="/employees" element={<EmployeesPage/>}/>
                             <Route path="/projects" element={<ProjectsPage/>}/>
                             <Route path="/register-admins" element={<PermissionsPage/>}/>
                             <Route path="/profile" element={<ProfilePage/>}/>

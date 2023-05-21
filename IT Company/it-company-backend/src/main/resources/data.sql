@@ -19,9 +19,6 @@ INSERT INTO public.administrator (id, name, phone_number, profession, surname, a
 VALUES ('6b977f75-db33-44fd-8b8f-19bf87d82c65', 'Stefan', '123456', 'Assembly', 'Apostolovic',
         '9edc7a9a-f6c5-41c0-a1ae-79c2e628b01f');
 
-INSERT INTO public.hr_manager (id, name, phone_number, profession, surname, address_id)
-VALUES ('08f190ce-c48c-4c56-ae95-fe0382f8158c', 'Milos', '123456', 'Proffessional', 'Milosevic',
-        '634b8ef3-4346-4898-bc2e-d73595a96f2d');
 
 INSERT INTO public.account
     (id, email, employee_id, "password", salt, status, is_activated)
