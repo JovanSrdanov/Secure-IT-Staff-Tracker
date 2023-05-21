@@ -27,6 +27,7 @@ import ProjectsPage from "./pages/admin-pages/projects-page";
 import EmployeesPage from "./pages/admin-pages/employees-page";
 import RegisterAdminsPage from "./pages/admin-pages/register-admins-page";
 import ManageMyProjectsPage from "./pages/project-manager-pages/manage-my-projects-page";
+import WorkedOnProjectsPage from "./pages/engineer-pages/worked-on-projects-page";
 
 function App() {
     const navigate = useNavigate()
@@ -171,7 +172,7 @@ function App() {
                                     <Button startIcon={<WorkIcon/>}
                                             sx={{color: 'inherit'}}
                                             onClick={() => {
-                                                navigate('/register-admins');
+                                                navigate('/worked-on-projects-page');
                                             }}
                                     >
                                         Projects
@@ -255,6 +256,7 @@ function App() {
                         <>
                             <Route path="/profile" element={<ProfilePage/>}/>
                             <Route path="/skills" element={<SkillsPage/>}/>
+                            <Route path="/worked-on-projects-page" element={<WorkedOnProjectsPage/>}/>
                             <Route path="/*" element={<Navigate to="/profile"/>}/>
                         </>
                     )}
