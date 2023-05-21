@@ -1,5 +1,6 @@
 package jass.security.controller;
 
+import jakarta.validation.Valid;
 import jass.security.dto.employee.EmployeeProfileInfoDto;
 import jass.security.exception.NotFoundException;
 import jass.security.model.*;
@@ -112,7 +113,7 @@ public class EmployeeController {
 
     @PutMapping("/logged-in-info")
     @PreAuthorize("hasAuthority('updateLoggedInInfo')")
-    public ResponseEntity<?> updateLoggedInInfo(@RequestBody EmployeeProfileInfoDto dto, Principal principal) {
+    public ResponseEntity<?> updateLoggedInInfo(@Valid @RequestBody EmployeeProfileInfoDto dto, Principal principal) {
         String employeeEmail = principal.getName();
         Account employeeCredentials = _accountService.findByEmail(employeeEmail);
         String role = TokenUtils.extractRoleFromAuthenticationHeader((Authentication) principal);
