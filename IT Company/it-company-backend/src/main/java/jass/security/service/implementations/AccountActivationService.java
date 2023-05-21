@@ -11,6 +11,7 @@ import jass.security.service.interfaces.IAccountService;
 import jass.security.utils.DateUtils;
 import jass.security.utils.HashUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,9 @@ public class AccountActivationService implements IAccountActivationService {
     private final IAccountActivationRepository accountActivationRepository;
 
     private final IAccountService accountService;
+
+    @Value("${hmacSecret}")
+    private String hmacSecret;
 
     @Autowired
     public AccountActivationService(IAccountActivationRepository accountActivationRepository, IAccountService accountRepository) {
