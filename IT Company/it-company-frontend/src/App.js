@@ -19,6 +19,9 @@ import Diversity3Icon from '@mui/icons-material/Diversity3';
 import PermissionsPage from "./pages/admin-pages/permissions-page";
 import ProfilePage from "./pages/for-all-pages/profile-page";
 import RegistrationApprovalPage from "./pages/admin-pages/registration-approval-page";
+import WorkIcon from '@mui/icons-material/Work';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import SkillsPage from "./pages/engineer-pages/skills-page";
 
 function App() {
     const navigate = useNavigate()
@@ -55,6 +58,7 @@ function App() {
             return null;
         }
         const decodedToken = jwt_decode(token);
+        console.log(decodedToken.role)
         return decodedToken.role;
     }
 
@@ -137,6 +141,29 @@ function App() {
                             </>)}
                         {ROLE === "ROLE_ENGINEER" && (
                             <>
+                                <Tooltip title="My skills and seniority" arrow>
+                                    <Button startIcon={<EmojiEventsIcon/>}
+                                            sx={{color: 'inherit'}}
+                                            onClick={() => {
+                                                navigate('/skills');
+                                            }}
+                                    >
+                                        Skils
+                                    </Button>
+                                </Tooltip>
+
+                                <Tooltip title="My projects" arrow>
+                                    <Button startIcon={<WorkIcon/>}
+                                            sx={{color: 'inherit'}}
+                                            onClick={() => {
+                                                navigate('/register-admins');
+                                            }}
+                                    >
+                                        Projects
+                                    </Button>
+                                </Tooltip>
+
+
                             </>)}
                         {ROLE === "ROLE_PROJECT_MANAGER" && (
                             <>
@@ -200,6 +227,7 @@ function App() {
                     {ROLE === "ROLE_ENGINEER" && (
                         <>
                             <Route path="/profile" element={<ProfilePage/>}/>
+                            <Route path="/skills" element={<SkillsPage/>}/>
                             <Route path="/*" element={<Navigate to="/profile"/>}/>
                         </>
                     )}

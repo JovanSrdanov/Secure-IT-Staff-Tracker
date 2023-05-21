@@ -14,12 +14,7 @@ interceptor.interceptors.request.use(
         if (accessToken) {
             config.headers.Authorization = `Bearer ${accessToken}`;
         }
-        if (refreshToken) {
-            config.data = {
-                ...config.data,
-                refresh_token: refreshToken,
-            };
-        }
+    
         return config;
     },
     (error) => Promise.reject(error)

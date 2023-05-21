@@ -16,13 +16,11 @@ VALUES ('c390e0cf-9c9d-41b7-80f9-b55939cc11e8', 'Petar', '123456', '.Net Senior'
 
 INSERT INTO public.account
     (id, email, employee_id, "password", salt, status, is_activated)
-values ('c46b1a28-fe30-4f6b-834c-72fe7de6ee7f', 'jovansrdanov2000+2@gmail.com', 'aafbd593-de86-4510-8c63-0d912e95b3b6',
-        '$2y$10$lFp.7xd3uHzrVnftpUcCFOPlEdsU8n76eUy4A/e8c0Eg/.AAc9M8y', 'a', 1, true),
-       ('9d0dc40b-a0c6-4610-ac51-23ed75b94a9a', 'jovansrdanov2000+1@gmail.com', '6b977f75-db33-44fd-8b8f-19bf87d82c65',
+values ('9d0dc40b-a0c6-4610-ac51-23ed75b94a9a', 'jovansrdanov2000+1@gmail.com', '6b977f75-db33-44fd-8b8f-19bf87d82c65',
         '$2y$10$lFp.7xd3uHzrVnftpUcCFOPlEdsU8n76eUy4A/e8c0Eg/.AAc9M8y', 'a', 1, true),
        ('be256f3c-48a3-449d-86e5-4bb1165122b3', 'jovansrdanov2000+3@gmail.com', 'cf11ba92-dea3-4d80-b2f0-8187060cb831',
         '$2y$10$lFp.7xd3uHzrVnftpUcCFOPlEdsU8n76eUy4A/e8c0Eg/.AAc9M8y', 'a', 1, true),
-       ('a7c0173e-0bcc-4df7-96b4-481d582dea60', 'jovansrdanov2000+4@gmail.com', 'c390e0cf-9c9d-41b7-80f9-b55939cc11e8',
+       ('a7c0173e-0bcc-4df7-96b4-481d582dea60', 'jovansrdanov2000+2@gmail.com', 'c390e0cf-9c9d-41b7-80f9-b55939cc11e8',
         '$2y$10$lFp.7xd3uHzrVnftpUcCFOPlEdsU8n76eUy4A/e8c0Eg/.AAc9M8y', 'a', 1, true);
 
 
@@ -62,8 +60,7 @@ values ('79113e08-0b50-41ee-a8ea-42559259d44e', 'ROLE_ENGINEER'),
 
 INSERT INTO public.users_roles
     (user_id, role_id)
-values ('c46b1a28-fe30-4f6b-834c-72fe7de6ee7f', '79113e08-0b50-41ee-a8ea-42559259d44e'),
-       ('9d0dc40b-a0c6-4610-ac51-23ed75b94a9a', '037bbd08-1f2c-4f9d-80af-1710d90efb01'),
+values ('9d0dc40b-a0c6-4610-ac51-23ed75b94a9a', '037bbd08-1f2c-4f9d-80af-1710d90efb01'),
        ('be256f3c-48a3-449d-86e5-4bb1165122b3', '2cdfba8e-78a3-46a9-b414-96a41d1a5c62'),
        ('a7c0173e-0bcc-4df7-96b4-481d582dea60', '79113e08-0b50-41ee-a8ea-42559259d44e');
 
