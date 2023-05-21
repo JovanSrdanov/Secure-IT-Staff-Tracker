@@ -49,7 +49,8 @@ values ('fc784caa-1a09-459f-9fef-d2ce4b1b89e6', 'changeAccStatusAccept'),
        ('d270db68-12fb-4dce-a9f0-7ef64d091731', 'adminPasswordChange'),
        ('b7b7775c-e81a-4ec7-bfbf-81bdd3c15100', 'removeSkillSwEngineer'),
        ('44c764a7-fa8e-4820-8c31-5d882514f65c', 'getAllEmployee'),
-       ('aaf59fa1-4d0f-49ef-bd45-755a5985f61d', 'getAllUnemployedOnProjectEmployee'),
+       ('aaf59fa1-4d0f-49ef-bd45-755a5985f61d', 'getAllUnemployedOnProjectEngineer'),
+       ('931fcaa3-e336-4ba7-b5ba-c136c440bfc2', 'getAllUnemployedOnProjectPRManager'),
        ('602a2482-a824-4b52-91e1-a30b3c0e710d', 'getMySeniority'),
        ('a8bc9435-22b3-45d0-8d74-a28f64f388da', 'getAllSkillSwEngineer');
 
@@ -89,9 +90,14 @@ values
 ('037bbd08-1f2c-4f9d-80af-1710d90efb01', '7facde86-1695-4281-aeb9-34fda5913f05'),
 ('037bbd08-1f2c-4f9d-80af-1710d90efb01', '44c764a7-fa8e-4820-8c31-5d882514f65c'),
 ('037bbd08-1f2c-4f9d-80af-1710d90efb01', 'aaf59fa1-4d0f-49ef-bd45-755a5985f61d'),
+('037bbd08-1f2c-4f9d-80af-1710d90efb01', '931fcaa3-e336-4ba7-b5ba-c136c440bfc2'),
+('037bbd08-1f2c-4f9d-80af-1710d90efb01', 'da6aaa1b-6e8e-472a-8598-a27edc2be510'),
 -- PR MANAGER
 ('2cdfba8e-78a3-46a9-b414-96a41d1a5c62', 'da6aaa1b-6e8e-472a-8598-a27edc2be510'),
 ('2cdfba8e-78a3-46a9-b414-96a41d1a5c62', 'b3adb8f2-4ea3-41c2-a3e1-709b9e7ba7a8'),
+('2cdfba8e-78a3-46a9-b414-96a41d1a5c62', 'aaf59fa1-4d0f-49ef-bd45-755a5985f61d'),
+('2cdfba8e-78a3-46a9-b414-96a41d1a5c62', 'f60d3289-526a-4aae-b720-5409f472cd2b'),
+
 -- SOFTWARE ENGINEER
 ('79113e08-0b50-41ee-a8ea-42559259d44e', '9c571498-c945-4089-a529-8e3746d0a4b3'),
 ('79113e08-0b50-41ee-a8ea-42559259d44e', 'c7133aa4-d7e9-4f2f-839d-e4524ebd3bb4'),
@@ -103,4 +109,4 @@ values
 ('153c2366-eb2d-4ce2-b55e-42c83609da8a', 'd270db68-12fb-4dce-a9f0-7ef64d091731');
 
 INSERT INTO public.project (id, start_date, end_date, "name")
-VALUES ('6eeb9244-9c87-4545-a940-fe39bf3a268f', '2023-05-25 02:00:00', '2023-09-25 02:00:00', 'Mega projekat');
+VALUES ('6eeb9244-9c87-4545-a940-fe39bf3a268f', '2023-05-25 02:00:00', '2023-09-25 02:00:00', 'TEST PROJECT');

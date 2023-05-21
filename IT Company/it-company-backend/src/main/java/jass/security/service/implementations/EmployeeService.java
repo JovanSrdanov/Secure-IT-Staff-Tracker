@@ -24,13 +24,22 @@ public class EmployeeService implements IEmployeeService {
     }
 
     @Override
-    public List<EmployeeInfoDto> getAllUnemployedOnProject(UUID projectId) {
-        var employedIds = _employeeRepository.getAllEmployedOnProjectId(projectId);
-        if(employedIds.isEmpty())
-        {
+    public List<EmployeeInfoDto> getAllUnemployedEngineerOnProject(UUID projectId) {
+        var employedIds = _employeeRepository.getAllEmployedEngineerOnProjectId(projectId);
+        if (employedIds.isEmpty()) {
             //HQL cant work with empty list
             employedIds.add(new UUID(0L, 0L));
         }
-        return _employeeRepository.getOppositeEmployeeGroup(employedIds);
+        return _employeeRepository.getOppositeEmployeeEngineerGroup(employedIds);
+    }
+
+    @Override
+    public List<EmployeeInfoDto> getAllUnemployedEngineerPRManager(UUID projectId) {
+        var employedIds = _employeeRepository.getAllEmployedPrManagerOnProjectId(projectId);
+        if (employedIds.isEmpty()) {
+            //HQL cant work with empty list
+            employedIds.add(new UUID(0L, 0L));
+        }
+        return _employeeRepository.getOppositeEmployeePrManagerGroup(employedIds);
     }
 }
