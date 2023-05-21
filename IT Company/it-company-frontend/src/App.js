@@ -22,6 +22,8 @@ import RegistrationApprovalPage from "./pages/admin-pages/registration-approval-
 import WorkIcon from '@mui/icons-material/Work';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import SkillsPage from "./pages/engineer-pages/skills-page";
+import BarChartIcon from '@mui/icons-material/BarChart';
+import ProjectsPage from "./pages/admin-pages/projects-page";
 
 function App() {
     const navigate = useNavigate()
@@ -118,14 +120,24 @@ function App() {
                                         Search engineers
                                     </Button>
                                 </Tooltip>
-                                <Tooltip title="Search engineers" arrow>
+                                <Tooltip title="View all employees" arrow>
                                     <Button startIcon={<Diversity3Icon/>}
                                             sx={{color: 'inherit'}}
                                             onClick={() => {
                                                 navigate('/employees-and-projects');
                                             }}
                                     >
-                                        Employees and projects
+                                        Employees
+                                    </Button>
+                                </Tooltip>
+                                <Tooltip title="Create and view projects" arrow>
+                                    <Button startIcon={<BarChartIcon/>}
+                                            sx={{color: 'inherit'}}
+                                            onClick={() => {
+                                                navigate('/projects');
+                                            }}
+                                    >
+                                        Projects
                                     </Button>
                                 </Tooltip>
                                 <Tooltip title="Register admins" arrow>
@@ -218,7 +230,8 @@ function App() {
                             <Route path="/permissions" element={<PermissionsPage/>}/>
                             <Route path="/registration-approval" element={<RegistrationApprovalPage/>}/>
                             <Route path="/search-engineers" element={<PermissionsPage/>}/>
-                            <Route path="/employees-and-projects" element={<PermissionsPage/>}/>
+                            <Route path="/employees" element={<PermissionsPage/>}/>
+                            <Route path="/projects" element={<ProjectsPage/>}/>
                             <Route path="/register-admins" element={<PermissionsPage/>}/>
                             <Route path="/profile" element={<ProfilePage/>}/>
                             <Route path="/*" element={<Navigate to="/profile"/>}/>
