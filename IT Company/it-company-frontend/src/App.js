@@ -299,7 +299,7 @@ function App() {
                             <Route path="/error-page"
                                    element={<h1>Account not activated, there has been an error</h1>}/>
 
-                            <Route path="/passwordless-login/:hash" element={<PasswordlessLoginPage/>}/>
+                            <Route path="/passwordless-login" element={<PasswordlessLoginPage/>}/>
                             <Route path="/*" element={<Navigate to="/login"/>}/>
                         </>
                     )}

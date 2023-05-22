@@ -1,6 +1,6 @@
-import React from 'react';
+import React, {useState} from 'react';
 
-import {Alert, Button, TextField} from "@mui/material";
+import {Alert, Button, Dialog, DialogActions, DialogTitle, TextField} from "@mui/material";
 import LoginIcon from '@mui/icons-material/Login';
 import {useNavigate} from "react-router-dom";
 import interceptor from "../../interceptor/interceptor";
@@ -44,10 +44,11 @@ function Login() {
     };
 
     const handlePasswordlessLogin = () => {
-        interceptor.post('auth/login-GASCINA', {
+        interceptor.post('auth/login/passwordless/generate', {
             email: emailPasswordLess,
         }).then(res => {
-            console.log(res.data)
+
+            setSuccessDialogShow(true)
 
         }).catch(err => {
             setShowAlert(true);
@@ -61,8 +62,24 @@ function Login() {
         console.log(resetPasswordEmail)
     }
 
+    const [successDialogShow, setSuccessDialogShow] = useState(false);
+    const handleClose = () => {
+        setSuccessDialogShow(false)
+    };
+
     return (
         <>
+            <Dialog onClose={handleClose} open={successDialogShow}>
+                <DialogTitle>Mail sent! </DialogTitle>
+                <DialogActions>
+                    <Button onClick={handleClose}
+                            variant="contained"
+                    >
+                        Close
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
             <Flex flexDirection="row" justifyContent="center" alignItems="center">
                 <div className="wrapper">
                     <TextField
