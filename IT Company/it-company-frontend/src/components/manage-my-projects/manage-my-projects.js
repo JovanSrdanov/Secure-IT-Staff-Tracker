@@ -197,19 +197,16 @@ function Projects(props) {
 
 
         var sendData = {
-            id: selectedProject.project.id,
             endDate: new Date(newProject.duration.endDate),
             name: newProject.name
-
         }
-        console.log(sendData)
 
-        // interceptor.put("project", sendData).then((res) => {
-        //     getAllProjects();
-        //     handleCloseUpdatingProjectDialog();
-        // }).catch((err) => {
-        //     console.log(err)
-        // })
+        interceptor.put("project/" + selectedProject.project.id + "/update-project", sendData).then((res) => {
+            getAllProjects();
+            handleCloseUpdatingProjectDialog();
+        }).catch((err) => {
+            console.log(err)
+        })
 
     };
 
