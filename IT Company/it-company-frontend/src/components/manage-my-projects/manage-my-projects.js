@@ -222,6 +222,7 @@ function Projects(props) {
                                                 <StyledTableCell>
                                                     <Box m={1}>
                                                         <Button fullWidth variant="contained" color="error"
+                                                                disabled={item.workingPeriod.endDate !== null}
                                                                 onClick={() => {
                                                                     removeEngineerFromProject(item)
                                                                 }}

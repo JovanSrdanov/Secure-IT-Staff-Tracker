@@ -13,7 +13,6 @@ import jass.security.service.interfaces.IAccountActivationService;
 import jass.security.service.interfaces.IAccountService;
 import jass.security.utils.TokenUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.autoconfigure.observation.ObservationProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -137,7 +136,7 @@ public class AuthenticationController {
     public ResponseEntity<?> registerNewAdminAccount(@Valid @RequestBody RegisterAdminAccountDto dto) {
         try {
             accountService.registerAdminAccount(dto);
-            return new ResponseEntity<>( HttpStatus.CREATED);
+            return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (EmailTakenException e) {
             return new ResponseEntity<>("This e-mail is taken!", HttpStatus.CONFLICT);
         }
@@ -196,7 +195,7 @@ public class AuthenticationController {
 
     @PatchMapping("/admin-change-password")
     @PreAuthorize("hasAuthority('adminPasswordChange')")
-    public ResponseEntity<?> changeAdminPassword(Principal principal,@RequestBody ChangeAdminPasswordDto dto){
+    public ResponseEntity<?> changeAdminPassword(Principal principal, @RequestBody ChangeAdminPasswordDto dto) {
         try {
             accountService.changeAdminPassword(principal.getName(), dto);
             return new ResponseEntity<>(HttpStatus.OK);
@@ -208,7 +207,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login/passwordless/generate")
-    public ResponseEntity<?> generatePasswordlessLoginToken(@RequestBody GeneratePasswordlessLoginTokenDto dto ){
+    public ResponseEntity<?> generatePasswordlessLoginToken(@RequestBody GeneratePasswordlessLoginTokenDto dto) {
         try {
             accountService.generatePasswordlessLoginToken(dto.getEmail());
             return new ResponseEntity<>(HttpStatus.OK);
@@ -218,7 +217,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/passwordless-login/{token}")
-    public ResponseEntity<?> generatePasswordlessLoginToken(@PathVariable String token){
+    public ResponseEntity<?> passwordlessLogin(@PathVariable String token) {
         try {
             var plToken = accountService.usePLToken(token);
             Account account = accountService.findByEmail(plToken.getEmail());

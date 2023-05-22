@@ -328,11 +328,20 @@ function Projects(props) {
                                                         <li>Surname: {item.prManager.surname}</li>
                                                         <li>Phone number: {item.prManager.phoneNumber}</li>
                                                         <li>Profession: {item.prManager.profession}</li>
+                                                        <li>Start
+                                                            date: {new Date(item.workingPeriod.startDate).toLocaleDateString('en-US', {hour12: false})}</li>
+                                                        <li>
+                                                            End
+                                                            date: {item.workingPeriod.endDate ? new Date(item.workingPeriod.endDate).toLocaleDateString('en-US', {hour12: false}) : ''}
+                                                        </li>
+
+
                                                     </Box>
                                                 </StyledTableCell>
                                                 <StyledTableCell>
                                                     <Box m={1}>
                                                         <Button fullWidth variant="contained" color="error"
+                                                                disabled={item.workingPeriod.endDate !== null}
                                                                 onClick={() => {
                                                                     removePrManagerFromProject(item)
                                                                 }}
@@ -393,6 +402,7 @@ function Projects(props) {
                                                 <StyledTableCell>
                                                     <Box m={1}>
                                                         <Button fullWidth variant="contained" color="error"
+                                                                disabled={item.workingPeriod.endDate !== null}
                                                                 onClick={() => {
                                                                     removeEngineerFromProject(item)
                                                                 }}

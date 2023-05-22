@@ -28,6 +28,8 @@ import EmployeesPage from "./pages/admin-pages/employees-page";
 import RegisterAdminsPage from "./pages/admin-pages/register-admins-page";
 import ManageMyProjectsPage from "./pages/project-manager-pages/manage-my-projects-page";
 import WorkedOnProjectsPage from "./pages/engineer-pages/worked-on-projects-page";
+import AdminPasswordChangePage from "./pages/admin-pages/admin-password-change-page";
+import PasswordlessLoginPage from "./pages/unauthenticated-pages/passwordless-login-page";
 
 function App() {
     const navigate = useNavigate()
@@ -218,11 +220,22 @@ function App() {
                                     </Button>
                                 </Tooltip>
                             </>)}
+
                         {ROLE !== null && (
+                            <>
+                                <Tooltip title="Log out of the system" arrow>
+                                    <Button
+                                        sx={{marginLeft: "auto"}}
+                                        color="error" onClick={handleLogout} startIcon={<LogoutOutlinedIcon/>}>
+                                        Log out
+                                    </Button>
+                                </Tooltip>
+                            </>)}
+                        {ROLE !== null && ROLE !== "ROLE_ADMIN_PASSWORD_CHANGE" && (
                             <>
                                 <Tooltip title="Your information" arrow>
                                     <Button color="info"
-                                            sx={{marginLeft: 'auto'}}
+
                                             startIcon={<PersonOutlineOutlinedIcon/>}
                                             onClick={() => {
                                                 navigate('/profile');
@@ -230,11 +243,7 @@ function App() {
                                         My profile
                                     </Button>
                                 </Tooltip>
-                                <Tooltip title="Log out of the system" arrow>
-                                    <Button color="error" onClick={handleLogout} startIcon={<LogoutOutlinedIcon/>}>
-                                        Log out
-                                    </Button>
-                                </Tooltip>
+
                             </>)}
 
                     </Toolbar>
@@ -269,6 +278,14 @@ function App() {
                         </>
                     )}
 
+                    {ROLE === "ROLE_ADMIN_PASSWORD_CHANGE" && (
+                        <>
+                            <Route path="/admin-password-change" element={<AdminPasswordChangePage/>}/>
+                            <Route path="/*" element={<Navigate to="/admin-password-change"/>}/>
+                        </>
+                    )}
+
+
                     {ROLE === "ROLE_HR_MANAGER" && (
                         <>
                             <Route path="/profile" element={<ProfilePage/>}/>
@@ -281,6 +298,8 @@ function App() {
                             <Route path="/register" element={<RegisterPage/>}/>
                             <Route path="/error-page"
                                    element={<h1>Account not activated, there has been an error</h1>}/>
+
+                            <Route path="/passwordless-login" element={<PasswordlessLoginPage/>}/>
                             <Route path="/*" element={<Navigate to="/login"/>}/>
                         </>
                     )}
