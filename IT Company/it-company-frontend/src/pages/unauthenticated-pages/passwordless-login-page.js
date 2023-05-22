@@ -27,7 +27,7 @@ function PasswordlessLoginPage(props) {
 
     return (
         <div>
-            <h1>gas</h1>
+            <h1>Checking the hash</h1>
         </div>
     );
 }
