@@ -41,7 +41,10 @@ function AdminPasswordChange(props) {
 
     const handleChangePassword = () => {
         console.log({oldPassword, newPassword})
-        interceptor.post("", {oldPassword: oldPassword, newPassword: newPassword}).then((res) => {
+        interceptor.patch("/auth/admin-change-password", {
+            oldPassword: oldPassword,
+            newPassword: newPassword
+        }).then((res) => {
             console.log(res.data)
             setSuccessDialogShow(true)
         }).catch((err) => {
