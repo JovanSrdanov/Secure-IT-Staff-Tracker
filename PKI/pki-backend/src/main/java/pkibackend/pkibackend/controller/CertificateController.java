@@ -1,5 +1,7 @@
 package pkibackend.pkibackend.controller;
 
+import org.bouncycastle.openssl.PEMWriter;
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -7,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.webjars.NotFoundException;
+import pkibackend.pkibackend.Utilities.UniqueFIleCreator;
 import pkibackend.pkibackend.dto.BooleanResponse;
 import pkibackend.pkibackend.dto.CertificateInfoDto;
 import pkibackend.pkibackend.dto.CertificateSerialNum;
@@ -15,24 +18,31 @@ import pkibackend.pkibackend.exceptions.BadRequestException;
 import pkibackend.pkibackend.exceptions.InternalServerErrorException;
 import pkibackend.pkibackend.model.Account;
 import pkibackend.pkibackend.model.Certificate;
+import pkibackend.pkibackend.model.KeystoreRowInfo;
 import pkibackend.pkibackend.service.interfaces.IAccountService;
 import pkibackend.pkibackend.service.interfaces.ICertificateService;
+import pkibackend.pkibackend.service.interfaces.IKeystoreRowInfoService;
 
-import java.io.IOException;
+import java.io.*;
 import java.math.BigInteger;
 import java.security.Principal;
+import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("certificate")
 public class CertificateController {
     private final ICertificateService _certificateService;
     private final IAccountService _accountService;
+    private final IKeystoreRowInfoService _keystoreRowInfoService;
 
-    public CertificateController(ICertificateService certificateService, IAccountService accountService) {
+    public CertificateController(ICertificateService certificateService, IAccountService accountService,
+                                 IKeystoreRowInfoService keystoreRowInfoService) {
         _certificateService = certificateService;
         _accountService = accountService;
+        _keystoreRowInfoService = keystoreRowInfoService;
     }
 
     @PreAuthorize("hasAnyRole('ROLE_PKI_ADMIN','ROLE_CERTIFICATE_USER')")
@@ -119,6 +129,44 @@ public class CertificateController {
         }
         try {
             byte[] certificateBytes = x509Certificate.getEncoded();
+            // Convert the X509Certificate to PEM format
+            ByteArrayOutputStream pemStream = new ByteArrayOutputStream();
+            JcaPEMWriter certPemWriter = new JcaPEMWriter(new OutputStreamWriter(pemStream));
+            certPemWriter.writeObject(x509Certificate);
+            certPemWriter.close();
+
+            byte[] pemBytes = pemStream.toByteArray();
+
+
+            // skidanje alias-a, privatnog kljuca, lozinke od keystore-a od sertifikata
+            Optional<KeystoreRowInfo> downloadedCertificateKeystoreInfo = _keystoreRowInfoService.findByCertificateSerialNumber(certificateSerialNum);
+            if (downloadedCertificateKeystoreInfo.isEmpty()) {
+                return new ResponseEntity("Certificate not found in keystore", HttpStatus.NOT_FOUND);
+            }
+            String keystoreName = downloadedCertificateKeystoreInfo.get().getKeystoreName();
+            String keyStorePassword = downloadedCertificateKeystoreInfo.get().getPassword();
+            String downloadedCertificateAlias = downloadedCertificateKeystoreInfo.get().getAlias();
+            String downloadedCertificateRowPassword = downloadedCertificateKeystoreInfo.get().getRowPassword();
+            PrivateKey downloadedCertificatePrivateKey = _certificateService.GetCertificatePrivateKey(keystoreName,
+                    keyStorePassword, downloadedCertificateAlias, downloadedCertificateRowPassword);
+            String downloadedCertificatePrivateKeyPassword = downloadedCertificateKeystoreInfo.get().getRowPassword();
+
+            // kreiranje tekstualnih info za sertifikat za https
+            File file = UniqueFIleCreator.createUniqueFile("certInfo.txt");
+            FileWriter writer = new FileWriter(file);
+            writer.write("keystore password: " + keyStorePassword + ", alias: " + downloadedCertificateAlias +
+                    ", key password: " + downloadedCertificatePrivateKeyPassword);
+            writer.close();
+
+            // cuvanje privatnog kljuca koji odgovara sertifikatu
+            File keyFile = UniqueFIleCreator.createUniqueFile("privateKey.key");
+
+            FileOutputStream fileOutputStream = new FileOutputStream(keyFile);
+            PEMWriter pemWriter = new PEMWriter(new OutputStreamWriter(fileOutputStream));
+
+            pemWriter.writeObject(downloadedCertificatePrivateKey);
+
+            pemWriter.close();
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentDispositionFormData("attachment", "certificate.crt");
@@ -126,7 +174,7 @@ public class CertificateController {
 
             return ResponseEntity.ok()
                     .headers(headers)
-                    .body(certificateBytes);
+                    .body(pemBytes);
         } catch (CertificateEncodingException e) {
             throw new RuntimeException(e);
         }

@@ -10,4 +10,8 @@ public class DateUtils {
         calendar.add(Calendar.HOUR_OF_DAY, hours);
         return calendar.getTime();
     }
+
+    public static Boolean isEndDateAfterStartDate(Date startDate, Date endDate) {
+        return endDate.after(startDate);
+    }
 }

@@ -8,6 +8,7 @@ import pkibackend.pkibackend.model.Certificate;
 import pkibackend.pkibackend.model.KeystoreRowInfo;
 
 import java.math.BigInteger;
+import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.text.ParseException;
@@ -27,4 +28,6 @@ public interface ICertificateService extends ICrudService<Certificate>{
     X509Certificate GetCertificateBySerialNumber(BigInteger serialNumber) throws BadRequestException;
     boolean isChainValid(BigInteger certSerialNum) throws BadRequestException;
     boolean isInKeystore(Set<KeystoreRowInfo> rows, BigInteger certSerialNum);
+    public PrivateKey GetCertificatePrivateKey(String keyStoreName,
+                                               String keyStorePass, String alias, String pass);
 }
