@@ -112,12 +112,12 @@ function AdminPasswordChange(props) {
                         !/[A-Z]/.test(oldPassword) ||  // At least one uppercase letter in old password
                         !/[a-z]/.test(oldPassword) ||  // At least one lowercase letter in old password
                         !/\d/.test(oldPassword) ||     // At least one number in old password
-                        !/[!@#$%^&*]/.test(oldPassword)  // At least one special character in old password
+                        !/[_!@#$%^&*]/.test(oldPassword)   // At least one special character in old password
                         ||
                         !/[A-Z]/.test(newPassword) ||  // At least one uppercase letter in new password
                         !/[a-z]/.test(newPassword) ||  // At least one lowercase letter in new password
                         !/\d/.test(newPassword) ||     // At least one number in new password
-                        !/[!@#$%^&*]/.test(newPassword)  // At least one special character in new password
+                        !/[_!@#$%^&*]/.test(newPassword)   // At least one special character in new password
                     }
                     color="warning"
                     variant="contained"
