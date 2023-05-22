@@ -61,6 +61,7 @@ values ('fc784caa-1a09-459f-9fef-d2ce4b1b89e6', 'changeAccStatusAccept'),
        ('602a2482-a824-4b52-91e1-a30b3c0e710d', 'getMySeniority'),
        ('85deb19a-6bbb-4a97-93f1-7d118f17c014', 'getLoggedInInfo'),
        ('ab494841-f5aa-4e4e-b6e2-5d8c1085eb3f', 'updateLoggedInInfo'),
+       ('f7fe6f68-08d4-42f0-804f-d49107dfd9ba', 'updateProjectInfo'),
        ('a8bc9435-22b3-45d0-8d74-a28f64f388da', 'getAllSkillSwEngineer');
 
 
@@ -115,6 +116,7 @@ values
 ('2cdfba8e-78a3-46a9-b414-96a41d1a5c62', 'da6aaa1b-6e8e-472a-8598-a27edc2be510'),
 ('2cdfba8e-78a3-46a9-b414-96a41d1a5c62', '85deb19a-6bbb-4a97-93f1-7d118f17c014'),
 ('2cdfba8e-78a3-46a9-b414-96a41d1a5c62', 'ab494841-f5aa-4e4e-b6e2-5d8c1085eb3f'),
+('2cdfba8e-78a3-46a9-b414-96a41d1a5c62', 'f7fe6f68-08d4-42f0-804f-d49107dfd9ba'),
 -- SOFTWARE ENGINEER
 ('79113e08-0b50-41ee-a8ea-42559259d44e', '9c571498-c945-4089-a529-8e3746d0a4b3'),
 ('79113e08-0b50-41ee-a8ea-42559259d44e', 'c7133aa4-d7e9-4f2f-839d-e4524ebd3bb4'),

@@ -1,6 +1,8 @@
 package jass.security.controller;
 
+import jass.security.dto.employee.EmployeeProfileInfoDto;
 import jass.security.dto.project.*;
+import jass.security.exception.InvalidDateException;
 import jass.security.exception.NotFoundException;
 import jass.security.model.Account;
 import jass.security.model.Project;
@@ -45,7 +47,27 @@ public class ProjectController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-
+    @PutMapping("{id}/update-project")
+    @PreAuthorize("hasAuthority('updateProjectInfo')")
+    public ResponseEntity<?> updateProject(@RequestBody UpdateProjectDto dto, @PathVariable("id") UUID projectId) {
+        try {
+            var updatedProjectInfo = _projectService.update(projectId, dto);
+            return new ResponseEntity<>(
+                    ObjectMapperUtils.map(updatedProjectInfo, UpdateProjectDto.class),
+                    HttpStatus.OK
+            );
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(
+                    "cannot find project info",
+                    HttpStatus.NOT_FOUND
+            );
+        } catch (InvalidDateException e) {
+            return new ResponseEntity<>(
+                    "Project end date must be after it's start date",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+    }
 
     @PatchMapping("{id}/add-sw-engineer")
     @PreAuthorize("hasAuthority('addSwEngineerToProject')")

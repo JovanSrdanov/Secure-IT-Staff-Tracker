@@ -1,10 +1,12 @@
 package jass.security.service.implementations;
 
 import jass.security.dto.project.*;
+import jass.security.exception.InvalidDateException;
 import jass.security.exception.NotFoundException;
 import jass.security.model.*;
 import jass.security.repository.*;
 import jass.security.service.interfaces.IProjectService;
+import jass.security.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -39,8 +41,12 @@ public class ProjectService implements IProjectService {
     }
 
     @Override
-    public Project findById(UUID id) {
-        return null;
+    public Project findById(UUID id) throws NotFoundException {
+        var project = _projectRepository.findById(id);
+        if (project.isEmpty()) {
+            throw new NotFoundException("engineer not found");
+        }
+        return project.get();
     }
 
     @Override
@@ -150,5 +156,16 @@ public class ProjectService implements IProjectService {
         var newStats = stats.get();
         newStats.setJobDescription(newJobDescription);
         _swEngineerProjectStatsRepository.save(newStats);
+    }
+
+    @Override
+    public Project update(UUID projectId, UpdateProjectDto dto) throws NotFoundException, InvalidDateException {
+        var oldProject = findById(projectId);
+        if (!DateUtils.isEndDateAfterStartDate(oldProject.getDuration().getStartDate(), dto.getEndDate())) {
+            throw new InvalidDateException("Project end date must be after it's start date");
+        }
+        oldProject.update(dto);
+
+        return _projectRepository.save(oldProject);
     }
 }
