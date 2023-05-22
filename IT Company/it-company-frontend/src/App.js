@@ -29,6 +29,7 @@ import RegisterAdminsPage from "./pages/admin-pages/register-admins-page";
 import ManageMyProjectsPage from "./pages/project-manager-pages/manage-my-projects-page";
 import WorkedOnProjectsPage from "./pages/engineer-pages/worked-on-projects-page";
 import AdminPasswordChangePage from "./pages/admin-pages/admin-password-change-page";
+import PasswordlessLoginPage from "./pages/unauthenticated-pages/passwordless-login-page";
 
 function App() {
     const navigate = useNavigate()
@@ -234,7 +235,7 @@ function App() {
                             <>
                                 <Tooltip title="Your information" arrow>
                                     <Button color="info"
-                                       
+
                                             startIcon={<PersonOutlineOutlinedIcon/>}
                                             onClick={() => {
                                                 navigate('/profile');
@@ -297,6 +298,8 @@ function App() {
                             <Route path="/register" element={<RegisterPage/>}/>
                             <Route path="/error-page"
                                    element={<h1>Account not activated, there has been an error</h1>}/>
+
+                            <Route path="/passwordless-login/:hash" element={<PasswordlessLoginPage/>}/>
                             <Route path="/*" element={<Navigate to="/login"/>}/>
                         </>
                     )}
