@@ -8,7 +8,7 @@ public class RandomPasswordGenerator {
         String uppercaseLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         String lowercaseLetters = "abcdefghijklmnopqrstuvwxyz";
         String numbers = "0123456789";
-        String specialCharacters = "!?.(#)";
+        String specialCharacters = "!_";
 
         String allCharacters = uppercaseLetters + lowercaseLetters + numbers + specialCharacters;
 

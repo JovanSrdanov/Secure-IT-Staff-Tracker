@@ -13,6 +13,7 @@ import jass.security.service.interfaces.IAccountActivationService;
 import jass.security.service.interfaces.IAccountService;
 import jass.security.utils.TokenUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.autoconfigure.observation.ObservationProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -206,4 +207,32 @@ public class AuthenticationController {
         }
     }
 
+    @PostMapping("/login/passwordless/generate")
+    public ResponseEntity<?> generatePasswordlessLoginToken(@RequestBody GeneratePasswordlessLoginTokenDto dto ){
+        try {
+            accountService.generatePasswordlessLoginToken(dto.getEmail());
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/passwordless-login/{token}")
+    public ResponseEntity<?> generatePasswordlessLoginToken(@PathVariable String token){
+        try {
+            var plToken = accountService.usePLToken(token);
+            Account account = accountService.findByEmail(plToken.getEmail());
+            var roles = new ArrayList<Role>(account.getRoles());
+
+            String jwt = tokenUtils.generateToken(plToken.getEmail(), roles.get(0).getName());
+            String resfresh = tokenUtils.generateRefreshToken(plToken.getEmail());
+            int expiresIn = tokenUtils.getExpiredIn();
+
+            return new ResponseEntity<>(new UserTokenState(jwt, resfresh, expiresIn), HttpStatus.OK);
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (PlTokenUsedException | TokenExpiredException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
 }
