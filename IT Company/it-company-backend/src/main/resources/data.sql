@@ -2,6 +2,7 @@ INSERT INTO public.address (id, city, country, street, street_number)
 VALUES ('d3adcff2-ae88-495b-91f6-234d6eba6d11', 'Nova Pazova', 'Srbija', 'Zlatne Grede', '12'),
        ('85015489-7336-4636-b6e1-68343be88f09', 'Loznica', 'Srbija', 'Lekarska', '10'),
        ('9edc7a9a-f6c5-41c0-a1ae-79c2e628b01f', 'Nis', 'Srbija', 'Pariske komune', '11'),
+       ('b7b0e323-7ce7-4724-8696-9c8b7bb70734', 'Novi Sad', 'Srbija', 'Djordja Jovanovica', '8'),
        ('634b8ef3-4346-4898-bc2e-d73595a96f2d', 'Novi Sad', 'Srbija', 'Gunduliceva', '8');
 
 
@@ -19,6 +20,8 @@ INSERT INTO public.administrator (id, name, phone_number, profession, surname, a
 VALUES ('6b977f75-db33-44fd-8b8f-19bf87d82c65', 'Stefan', '123456', 'Assembly', 'Apostolovic',
         '9edc7a9a-f6c5-41c0-a1ae-79c2e628b01f');
 
+INSERT INTO public.hr_manager (id, name, phone_number, profession, surname, address_id)
+VALUES ('a3c2eba9-fd68-4d6a-851c-41ac05bd77d3', 'Miodrag', '123456', 'profesija', 'Miodragovic', 'b7b0e323-7ce7-4724-8696-9c8b7bb70734');
 
 INSERT INTO public.account
     (id, email, employee_id, "password", salt, status, is_activated)
@@ -26,6 +29,8 @@ values ('9d0dc40b-a0c6-4610-ac51-23ed75b94a9a', 'jovansrdanov2000+1@gmail.com', 
         '$2y$10$lFp.7xd3uHzrVnftpUcCFOPlEdsU8n76eUy4A/e8c0Eg/.AAc9M8y', 'a', 1, true),
        ('be256f3c-48a3-449d-86e5-4bb1165122b3', 'jovansrdanov2000+3@gmail.com', 'cf11ba92-dea3-4d80-b2f0-8187060cb831',
         '$2y$10$lFp.7xd3uHzrVnftpUcCFOPlEdsU8n76eUy4A/e8c0Eg/.AAc9M8y', 'a', 1, true),
+        ('2eeff05d-924f-49ce-b5db-43b18096e00a', 'jovansrdanov2000+4@gmail.com', 'a3c2eba9-fd68-4d6a-851c-41ac05bd77d3',
+         '$2y$10$lFp.7xd3uHzrVnftpUcCFOPlEdsU8n76eUy4A/e8c0Eg/.AAc9M8y', 'a', 1, true),
     -- TODO zameni mail
        ('a7c0173e-0bcc-4df7-96b4-481d582dea60', 'al.stojanovic0@gmail.com', 'c390e0cf-9c9d-41b7-80f9-b55939cc11e8',
         '$2y$10$lFp.7xd3uHzrVnftpUcCFOPlEdsU8n76eUy4A/e8c0Eg/.AAc9M8y', 'a', 1, true);
@@ -78,6 +83,7 @@ INSERT INTO public.users_roles
     (user_id, role_id)
 values ('9d0dc40b-a0c6-4610-ac51-23ed75b94a9a', '153c2366-eb2d-4ce2-b55e-42c83609da8a'),
        ('be256f3c-48a3-449d-86e5-4bb1165122b3', '2cdfba8e-78a3-46a9-b414-96a41d1a5c62'),
+       ('2eeff05d-924f-49ce-b5db-43b18096e00a', '407d5496-2b68-4052-9219-f87ed4126fc9'),
        ('a7c0173e-0bcc-4df7-96b4-481d582dea60', '79113e08-0b50-41ee-a8ea-42559259d44e');
 
 
