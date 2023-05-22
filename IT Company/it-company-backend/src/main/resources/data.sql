@@ -51,6 +51,7 @@ values ('fc784caa-1a09-459f-9fef-d2ce4b1b89e6', 'changeAccStatusAccept'),
        ('c7877299-353d-4938-95da-0e6b97aadd6f', 'addSkillSwEngineer'),
        ('e020ef1f-eb11-4d1d-bedf-b87c033de306', 'getAllPrivilegeForRole'),
        ('fc797a4e-009a-44de-aec0-d7ca52c64609', 'getRoles'),
+       ('9f82f05e-1e85-4c4b-b112-6701c8993929', 'registerAdmin'),
        ('d270db68-12fb-4dce-a9f0-7ef64d091731', 'adminPasswordChange'),
        ('b7b7775c-e81a-4ec7-bfbf-81bdd3c15100', 'removeSkillSwEngineer'),
        ('44c764a7-fa8e-4820-8c31-5d882514f65c', 'getAllEmployee'),
@@ -73,7 +74,7 @@ values ('79113e08-0b50-41ee-a8ea-42559259d44e', 'ROLE_ENGINEER'),
 
 INSERT INTO public.users_roles
     (user_id, role_id)
-values ('9d0dc40b-a0c6-4610-ac51-23ed75b94a9a', '037bbd08-1f2c-4f9d-80af-1710d90efb01'),
+values ('9d0dc40b-a0c6-4610-ac51-23ed75b94a9a', '153c2366-eb2d-4ce2-b55e-42c83609da8a'),
        ('be256f3c-48a3-449d-86e5-4bb1165122b3', '2cdfba8e-78a3-46a9-b414-96a41d1a5c62'),
        ('a7c0173e-0bcc-4df7-96b4-481d582dea60', '79113e08-0b50-41ee-a8ea-42559259d44e');
 
@@ -103,6 +104,7 @@ values
 ('037bbd08-1f2c-4f9d-80af-1710d90efb01', 'ab494841-f5aa-4e4e-b6e2-5d8c1085eb3f'),
 ('037bbd08-1f2c-4f9d-80af-1710d90efb01', '85deb19a-6bbb-4a97-93f1-7d118f17c014'),
 ('037bbd08-1f2c-4f9d-80af-1710d90efb01', 'b3adb8f2-4ea3-41c2-a3e1-709b9e7ba7a8'),
+('037bbd08-1f2c-4f9d-80af-1710d90efb01', '9f82f05e-1e85-4c4b-b112-6701c8993929'),
 -- PR MANAGER
 ('2cdfba8e-78a3-46a9-b414-96a41d1a5c62', 'f60d3289-526a-4aae-b720-5409f472cd2b'),
 ('2cdfba8e-78a3-46a9-b414-96a41d1a5c62', 'c4640c3d-e9fe-40b3-9158-004fb119b8f6'),

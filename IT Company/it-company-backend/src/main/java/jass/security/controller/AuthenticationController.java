@@ -28,6 +28,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.Principal;
 import java.util.ArrayList;
 
 //Kontroler zaduzen za autentifikaciju korisnika
@@ -130,6 +131,18 @@ public class AuthenticationController {
         }
     }
 
+    @PostMapping("register-admin")
+    @PreAuthorize("hasAuthority('registerAdmin')")
+    public ResponseEntity<?> registerNewAdminAccount(@Valid @RequestBody RegisterAdminAccountDto dto) {
+        try {
+            accountService.registerAdminAccount(dto);
+            return new ResponseEntity<>( HttpStatus.CREATED);
+        } catch (EmailTakenException e) {
+            return new ResponseEntity<>("This e-mail is taken!", HttpStatus.CONFLICT);
+        }
+    }
+
+
     @PreAuthorize("hasAuthority('changeAccStatusAccept')")
     @GetMapping("/accept-registration/{mail}")
     public ResponseEntity<?> acceptRegistration(@PathVariable String mail) {
@@ -178,6 +191,19 @@ public class AuthenticationController {
         attributes.addAttribute("attribute", "redirectWithRedirectView");
         //Todo  JOVAN dodaj https
         return new RedirectView("http://localhost:4444/login");
+    }
+
+    @PatchMapping("/admin-change-password")
+    @PreAuthorize("hasAuthority('adminPasswordChange')")
+    public ResponseEntity<?> changeAdminPassword(Principal principal,@RequestBody ChangeAdminPasswordDto dto){
+        try {
+            accountService.changeAdminPassword(principal.getName(), dto);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (IncorrectPasswordException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
     }
 
 }

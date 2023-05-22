@@ -2,10 +2,7 @@ package jass.security.model;
 
 import jakarta.persistence.*;
 import jass.security.dto.employee.EmployeeProfileInfoDto;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.UUID;
 

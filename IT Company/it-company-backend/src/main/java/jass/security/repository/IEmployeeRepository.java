@@ -16,6 +16,7 @@ public interface IEmployeeRepository extends JpaRepository<Employee, UUID> {
             " engineer.profession, engineer.surname) " +
             "from SoftwareEngineer engineer left join Account account " +
             "on engineer.id = account.employeeId " +
+            "where account.status = 1 " +
 
             " union " +
 
@@ -25,6 +26,8 @@ public interface IEmployeeRepository extends JpaRepository<Employee, UUID> {
             " prManager.profession, prManager.surname) " +
             "from ProjectManager prManager left join Account account " +
             "on prManager.id = account.employeeId " +
+            "where account.status = 1 " +
+
 
             "union " +
 
@@ -33,7 +36,9 @@ public interface IEmployeeRepository extends JpaRepository<Employee, UUID> {
             "hrManager.address.street, hrManager.address.streetNumber, hrManager.name, hrManager.phoneNumber," +
             " hrManager.profession, hrManager.surname) " +
             "from HrManager hrManager left join Account account " +
-            "on hrManager.id = account.employeeId")
+            "on hrManager.id = account.employeeId " +
+            "where account.status = 1"
+    )
     List<EmployeeInfoDto> getAll();
 
     @Query("select engineer.id " +
@@ -57,7 +62,7 @@ public interface IEmployeeRepository extends JpaRepository<Employee, UUID> {
             " engineer.profession, engineer.surname) " +
             "from SoftwareEngineer engineer left join Account account " +
             "on engineer.id = account.employeeId " +
-            "where engineer.id not in :employeeIds ")
+            "where engineer.id not in :employeeIds and account.status = 1 ")
     List<EmployeeInfoDto> getOppositeEmployeeEngineerGroup(@Param("employeeIds") List<UUID> employeeIds);
 
 
@@ -67,7 +72,6 @@ public interface IEmployeeRepository extends JpaRepository<Employee, UUID> {
             " prManager.profession, prManager.surname) " +
             "from ProjectManager prManager left join Account account " +
             "on prManager.id = account.employeeId " +
-            "where prManager.id not in :employeeIds ")
+            "where prManager.id not in :employeeIds and account.status = 1")
     List<EmployeeInfoDto> getOppositeEmployeePrManagerGroup(@Param("employeeIds") List<UUID> employeeIds);
-
 }
