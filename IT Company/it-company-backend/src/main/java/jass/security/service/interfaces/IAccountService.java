@@ -4,15 +4,12 @@ import jass.security.dto.AccountApprovalDto;
 import jass.security.dto.ChangeAdminPasswordDto;
 import jass.security.dto.RegisterAccountDto;
 import jass.security.dto.RegisterAdminAccountDto;
-import jass.security.exception.EmailRejectedException;
-import jass.security.exception.EmailTakenException;
-import jass.security.exception.IncorrectPasswordException;
-import jass.security.exception.NotFoundException;
+import jass.security.exception.*;
 import jass.security.model.Account;
+import jass.security.model.PasswordlessLoginToken;
 import jass.security.model.RegistrationRequestStatus;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 public interface IAccountService extends ICrudService<Account> {
@@ -26,4 +23,8 @@ public interface IAccountService extends ICrudService<Account> {
     ArrayList<AccountApprovalDto> findAllByStatusInfo(RegistrationRequestStatus status);
      void changeAdminPassword(String email, ChangeAdminPasswordDto dto) throws IncorrectPasswordException, NotFoundException;
 
-}
+     void generatePasswordlessLoginToken(String email) throws NotFoundException;
+    PasswordlessLoginToken usePLToken(String token) throws NotFoundException, PlTokenUsedException, TokenExpiredException;
+
+
+    }
