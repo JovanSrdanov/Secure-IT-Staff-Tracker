@@ -11,4 +11,10 @@ import lombok.Setter;
 @AllArgsConstructor
 public class AccountApprovalDto {
     private String email;
+    private String name;
+    private String surname;
+    private AddressDto address;
+    private String phoneNumber;
+    private String profession;
+    private String role;
 }

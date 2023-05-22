@@ -1,54 +1,47 @@
 package jass.security.utils;
 
-import java.util.Date;
-
-import jakarta.servlet.http.HttpServletRequest;
-import jass.security.exception.TokenExpiredException;
-import jass.security.model.Account;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import jakarta.servlet.http.HttpServletRequest;
+import jass.security.exception.TokenExpiredException;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
+
+import java.util.Date;
+import java.util.List;
 
 // Utility klasa za rad sa JSON Web Tokenima
 @Component
 public class TokenUtils {
 
-    // Izdavac tokena
-    @Value("spring-security-example")
-    private String APP_NAME;
-
+    private static final String AUDIENCE_WEB = "web";
+    // Algoritam za potpisivanje JWT
+    private final SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS512;
     // Tajna koju samo backend aplikacija treba da zna kako bi mogla da generise i proveri JWT https://jwt.io/
     @Value("${tokenSecretKey}")
     public String SECRET;
-
+    // Izdavac tokena
+    @Value("spring-security-example")
+    private String APP_NAME;
     // Period vazenja tokena - 15 minuta
     @Value("${tokenExpiration}")
     private int EXPIRES_IN;
-
-    @Value("7200000")
+    @Value("${refreshTokenExpiration}")
     private int REFRESH_EXPIRES_IN;
-
-    // Naziv headera kroz koji ce se prosledjivati JWT u komunikaciji server-klijent
-    @Value("Authorization")
-    private String AUTH_HEADER;
-
     // Moguce je generisati JWT za razlicite klijente (npr. web i mobilni klijenti nece imati isto trajanje JWT,
     // JWT za mobilne klijente ce trajati duze jer se mozda aplikacija redje koristi na taj nacin)
     // Radi jednostavnosti primera, necemo voditi racuna o uređaju sa kojeg zahtev stiže.
     //	private static final String AUDIENCE_UNKNOWN = "unknown";
     //	private static final String AUDIENCE_MOBILE = "mobile";
     //	private static final String AUDIENCE_TABLET = "tablet";
-
-    private static final String AUDIENCE_WEB = "web";
-
-    // Algoritam za potpisivanje JWT
-    private SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS512;
-
+    // Naziv headera kroz koji ce se prosledjivati JWT u komunikaciji server-klijent
+    @Value("Authorization")
+    private String AUTH_HEADER;
 
     // ============= Funkcije za generisanje JWT tokena =============
 
@@ -86,6 +79,7 @@ public class TokenUtils {
 
     /**
      * Funkcija za utvrđivanje tipa uređaja za koji se JWT kreira.
+     *
      * @return Tip uređaja.
      */
     private String generateAudience() {
@@ -143,6 +137,7 @@ public class TokenUtils {
 
     /**
      * Funkcija za preuzimanje vlasnika tokena (korisničko ime).
+     *
      * @param token JWT token.
      * @return Korisničko ime iz tokena ili null ukoliko ne postoji.
      */
@@ -163,6 +158,7 @@ public class TokenUtils {
 
     /**
      * Funkcija za preuzimanje datuma kreiranja tokena.
+     *
      * @param token JWT token.
      * @return Datum kada je token kreiran.
      */
@@ -249,7 +245,7 @@ public class TokenUtils {
     /**
      * Funkcija za validaciju JWT tokena.
      *
-     * @param token JWT token.
+     * @param token       JWT token.
      * @param userDetails Informacije o korisniku koji je vlasnik JWT tokena.
      * @return Informacija da li je token validan ili ne.
      */
@@ -267,8 +263,8 @@ public class TokenUtils {
         // Token je validan kada:
         return (
                 username != null // korisnicko ime nije null
-                && username.equals(userDetails.getUsername())
-                && !claims.get("isRefresh", Boolean.class)
+                        && username.equals(userDetails.getUsername())
+                        && !claims.get("isRefresh", Boolean.class)
         ); //isto u bazi
     }
 
@@ -291,7 +287,7 @@ public class TokenUtils {
     /**
      * Funkcija proverava da li je lozinka korisnika izmenjena nakon izdavanja tokena.
      *
-     * @param created Datum kreiranja tokena.
+     * @param created           Datum kreiranja tokena.
      * @param lastPasswordReset Datum poslednje izmene lozinke.
      * @return Informacija da li je token kreiran pre poslednje izmene lozinke ili ne.
      */
@@ -314,10 +310,18 @@ public class TokenUtils {
      * Funkcija za preuzimanje sadržaja AUTH_HEADER-a iz zahteva.
      *
      * @param request HTTP zahtev.
-     *
      * @return Sadrzaj iz AUTH_HEADER-a.
      */
     public String getAuthHeaderFromHeader(HttpServletRequest request) {
         return request.getHeader(AUTH_HEADER);
+    }
+
+    public static String extractRoleFromAuthenticationHeader(Authentication principal) {
+        List<String> authorities = principal.getAuthorities()
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
+
+        return authorities.get(0);
     }
 }

@@ -1,7 +1,6 @@
 package jass.security.utils;
 
-import java.io.IOException;
-
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,15 +13,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import io.jsonwebtoken.ExpiredJwtException;
+import java.io.IOException;
 
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
-    private TokenUtils tokenUtils;
-
-    private UserDetailsService userDetailsService;
-
     protected final Log LOGGER = LogFactory.getLog(getClass());
+    private final TokenUtils tokenUtils;
+    private final UserDetailsService userDetailsService;
 
     public TokenAuthenticationFilter(TokenUtils tokenHelper, UserDetailsService userDetailsService) {
         this.tokenUtils = tokenHelper;
@@ -65,11 +62,12 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
         } catch (ExpiredJwtException | TokenExpiredException ex) {
             isExpired = true;
-            response.sendError(HttpServletResponse.SC_GONE, "Token expired");
+            //response.sendError(HttpServletResponse.SC_GONE, "Token expired");
+            response.setStatus(HttpServletResponse.SC_GONE);
         }
 
         // prosledi request dalje u sledeci filter
-        if(!isExpired) {
+        if (!isExpired) {
             chain.doFilter(request, response);
         }
     }

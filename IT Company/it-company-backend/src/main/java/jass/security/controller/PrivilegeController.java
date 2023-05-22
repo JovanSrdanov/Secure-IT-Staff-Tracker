@@ -33,20 +33,20 @@ public class PrivilegeController {
     }
 
     @GetMapping("/all")
-    @PreAuthorize("hasAuthority('getPrivilege')")
+    @PreAuthorize("hasAuthority('getAllPrivilege')")
     public ResponseEntity<?> getAll() {
         return ResponseEntity.ok(ObjectMapperUtils.mapAll(privilegeService.findAll(), PrivilegeInfoDto.class));
     }
 
     @GetMapping("/all/{roleName}")
-    @PreAuthorize("hasAuthority('getPrivilege')")
+    @PreAuthorize("hasAuthority('getAllPrivilegeForRole')")
     public ResponseEntity<?> getAllByName(@PathVariable String roleName) {
         return ResponseEntity.ok(ObjectMapperUtils.mapAll(roleService.findPrivileges(roleName), PrivilegeInfoDto.class));
     }
 
     @GetMapping("/roles")
-    @PreAuthorize("hasAuthority('getPrivilege')")
+    @PreAuthorize("hasAuthority('getRoles')")
     public ResponseEntity<?> getAllRoles() {
         return ResponseEntity.ok(ObjectMapperUtils.mapAll(roleService.findAll(), RoleInfoDto.class));
     }
- }
+}
