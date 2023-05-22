@@ -1,12 +1,10 @@
 package jass.security.controller;
 
-import jass.security.dto.employee.EmployeeProfileInfoDto;
 import jass.security.dto.project.*;
 import jass.security.exception.InvalidDateException;
 import jass.security.exception.NotFoundException;
 import jass.security.model.Account;
 import jass.security.model.Project;
-import jass.security.model.ProjectManager;
 import jass.security.service.interfaces.IAccountService;
 import jass.security.service.interfaces.IProjectService;
 import jass.security.utils.ObjectMapperUtils;
@@ -36,13 +34,14 @@ public class ProjectController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('createProject')")
-    public ResponseEntity<Project> Create(@RequestBody CreateProjectDto dto){
+    public ResponseEntity<Project> Create(@RequestBody CreateProjectDto dto) {
         var result = _projectService.save(ObjectMapperUtils.map(dto, Project.class));
         return new ResponseEntity<>(result, HttpStatus.CREATED);
     }
+
     @GetMapping
     @PreAuthorize("hasAuthority('getAllProject')")
-    public ResponseEntity<List<Project>> GetAll(){
+    public ResponseEntity<List<Project>> GetAll() {
         var result = _projectService.findAll();
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
@@ -71,7 +70,7 @@ public class ProjectController {
 
     @PatchMapping("{id}/add-sw-engineer")
     @PreAuthorize("hasAuthority('addSwEngineerToProject')")
-    public ResponseEntity<?> AddSwEngineerToProject(@RequestBody AddSwEngineerToProjectDto dto, @PathVariable("id") UUID projectId){
+    public ResponseEntity<?> AddSwEngineerToProject(@RequestBody AddSwEngineerToProjectDto dto, @PathVariable("id") UUID projectId) {
         try {
             _projectService.AddSwEngineerToProject(dto, projectId);
             return new ResponseEntity<>(HttpStatus.OK);
@@ -82,10 +81,10 @@ public class ProjectController {
 
     @PatchMapping("{id}/add-pr-manager")
     @PreAuthorize("hasAuthority('addPrManagerToProject')")
-    public ResponseEntity<?> AddPrManagerToProject(@RequestBody AddProjectMangerToProjectDto dto, @PathVariable("id") UUID projectId){
+    public ResponseEntity<?> AddPrManagerToProject(@RequestBody AddProjectMangerToProjectDto dto, @PathVariable("id") UUID projectId) {
         try {
             _projectService.AddPrManagerToProject(dto, projectId);
-            return new ResponseEntity<>( HttpStatus.OK);
+            return new ResponseEntity<>(HttpStatus.OK);
         } catch (NotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
@@ -93,7 +92,7 @@ public class ProjectController {
 
     @PatchMapping("{id}/dismiss-sw-engineer")
     @PreAuthorize("hasAuthority('dismissSwEngineerFromProject')")
-    public ResponseEntity<?> DismissSwEngineerFromProject(@RequestBody DismissWorkerFromProjectDto dto, @PathVariable("id") UUID projectId){
+    public ResponseEntity<?> DismissSwEngineerFromProject(@RequestBody DismissWorkerFromProjectDto dto, @PathVariable("id") UUID projectId) {
         try {
             _projectService.DismissSwEngineerFromProject(dto.getWorkerId(), projectId);
             return new ResponseEntity<>(HttpStatus.OK);
@@ -104,7 +103,7 @@ public class ProjectController {
 
     @PatchMapping("{id}/dismiss-pr-manager")
     @PreAuthorize("hasAuthority('dismissPrManagerFromProject')")
-    public ResponseEntity<?> DismissPrManagerFromProject(@RequestBody DismissWorkerFromProjectDto dto, @PathVariable("id") UUID projectId){
+    public ResponseEntity<?> DismissPrManagerFromProject(@RequestBody DismissWorkerFromProjectDto dto, @PathVariable("id") UUID projectId) {
         try {
             _projectService.DismissPrManagerFromProject(dto.getWorkerId(), projectId);
             return new ResponseEntity<>(HttpStatus.OK);
@@ -115,21 +114,21 @@ public class ProjectController {
 
     @GetMapping("{id}/sw-engineers")
     @PreAuthorize("hasAuthority('getSwEngineersOnProject')")
-    public ResponseEntity<?> GetSwEngineersOnProject(@PathVariable("id") UUID projectId){
+    public ResponseEntity<?> GetSwEngineersOnProject(@PathVariable("id") UUID projectId) {
         var result = _projectService.GetSwEngineersOnProject(projectId);
-        return new ResponseEntity<>(result ,HttpStatus.OK);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @GetMapping("{id}/pr-managers")
     @PreAuthorize("hasAuthority('getPrManagersOnProject')")
-    public ResponseEntity<?> GetPrManagersOnProject(@PathVariable("id") UUID projectId){
+    public ResponseEntity<?> GetPrManagersOnProject(@PathVariable("id") UUID projectId) {
         var result = _projectService.GetPrManagersOnProject(projectId);
-        return new ResponseEntity<>(result ,HttpStatus.OK);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @GetMapping("pr-manager")
     @PreAuthorize("hasAuthority('getPrManagersProjects')")
-    public ResponseEntity<?> GetPrManagersProjects(Principal principal){
+    public ResponseEntity<?> GetPrManagersProjects(Principal principal) {
         String projectManagerEmail = principal.getName();
         Account prManager = _accountService.findByEmail(projectManagerEmail);
 
@@ -137,19 +136,34 @@ public class ProjectController {
         return new ResponseEntity<>(projects, HttpStatus.OK);
     }
 
+    @GetMapping("pr-manager/{id}")
+    @PreAuthorize("hasAuthority('getPrManagersProjectsById')")
+    public ResponseEntity<?> GetPrManagersProjectsById(@PathVariable("id") UUID managerId) {
+        var projects = _projectService.GetPrManagersProjects(managerId);
+        return new ResponseEntity<>(projects, HttpStatus.OK);
+    }
+
+
     @GetMapping("sw-engineer")
     @PreAuthorize("hasAuthority('getSwEngineersProjects')")
-    public ResponseEntity<?> GetSwEngineersProjects(Principal principal){
+    public ResponseEntity<?> GetSwEngineersProjects(Principal principal) {
         String swEngineerEmail = principal.getName();
         Account swEngineer = _accountService.findByEmail(swEngineerEmail);
-
         var projects = _projectService.GetSwEngineersProjects(swEngineer.getEmployeeId());
         return new ResponseEntity<>(projects, HttpStatus.OK);
     }
 
+    @GetMapping("sw-engineer/{id}")
+    @PreAuthorize("hasAuthority('getSwEngineersProjectsById')")
+    public ResponseEntity<?> GetSwEngineersProjectsById(@PathVariable("id") UUID swEngineerId) {
+        var projects = _projectService.GetSwEngineersProjects(swEngineerId);
+        return new ResponseEntity<>(projects, HttpStatus.OK);
+    }
+
+
     @PatchMapping("{id}/sw-engineer")
     @PreAuthorize("hasAuthority('changeSwEngineersJobDescription')")
-    public ResponseEntity<?> ChangeSwEngineersJobDescription(Principal principal, @RequestBody SwEngineerChangeJobDescriptionDto dto, @PathVariable("id") UUID projectId){
+    public ResponseEntity<?> ChangeSwEngineersJobDescription(Principal principal, @RequestBody SwEngineerChangeJobDescriptionDto dto, @PathVariable("id") UUID projectId) {
         String swEngineerEmail = principal.getName();
         Account swEngineer = _accountService.findByEmail(swEngineerEmail);
 
