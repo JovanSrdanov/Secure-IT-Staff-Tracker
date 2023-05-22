@@ -2,11 +2,8 @@ package jass.security.repository;
 
 import jass.security.dto.project.PrManagerProjectStatsDto;
 import jass.security.dto.project.PrManagerProjectStatsProjectDto;
-import jass.security.dto.project.SwEngineerProjectStatsDto;
 import jass.security.model.PrManagerProjectStats;
 import jass.security.model.PrManagerProjectStatsId;
-import jass.security.model.SwEngineerProjectStats;
-import jass.security.model.SwEngineerProjectStatsId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
