@@ -1,10 +1,7 @@
 package jass.security.service.implementations;
 
 import jass.security.dto.*;
-import jass.security.exception.EmailRejectedException;
-import jass.security.exception.EmailTakenException;
-import jass.security.exception.IncorrectPasswordException;
-import jass.security.exception.NotFoundException;
+import jass.security.exception.*;
 import jass.security.model.*;
 import jass.security.repository.*;
 import jass.security.service.interfaces.IAccountService;
@@ -12,12 +9,14 @@ import jass.security.service.interfaces.IRejectedMailService;
 import jass.security.utils.DateUtils;
 import jass.security.utils.ObjectMapperUtils;
 import jass.security.utils.RandomPasswordGenerator;
+import org.aspectj.weaver.ast.Not;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -38,12 +37,13 @@ public class AccountService implements IAccountService {
     private final IRejectedMailService rejectedMailService;
     private final IAdministratorRepository administratorRepository;
     private final MailSenderService mailService;
+    private final IPasswordlessLoginTokenRepository passwordlessLoginTokenRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    public AccountService(IAccountRepository accountRepository, IRoleRepository roleRespository, IHrManagerRepository hrManagerRepository, IProjectManagerRepository projectManagerRepository, ISoftwareEngineerRepository softwareEngineerRepository, IAddressRepository addressRepository, IRejectedMailService rejectedMailService, IAdministratorRepository administratorRepository, MailSenderService mailService) {
+    public AccountService(IAccountRepository accountRepository, IRoleRepository roleRespository, IHrManagerRepository hrManagerRepository, IProjectManagerRepository projectManagerRepository, ISoftwareEngineerRepository softwareEngineerRepository, IAddressRepository addressRepository, IRejectedMailService rejectedMailService, IAdministratorRepository administratorRepository, MailSenderService mailService, IPasswordlessLoginTokenRepository passwordlessLoginTokenRepository) {
         this._accountRepository = accountRepository;
         _roleRespository = roleRespository;
         this.hrManagerRepository = hrManagerRepository;
@@ -53,6 +53,7 @@ public class AccountService implements IAccountService {
         this.rejectedMailService = rejectedMailService;
         this.administratorRepository = administratorRepository;
         this.mailService = mailService;
+        this.passwordlessLoginTokenRepository = passwordlessLoginTokenRepository;
     }
 
     @Override
@@ -422,6 +423,49 @@ public class AccountService implements IAccountService {
         }
 
         return sb.toString();
+    }
+
+    public void generatePasswordlessLoginToken(String email) throws NotFoundException {
+
+        //Check if account with email exists
+        var result = _accountRepository.findByEmail(email);
+        if (result == null){
+            throw new NotFoundException("Username with given email not found");
+        }
+
+
+        String token = RandomPasswordGenerator.generatePassword(32);
+        int tokenDuration = 10; //minutes
+        PasswordlessLoginToken passwordlessLoginToken = new PasswordlessLoginToken(UUID.randomUUID(), email, token, LocalDateTime.now(),  tokenDuration, false );
+
+        passwordlessLoginTokenRepository.save(passwordlessLoginToken);
+        String mailBody = "Click on this link to login: <html><a>http://localhost:4444/passwordless-login/" + token + "</a></html>";
+        mailService.sendHtmlMail(email,"Passwordless login",mailBody);
+    }
+
+
+
+    @Override
+    public PasswordlessLoginToken usePLToken(String token) throws NotFoundException, PlTokenUsedException, TokenExpiredException {
+        var result = passwordlessLoginTokenRepository.findPasswordlessLoginTokenByToken(token);
+        
+        if(result.isEmpty()){
+            throw  new NotFoundException("Passwordless login token not found");
+        }
+
+        PasswordlessLoginToken plToken = result.get();
+
+        if(plToken.isUsed()){
+            throw new PlTokenUsedException("Passwordless login token already used");
+        }
+
+        if(plToken.isExpired()){
+           throw new TokenExpiredException("Passwordless login token expired");
+        }
+        
+        plToken.setUsed(true);
+        passwordlessLoginTokenRepository.save(plToken);
+        return plToken;
     }
 
 
