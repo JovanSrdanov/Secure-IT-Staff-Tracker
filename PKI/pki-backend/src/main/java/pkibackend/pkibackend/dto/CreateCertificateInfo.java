@@ -24,7 +24,4 @@ public class CreateCertificateInfo {
 
     // pogledaj addExtensions metodu u CertificateGenerator-u
     private Map<String, String> extensions;
-
-    // alias novog sertifikata
-    //String alias;
 }
