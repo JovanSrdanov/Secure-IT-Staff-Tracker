@@ -305,6 +305,8 @@ public class AccountService implements IAccountService {
             //Del adr
             addressRepository.deleteById(addressId);
 
+            _roleRespository.deleteAllByUserId(acc.getId().toString());
+
             //Add to rejected table
             Date date = DateUtils.addHoursToDate(new Date(), 72);
             RejectedMail rejectedMail = new RejectedMail(UUID.randomUUID(), email, date);
