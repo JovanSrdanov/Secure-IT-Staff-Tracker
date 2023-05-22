@@ -155,7 +155,7 @@ public class CertificateController {
             File file = UniqueFIleCreator.createUniqueFile("certInfo.txt");
             FileWriter writer = new FileWriter(file);
             writer.write("keystore password: " + keyStorePassword + ", alias: " + downloadedCertificateAlias +
-                    "key password: " + downloadedCertificatePrivateKeyPassword);
+                    ", key password: " + downloadedCertificatePrivateKeyPassword);
             writer.close();
 
             // cuvanje privatnog kljuca koji odgovara sertifikatu
