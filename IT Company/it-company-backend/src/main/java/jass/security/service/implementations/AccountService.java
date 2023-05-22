@@ -1,10 +1,9 @@
 package jass.security.service.implementations;
 
-import jass.security.dto.AccountApprovalDto;
-import jass.security.dto.AddressDto;
-import jass.security.dto.RegisterAccountDto;
+import jass.security.dto.*;
 import jass.security.exception.EmailRejectedException;
 import jass.security.exception.EmailTakenException;
+import jass.security.exception.IncorrectPasswordException;
 import jass.security.exception.NotFoundException;
 import jass.security.model.*;
 import jass.security.repository.*;
@@ -12,6 +11,7 @@ import jass.security.service.interfaces.IAccountService;
 import jass.security.service.interfaces.IRejectedMailService;
 import jass.security.utils.DateUtils;
 import jass.security.utils.ObjectMapperUtils;
+import jass.security.utils.RandomPasswordGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -36,12 +36,14 @@ public class AccountService implements IAccountService {
     private final IAddressRepository addressRepository;
 
     private final IRejectedMailService rejectedMailService;
+    private final IAdministratorRepository administratorRepository;
+    private final MailSenderService mailService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    public AccountService(IAccountRepository accountRepository, IRoleRepository roleRespository, IHrManagerRepository hrManagerRepository, IProjectManagerRepository projectManagerRepository, ISoftwareEngineerRepository softwareEngineerRepository, IAddressRepository addressRepository, IRejectedMailService rejectedMailService) {
+    public AccountService(IAccountRepository accountRepository, IRoleRepository roleRespository, IHrManagerRepository hrManagerRepository, IProjectManagerRepository projectManagerRepository, ISoftwareEngineerRepository softwareEngineerRepository, IAddressRepository addressRepository, IRejectedMailService rejectedMailService, IAdministratorRepository administratorRepository, MailSenderService mailService) {
         this._accountRepository = accountRepository;
         _roleRespository = roleRespository;
         this.hrManagerRepository = hrManagerRepository;
@@ -49,6 +51,8 @@ public class AccountService implements IAccountService {
         this.softwareEngineerRepository = softwareEngineerRepository;
         this.addressRepository = addressRepository;
         this.rejectedMailService = rejectedMailService;
+        this.administratorRepository = administratorRepository;
+        this.mailService = mailService;
     }
 
     @Override
@@ -136,6 +140,32 @@ public class AccountService implements IAccountService {
         return newAcc.getId();
     }
 
+    @Override
+    @Transactional(rollbackFor = {Exception.class})
+    public UUID registerAdminAccount(RegisterAdminAccountDto dto) throws EmailTakenException {
+        Address address = makeAddress(dto.getAddress());
+        UUID adminId = UUID.randomUUID();
+
+        Administrator admin = new Administrator(adminId, dto.getName(), dto.getSurname(), address, dto.getPhoneNumber(), dto.getProfession());
+        administratorRepository.save(admin);
+
+        var role = _roleRespository.findByName("ROLE_ADMIN_PASSWORD_CHANGE");
+
+        Account newAcc = makeAdminAccount(dto, adminId);
+
+
+        //TODO Strahinja: Da li ovo ovako ili nekako bolje da se salju ove role sa fronta?
+        var roles = new ArrayList<Role>();
+        roles.add(role);
+        newAcc.setRoles(roles);
+        role.getUsers().add(newAcc);
+
+        save(newAcc);
+        _roleRespository.save(role);
+
+        return newAcc.getId();
+    }
+
     private SoftwareEngineer makeSoftwareEngineer(RegisterAccountDto dto, Address address) {
         SoftwareEngineer softwareEngineer = new SoftwareEngineer();
         softwareEngineer.setName(dto.getName());
@@ -205,6 +235,30 @@ public class AccountService implements IAccountService {
         newAcc.setEmployeeId(employeeId);
         newAcc.setStatus(RegistrationRequestStatus.PENDING);
         newAcc.setIsActivated(false);
+
+        return newAcc;
+    }
+
+    private Account makeAdminAccount(RegisterAdminAccountDto dto, UUID adminId) throws EmailTakenException {
+        if (findByEmail(dto.getEmail()) != null) {
+            throw new EmailTakenException();
+        }
+
+        Account newAcc = new Account();
+
+        String salt = genereteSalt();
+
+        newAcc.setEmail(dto.getEmail());
+        String password = RandomPasswordGenerator.generatePassword(15);
+        newAcc.setPassword(passwordEncoder.encode(password + salt));
+        newAcc.setSalt(salt);
+        newAcc.setId(UUID.randomUUID());
+        newAcc.setEmployeeId(adminId);
+        newAcc.setStatus(RegistrationRequestStatus.APPROVED);
+        newAcc.setIsActivated(true);
+
+        String mailBody = "Your password is: " +password + "\n You will need to change it after first login.";
+        mailService.sendSimpleEmail(dto.getEmail(), "New registration password", mailBody);
 
         return newAcc;
     }
@@ -312,6 +366,48 @@ public class AccountService implements IAccountService {
         }
         return infos;
     }
+
+    private boolean passwordValid(String inputPassword, String dbPassword, String dbSalt){
+        return passwordEncoder.matches(inputPassword + dbSalt, dbPassword);
+    }
+
+    @Override
+    public void changeAdminPassword(String email, ChangeAdminPasswordDto dto) throws IncorrectPasswordException, NotFoundException {
+        var account = _accountRepository.findByEmail(email);
+
+        if(account == null){
+            throw new NotFoundException("Account with given email not found");
+        }
+
+        if(!passwordValid(dto.getOldPassword(), account.getPassword(), account.getSalt())){
+           throw new IncorrectPasswordException("Old password is incorrect");
+        }
+
+
+        String newSalt = genereteSalt();
+        String newPassword = passwordEncoder.encode(dto.getNewPassword() + newSalt);
+
+        account.setSalt(newSalt);
+        account.setPassword(newPassword);
+
+
+        //Role change
+
+        var oldRole = _roleRespository.findByName("ROLE_ADMIN_PASSWORD_CHANGE");
+        var newRole = _roleRespository.findByName("ROLE_ADMIN");
+
+        //TODO Strahinja: Da li ovo ovako ili nekako bolje da se salju ove role sa fronta?
+        var roles = new ArrayList<Role>();
+        roles.add(newRole);
+        account.setRoles(roles);
+
+        oldRole.getUsers().remove(account);
+        newRole.getUsers().add(account);
+
+        _accountRepository.save(account);
+        _roleRespository.save(newRole);
+    }
+
 
     private String genereteSalt() {
         int length = 8; // Desired length of the random string
