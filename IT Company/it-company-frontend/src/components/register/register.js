@@ -92,7 +92,7 @@ function Register() {
             /[A-Z]/.test(user.password) &&
             /[a-z]/.test(user.password) &&
             /\d/.test(user.password) &&
-            /[!@#$%^&*(),.?":{}|<>]/.test(user.password);
+            /[_!@#$%^&*(),.?":{}|<>]/.test(user.password);
 
         setIsDisabled(!isValid);
     }, [user]);

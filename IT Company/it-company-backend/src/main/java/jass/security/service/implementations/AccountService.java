@@ -9,7 +9,6 @@ import jass.security.service.interfaces.IRejectedMailService;
 import jass.security.utils.DateUtils;
 import jass.security.utils.ObjectMapperUtils;
 import jass.security.utils.RandomPasswordGenerator;
-import org.aspectj.weaver.ast.Not;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -258,7 +257,7 @@ public class AccountService implements IAccountService {
         newAcc.setStatus(RegistrationRequestStatus.APPROVED);
         newAcc.setIsActivated(true);
 
-        String mailBody = "Your password is: " +password + "\n You will need to change it after first login.";
+        String mailBody = "Your password is: " + password + "\n You will need to change it after first login.";
         mailService.sendSimpleEmail(dto.getEmail(), "New registration password", mailBody);
 
         return newAcc;
@@ -370,7 +369,7 @@ public class AccountService implements IAccountService {
         return infos;
     }
 
-    private boolean passwordValid(String inputPassword, String dbPassword, String dbSalt){
+    private boolean passwordValid(String inputPassword, String dbPassword, String dbSalt) {
         return passwordEncoder.matches(inputPassword + dbSalt, dbPassword);
     }
 
@@ -378,12 +377,12 @@ public class AccountService implements IAccountService {
     public void changeAdminPassword(String email, ChangeAdminPasswordDto dto) throws IncorrectPasswordException, NotFoundException {
         var account = _accountRepository.findByEmail(email);
 
-        if(account == null){
+        if (account == null) {
             throw new NotFoundException("Account with given email not found");
         }
 
-        if(!passwordValid(dto.getOldPassword(), account.getPassword(), account.getSalt())){
-           throw new IncorrectPasswordException("Old password is incorrect");
+        if (!passwordValid(dto.getOldPassword(), account.getPassword(), account.getSalt())) {
+            throw new IncorrectPasswordException("Old password is incorrect");
         }
 
 
@@ -431,40 +430,40 @@ public class AccountService implements IAccountService {
 
         //Check if account with email exists
         var result = _accountRepository.findByEmail(email);
-        if (result == null){
+        if (result == null) {
             throw new NotFoundException("Username with given email not found");
         }
 
 
         String token = RandomPasswordGenerator.generatePassword(32);
         int tokenDuration = 10; //minutes
-        PasswordlessLoginToken passwordlessLoginToken = new PasswordlessLoginToken(UUID.randomUUID(), email, token, LocalDateTime.now(),  tokenDuration, false );
+        PasswordlessLoginToken passwordlessLoginToken = new PasswordlessLoginToken(UUID.randomUUID(), email, token, LocalDateTime.now(), tokenDuration, false);
 
         passwordlessLoginTokenRepository.save(passwordlessLoginToken);
-        String mailBody = "Click on this link to login: <html><a>http://localhost:4444/passwordless-login/" + token + "</a></html>";
-        mailService.sendHtmlMail(email,"Passwordless login",mailBody);
+        String link = "http://localhost:4444/passwordless-login?hash=" + token;
+        String mailBody = "<html>Click on this <a href=\"" + link + "\">link</a> to login.</html>";
+        mailService.sendHtmlMail(email, "Passwordless login", mailBody);
     }
-
 
 
     @Override
     public PasswordlessLoginToken usePLToken(String token) throws NotFoundException, PlTokenUsedException, TokenExpiredException {
         var result = passwordlessLoginTokenRepository.findPasswordlessLoginTokenByToken(token);
-        
-        if(result.isEmpty()){
-            throw  new NotFoundException("Passwordless login token not found");
+
+        if (result.isEmpty()) {
+            throw new NotFoundException("Passwordless login token not found");
         }
 
         PasswordlessLoginToken plToken = result.get();
 
-        if(plToken.isUsed()){
+        if (plToken.isUsed()) {
             throw new PlTokenUsedException("Passwordless login token already used");
         }
 
-        if(plToken.isExpired()){
-           throw new TokenExpiredException("Passwordless login token expired");
+        if (plToken.isExpired()) {
+            throw new TokenExpiredException("Passwordless login token expired");
         }
-        
+
         plToken.setUsed(true);
         passwordlessLoginTokenRepository.save(plToken);
         return plToken;

@@ -3,6 +3,7 @@ import {Box, Button, Dialog, DialogActions, DialogTitle, TextField} from "@mui/m
 import HowToRegIcon from "@mui/icons-material/HowToReg";
 import {useNavigate} from "react-router-dom";
 import {Flex} from 'reflexbox'
+import interceptor from "../../interceptor/interceptor";
 
 function RegisterAdmins() {
     const navigate = useNavigate();
@@ -76,16 +77,14 @@ function RegisterAdmins() {
 
     const handleRegisterClick = () => {
         console.log(user)
-
-
-        // interceptor.post('/auth/register', user)
-        //     .then((response) => {
-        //         navigate('/profile');
-        //     })
-        //     .catch((error) => {
-        //         setErrorMessage(error.response.data)
-        //         setUsernameTakenDialogShow(true)
-        //     });
+        interceptor.post('/auth/register-admin', user)
+            .then((response) => {
+                navigate('/profile');
+            })
+            .catch((error) => {
+                setErrorMessage(error.response.data)
+                setUsernameTakenDialogShow(true)
+            });
     };
 
     return (
