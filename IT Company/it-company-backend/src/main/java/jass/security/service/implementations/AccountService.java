@@ -440,7 +440,7 @@ public class AccountService implements IAccountService {
         PasswordlessLoginToken passwordlessLoginToken = new PasswordlessLoginToken(UUID.randomUUID(), email, token, LocalDateTime.now(), tokenDuration, false);
 
         passwordlessLoginTokenRepository.save(passwordlessLoginToken);
-        String link = "http://localhost:4444/passwordless-login?hash=" + token;
+        String link = "https://localhost:4444/passwordless-login?hash=" + token;
         String mailBody = "<html>Click on this <a href=\"" + link + "\">link</a> to login.</html>";
         mailService.sendHtmlMail(email, "Passwordless login", mailBody);
     }

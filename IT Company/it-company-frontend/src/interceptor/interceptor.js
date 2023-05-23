@@ -3,7 +3,7 @@ import axios from 'axios';
 let failedRequests = 0; // Counter for failed requests with 401 status
 
 const interceptor = axios.create({
-    baseURL: 'http://localhost:4761/',
+    baseURL: 'https://localhost:443/',
     withCredentials: true
 });
 
@@ -14,7 +14,7 @@ interceptor.interceptors.request.use(
         if (accessToken) {
             config.headers.Authorization = `Bearer ${accessToken}`;
         }
-    
+
         return config;
     },
     (error) => Promise.reject(error)
@@ -31,7 +31,7 @@ interceptor.interceptors.response.use(
         if (error.response && error.response.status === 410 && !originalRequest._retry) {
             originalRequest._retry = true;
             try {
-                const response = await axios.post('http://localhost:4761/auth/refresh', {
+                const response = await axios.post('https://localhost:443/auth/refresh', {
                     token: getRefreshToken(),
                 });
 

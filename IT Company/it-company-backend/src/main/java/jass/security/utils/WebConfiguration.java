@@ -25,8 +25,8 @@ public class WebConfiguration implements WebMvcConfigurer {
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        //TODO JOVAN STEFAN promeni u https kad bude bilo
-        config.setAllowedOrigins(List.of("http://localhost:4444", "http://localhost:4444/"));
+       
+        config.setAllowedOrigins(List.of("https://localhost:4444", "https://localhost:4444/"));
         config.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Accept", "responseType", "Authorization"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "OPTIONS", "DELETE", "PATCH"));
         source.registerCorsConfiguration("/**", config);
