@@ -5,7 +5,6 @@ import jass.security.exception.NotFoundException;
 import jass.security.model.Account;
 import jass.security.model.AccountActivation;
 import jass.security.repository.IAccountActivationRepository;
-import jass.security.repository.IAccountRepository;
 import jass.security.service.interfaces.IAccountActivationService;
 import jass.security.service.interfaces.IAccountService;
 import jass.security.utils.DateUtils;
@@ -45,7 +44,7 @@ public class AccountActivationService implements IAccountActivationService {
 
     @Override
     public AccountActivation findById(UUID id) {
-        if(accountActivationRepository.findById(id).isPresent()) {
+        if (accountActivationRepository.findById(id).isPresent()) {
             return accountActivationRepository.findById(id).get();
         }
         return null;
@@ -75,10 +74,10 @@ public class AccountActivationService implements IAccountActivationService {
     @Override
     public void activateAccount(String hash) throws EmailActivationExpiredException, NotFoundException {
         AccountActivation accountActivation = findByToken(hash);
-        if(accountActivation == null) {
+        if (accountActivation == null) {
             throw new NotFoundException("This activation does not exist");
         }
-        if(accountActivation.getExpireyDate().before(new Date())) {
+        if (accountActivation.getExpireyDate().before(new Date())) {
             deleteById(accountActivation.getId());
             throw new EmailActivationExpiredException();
         }
@@ -101,7 +100,7 @@ public class AccountActivationService implements IAccountActivationService {
 
         save(accountActivation);
 
-        return "http://localhost:4761/auth/activate/" + hash;
+        return "http://localhost:443/auth/activate/" + hash;
     }
 
 }
