@@ -182,15 +182,15 @@ public class AuthenticationController {
     public RedirectView activateAccount(@PathVariable String hash, RedirectAttributes attributes) {
         try {
             accountActivationService.activateAccount(hash);
-            //Todo  JOVAN dodaj https
+           
         } catch (EmailActivationExpiredException | NotFoundException e) {
-            return new RedirectView("http://localhost:4444/error-page");
+            return new RedirectView("https://localhost:4444/error-page");
         }
 
         attributes.addFlashAttribute("flashAttribute", "redirectWithRedirectView");
         attributes.addAttribute("attribute", "redirectWithRedirectView");
-        //Todo  JOVAN dodaj https
-        return new RedirectView("http://localhost:4444/login");
+
+        return new RedirectView("https://localhost:4444/login");
     }
 
     @PatchMapping("/admin-change-password")

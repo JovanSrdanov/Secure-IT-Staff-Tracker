@@ -42,6 +42,15 @@ public class SoftwareEngineerController {
         return new ResponseEntity<>(skills, HttpStatus.OK);
     }
 
+    @GetMapping("skill/{id}")
+    @PreAuthorize("hasAuthority('getAllSkillSwEngineerById')")
+    public ResponseEntity<?> GetAllSkillsById(@PathVariable("id") UUID swEngineerId) {
+
+        var skills = _softwareEngineerService.GetAllSkills(swEngineerId);
+        return new ResponseEntity<>(skills, HttpStatus.OK);
+    }
+
+
     @PostMapping("skill")
     @PreAuthorize("hasAuthority('addSkillSwEngineer')")
     public ResponseEntity<?> AddSkill(@RequestBody AddSkillDto dto, Principal principal) {

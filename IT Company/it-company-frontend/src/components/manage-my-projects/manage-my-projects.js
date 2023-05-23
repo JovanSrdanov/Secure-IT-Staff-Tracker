@@ -18,6 +18,9 @@ import {
     TextField
 } from "@mui/material";
 import {Flex} from "reflexbox";
+import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
+import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
 
 const StyledTableCell = styled(TableCell)(({theme}) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -146,8 +149,116 @@ function Projects(props) {
 
 
     };
+
+    const [showUpdateProjectDialog, setShowUpdateProjectDialog] = React.useState(false)
+    const handleUpdateProjectClick = (item) => {
+        setSelectedProject(item);
+        setShowUpdateProjectDialog(true);
+
+    };
+
+    const [newProject, setNewProject] = React.useState({
+        name: "",
+        duration: {
+            startDate: dayjs(),
+            endDate: dayjs().add(1, 'day')
+        }
+    });
+
+    const handleCloseUpdatingProjectDialog = () => {
+        setShowUpdateProjectDialog(false);
+        setNewProject({
+            name: "",
+            duration: {
+                startDate: dayjs(),
+                endDate: dayjs().add(1, 'day')
+            }
+        });
+    };
+    const handleNameChange = (event) => {
+        setNewProject((prevProject) => ({
+            ...prevProject,
+            name: event.target.value,
+        }));
+    };
+
+    const handleEndDateChange = (date) => {
+        setNewProject((prevProject) => ({
+            ...prevProject,
+            duration: {
+                ...prevProject.duration,
+                endDate: date,
+            },
+        }));
+    };
+
+
+    const handleUpdatingProject = () => {
+
+
+        var sendData = {
+            endDate: new Date(newProject.duration.endDate),
+            name: newProject.name
+        }
+
+        interceptor.put("project/" + selectedProject.project.id + "/update-project", sendData).then((res) => {
+            getAllProjects();
+            handleCloseUpdatingProjectDialog();
+        }).catch((err) => {
+            console.log(err)
+        })
+
+    };
+
     return (
         <>
+
+
+            <Dialog onClose={handleCloseUpdatingProjectDialog} open={showUpdateProjectDialog}>
+                <DialogTitle>Project</DialogTitle>
+                <DialogContent>
+                    <Box m={2}>
+                        <TextField
+                            fullWidth
+                            label="Project name"
+                            variant="filled"
+                            value={newProject.name}
+                            onChange={handleNameChange}
+                        />
+                    </Box>
+                    <Box m={2}>
+                        Project start date: {(new Date()).toLocaleDateString()}
+                    </Box>
+                    <Box m={2}>
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DatePicker
+                                label="End date"
+                                minDate={dayjs().add(1, 'day')}
+
+                                value={newProject.duration.endDate}
+                                onChange={handleEndDateChange}
+                            />
+                        </LocalizationProvider>
+                    </Box>
+                </DialogContent>
+                <DialogActions>
+                    <Flex flexDirection="row" justifyContent="center" alignItems="center">
+                        <Button onClick={handleCloseUpdatingProjectDialog}
+                                variant="contained">
+                            Close
+                        </Button>
+                        <Box m={1}>
+                            <Button
+                                disabled={newProject.name === "" || newProject.name.length >= 255}
+                                variant="contained" color="success"
+                                onClick={handleUpdatingProject}
+                            >Update project</Button>
+                        </Box>
+                    </Flex>
+                </DialogActions>
+            </Dialog>
+
+
             <Dialog onClose={handleCloseDescriptionDialog} open={workDescirptionDialog}>
                 <DialogTitle>Work description:</DialogTitle>
                 <DialogContent>
@@ -215,7 +326,6 @@ function Projects(props) {
                                                             End
                                                             date: {item.workingPeriod.endDate ? new Date(item.workingPeriod.endDate).toLocaleDateString('en-US', {hour12: false}) : ''}
                                                         </li>
-
                                                     </Box>
 
                                                 </StyledTableCell>
@@ -308,7 +418,7 @@ function Projects(props) {
                                                 <Box m={1} sx={{
                                                     overflowX: 'auto',
                                                     width: 300,
-                                                    height: 100,
+                                                    height: 150,
                                                     overflowY: 'auto'
                                                 }}>
                                                     <li>Name: {item.project.name}</li>
@@ -317,7 +427,16 @@ function Projects(props) {
                                                         date: {new Date(item.project.duration.startDate).toLocaleDateString('en-US', {hour12: false})}</li>
                                                     <li>End
                                                         date: {new Date(item.project.duration.endDate).toLocaleDateString('en-US', {hour12: false})}</li>
+                                                    <Box mt={2}>
+                                                        <Button variant="contained" color="warning"
+                                                                onClick={() => handleUpdateProjectClick(item)}>
+
+                                                            Update project
+                                                        </Button>
+                                                    </Box>
                                                 </Box>
+
+
                                             </StyledTableCell>
                                             <StyledTableCell>
                                                 <Box m={1}>

@@ -2,6 +2,7 @@ INSERT INTO public.address (id, city, country, street, street_number)
 VALUES ('d3adcff2-ae88-495b-91f6-234d6eba6d11', 'Nova Pazova', 'Srbija', 'Zlatne Grede', '12'),
        ('85015489-7336-4636-b6e1-68343be88f09', 'Loznica', 'Srbija', 'Lekarska', '10'),
        ('9edc7a9a-f6c5-41c0-a1ae-79c2e628b01f', 'Nis', 'Srbija', 'Pariske komune', '11'),
+       ('b7b0e323-7ce7-4724-8696-9c8b7bb70734', 'Novi Sad', 'Srbija', 'Djordja Jovanovica', '8'),
        ('634b8ef3-4346-4898-bc2e-d73595a96f2d', 'Novi Sad', 'Srbija', 'Gunduliceva', '8');
 
 
@@ -19,6 +20,9 @@ INSERT INTO public.administrator (id, name, phone_number, profession, surname, a
 VALUES ('6b977f75-db33-44fd-8b8f-19bf87d82c65', 'Stefan', '123456', 'Assembly', 'Apostolovic',
         '9edc7a9a-f6c5-41c0-a1ae-79c2e628b01f');
 
+INSERT INTO public.hr_manager (id, name, phone_number, profession, surname, address_id)
+VALUES ('a3c2eba9-fd68-4d6a-851c-41ac05bd77d3', 'Miodrag', '123456', 'profesija', 'Miodragovic',
+        'b7b0e323-7ce7-4724-8696-9c8b7bb70734');
 
 INSERT INTO public.account
     (id, email, employee_id, "password", salt, status, is_activated)
@@ -26,8 +30,10 @@ values ('9d0dc40b-a0c6-4610-ac51-23ed75b94a9a', 'jovansrdanov2000+1@gmail.com', 
         '$2y$10$lFp.7xd3uHzrVnftpUcCFOPlEdsU8n76eUy4A/e8c0Eg/.AAc9M8y', 'a', 1, true),
        ('be256f3c-48a3-449d-86e5-4bb1165122b3', 'jovansrdanov2000+3@gmail.com', 'cf11ba92-dea3-4d80-b2f0-8187060cb831',
         '$2y$10$lFp.7xd3uHzrVnftpUcCFOPlEdsU8n76eUy4A/e8c0Eg/.AAc9M8y', 'a', 1, true),
-    -- TODO zameni mail
-       ('a7c0173e-0bcc-4df7-96b4-481d582dea60', 'al.stojanovic0@gmail.com', 'c390e0cf-9c9d-41b7-80f9-b55939cc11e8',
+       ('2eeff05d-924f-49ce-b5db-43b18096e00a', 'jovansrdanov2000+4@gmail.com', 'a3c2eba9-fd68-4d6a-851c-41ac05bd77d3',
+        '$2y$10$lFp.7xd3uHzrVnftpUcCFOPlEdsU8n76eUy4A/e8c0Eg/.AAc9M8y', 'a', 1, true),
+       -- TODO zameni mail
+       ('a7c0173e-0bcc-4df7-96b4-481d582dea60', 'jovansrdanov2000+2@gmail.com', 'c390e0cf-9c9d-41b7-80f9-b55939cc11e8',
         '$2y$10$lFp.7xd3uHzrVnftpUcCFOPlEdsU8n76eUy4A/e8c0Eg/.AAc9M8y', 'a', 1, true);
 
 
@@ -62,6 +68,9 @@ values ('fc784caa-1a09-459f-9fef-d2ce4b1b89e6', 'changeAccStatusAccept'),
        ('85deb19a-6bbb-4a97-93f1-7d118f17c014', 'getLoggedInInfo'),
        ('ab494841-f5aa-4e4e-b6e2-5d8c1085eb3f', 'updateLoggedInInfo'),
        ('f7fe6f68-08d4-42f0-804f-d49107dfd9ba', 'updateProjectInfo'),
+       ('1ebf0eda-ac58-4548-9cf0-69d33508a5a0', 'getPrManagersProjectsById'),
+       ('9edb2d3e-3ad5-45d5-bca9-d69b4161988d', 'getSwEngineersProjectsById'),
+       ('437bfba6-7add-4e5c-8354-d3bee0d09e0c', 'getAllSkillSwEngineerById'),
        ('a8bc9435-22b3-45d0-8d74-a28f64f388da', 'getAllSkillSwEngineer');
 
 
@@ -78,6 +87,7 @@ INSERT INTO public.users_roles
     (user_id, role_id)
 values ('9d0dc40b-a0c6-4610-ac51-23ed75b94a9a', '153c2366-eb2d-4ce2-b55e-42c83609da8a'),
        ('be256f3c-48a3-449d-86e5-4bb1165122b3', '2cdfba8e-78a3-46a9-b414-96a41d1a5c62'),
+       ('2eeff05d-924f-49ce-b5db-43b18096e00a', '407d5496-2b68-4052-9219-f87ed4126fc9'),
        ('a7c0173e-0bcc-4df7-96b4-481d582dea60', '79113e08-0b50-41ee-a8ea-42559259d44e');
 
 
@@ -129,6 +139,10 @@ values
 -- HR MANAGER
 ('407d5496-2b68-4052-9219-f87ed4126fc9', '85deb19a-6bbb-4a97-93f1-7d118f17c014'),
 ('407d5496-2b68-4052-9219-f87ed4126fc9', 'ab494841-f5aa-4e4e-b6e2-5d8c1085eb3f'),
+('407d5496-2b68-4052-9219-f87ed4126fc9', '1ebf0eda-ac58-4548-9cf0-69d33508a5a0'),
+('407d5496-2b68-4052-9219-f87ed4126fc9', '9edb2d3e-3ad5-45d5-bca9-d69b4161988d'),
+('407d5496-2b68-4052-9219-f87ed4126fc9', '437bfba6-7add-4e5c-8354-d3bee0d09e0c'),
+('407d5496-2b68-4052-9219-f87ed4126fc9', '44c764a7-fa8e-4820-8c31-5d882514f65c'),
 -- ADMIN_PASSWORD_CHANGE
 ('153c2366-eb2d-4ce2-b55e-42c83609da8a', 'd270db68-12fb-4dce-a9f0-7ef64d091731');
 

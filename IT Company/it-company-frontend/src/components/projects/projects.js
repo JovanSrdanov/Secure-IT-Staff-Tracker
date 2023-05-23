@@ -525,7 +525,7 @@ function Projects(props) {
 
 
             <Dialog onClose={handleCloseCreateNewProjectDialog} open={showCreateNewProjectDialog}>
-                <DialogTitle>Reason for rejection:</DialogTitle>
+                <DialogTitle>New project:</DialogTitle>
                 <DialogContent>
                     <Box m={2}>
                         <TextField
