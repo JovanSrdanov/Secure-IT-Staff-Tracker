@@ -9,7 +9,6 @@ import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
-import org.bouncycastle.openssl.PEMWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.mail.SimpleMailMessage;
@@ -38,7 +37,9 @@ import pkibackend.pkibackend.service.interfaces.ICertificateService;
 import pkibackend.pkibackend.service.interfaces.IRoleService;
 
 import javax.security.auth.x500.X500Principal;
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.CertificateEncodingException;
@@ -280,7 +281,7 @@ public class CertificateService implements ICertificateService {
             subject.setSalt(salt.toString());
             subject.setPassword(_passwordEncoder.encode(password.toString() + salt.toString()));
             _accountService.save(subject);
-            sendEmailWithPassword(subject.getEmail(), password.toString());
+            //  sendEmailWithPassword(subject.getEmail(), password.toString());
 
         } else {
             _accountService.updateAccount(subject, subject.getId());
