@@ -100,7 +100,7 @@ public class AccountActivationService implements IAccountActivationService {
 
         save(accountActivation);
 
-        return "http://localhost:4430/auth/activate/" + hash;
+        return "https://localhost:4430/auth/activate/" + hash;
     }
 
 }

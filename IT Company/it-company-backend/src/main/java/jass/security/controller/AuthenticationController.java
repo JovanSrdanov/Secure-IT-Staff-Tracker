@@ -159,8 +159,8 @@ public class AuthenticationController {
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
             return ResponseEntity.ok("Error while hashing!");
         }
-
-        mailSenderService.sendSimpleEmail(mail, "IT COMPANY", link);
+        String htmlLink = "Click this <a href="+ link + ">link</a> to activate account";
+        mailSenderService.sendHtmlMail(mail, "IT COMPANY", htmlLink);
         return ResponseEntity.ok("Registration approved");
     }
 
