@@ -12,6 +12,8 @@ import jass.security.service.implementations.MailSenderService;
 import jass.security.service.interfaces.IAccountActivationService;
 import jass.security.service.interfaces.IAccountService;
 import jass.security.utils.TokenUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -35,6 +37,7 @@ import java.util.ArrayList;
 @RestController
 @RequestMapping(value = "/auth", produces = MediaType.APPLICATION_JSON_VALUE)
 public class AuthenticationController {
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
 
     @Autowired
     private TokenUtils tokenUtils;
@@ -58,16 +61,21 @@ public class AuthenticationController {
             @RequestBody JwtAuthenticationRequest authenticationRequest, HttpServletResponse response) {
         // Ukoliko kredencijali nisu ispravni, logovanje nece biti uspesno, desice se
         // AuthenticationException
+        logger.info("ALLLLLLLLLLLLLLOOOOOOOOOOOOOOOOUUUUUUUUU USOOOOOOOOOOOO SAAAAAAAAAAAM!!!!!!!!!!");
+
         Account acc = accountService.findByEmail(authenticationRequest.getEmail());
         if (acc == null) {
+            logger.error("nie ga naso");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not found");
         }
 
         if (acc.getStatus() != RegistrationRequestStatus.APPROVED) {
+            logger.error("admin ne da");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Registration is not yet accepted by admin");
         }
 
         if (!acc.getIsActivated()) {
+            logger.error("nisi aktivan");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Account not activated");
         }
 
@@ -76,6 +84,7 @@ public class AuthenticationController {
             authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                     authenticationRequest.getEmail(), authenticationRequest.getPassword() + acc.getSalt()));
         } catch (BadCredentialsException e) {
+            logger.error("pukla autentifikacija");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Auth failed");
         }
 
@@ -95,6 +104,7 @@ public class AuthenticationController {
         int expiresIn = tokenUtils.getExpiredIn();
 
         // Vrati token kao odgovor na uspesnu autentifikaciju
+        logger.info("uspeo si da udjes :)");
         return ResponseEntity.ok(new UserTokenState(jwt, resfresh, expiresIn));
     }
 
