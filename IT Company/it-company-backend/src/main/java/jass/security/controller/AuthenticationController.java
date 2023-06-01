@@ -51,12 +51,12 @@ import java.util.List;
 public class AuthenticationController {
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
     //Twilio
-    @Value("${twilioAccountSid}")
-    private String TWILIO_ACCOUNT_SID;
-    @Value("${twilioAuthToken}")
-    private String TWILIO_AUTH_TOKEN;
-    @Value("${twilioPhoneNumber}")
-    private String TWILIO_PHONE_NUMBER;
+//    @Value("${twilioAccountSid}")
+//    private String TWILIO_ACCOUNT_SID;
+//    @Value("${twilioAuthToken}")
+//    private String TWILIO_AUTH_TOKEN;
+//    @Value("${twilioPhoneNumber}")
+//    private String TWILIO_PHONE_NUMBER;
 
     //Clicksend
     @Autowired
@@ -187,6 +187,11 @@ public class AuthenticationController {
         } catch (EmailRejectedException e) {
             logger.warn("User failed to register, from IP: " + IPUtils.getIPAddressFromHttpRequest(request),
                     " reason: given email is temporarily blocked");
+
+            //Clicksend
+            SMSDto smsDto = new SMSDto("IT Company", "User with an IP: " + IPUtils.getIPAddressFromHttpRequest(request)
+                    + " tried to register with a blocked email: " + dto.getEmail(), "+381628387347");
+            SMSUtils.sendSMS(logger, clickSendConfig, smsDto);
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Email is blocked temporarily!");
         }
     }

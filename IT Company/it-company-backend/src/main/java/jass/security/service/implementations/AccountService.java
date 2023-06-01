@@ -99,9 +99,9 @@ public class AccountService implements IAccountService {
         }
 
 
-        //make adres
+        //make address
         Address address = makeAddress(dto.getAddress());
-        //make employye
+        //make employee
         UUID employeeId;
         Role role;
 

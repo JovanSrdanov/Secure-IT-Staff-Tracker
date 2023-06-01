@@ -7,21 +7,21 @@ VALUES ('d3adcff2-ae88-495b-91f6-234d6eba6d11', 'Nova Pazova', 'Srbija', 'Zlatne
 
 
 INSERT INTO public.project_manager (id, name, phone_number, profession, surname, address_id)
-VALUES ('cf11ba92-dea3-4d80-b2f0-8187060cb831', 'Smilja', '123456', 'Proffessional air breather', 'Uskokovic',
+VALUES ('cf11ba92-dea3-4d80-b2f0-8187060cb831', 'Smilja', '+381628387347', 'Proffessional air breather', 'Uskokovic',
         'd3adcff2-ae88-495b-91f6-234d6eba6d11');
 
 INSERT INTO public.software_engineer (id, name, phone_number, profession, surname, date_of_employment, address_id,
                                       cv_id)
-VALUES ('c390e0cf-9c9d-41b7-80f9-b55939cc11e8', 'Petar', '123456', '.Net Senior', 'Popovic',
+VALUES ('c390e0cf-9c9d-41b7-80f9-b55939cc11e8', 'Petar', '+381628387347', '.Net Senior', 'Popovic',
         TIMESTAMP '2005-11-25 23:56:00', '85015489-7336-4636-b6e1-68343be88f09', NULL);
 
 
 INSERT INTO public.administrator (id, name, phone_number, profession, surname, address_id)
-VALUES ('6b977f75-db33-44fd-8b8f-19bf87d82c65', 'Stefan', '123456', 'Assembly', 'Apostolovic',
+VALUES ('6b977f75-db33-44fd-8b8f-19bf87d82c65', 'Stefan', '+381628387347', 'Assembly', 'Apostolovic',
         '9edc7a9a-f6c5-41c0-a1ae-79c2e628b01f');
 
 INSERT INTO public.hr_manager (id, name, phone_number, profession, surname, address_id)
-VALUES ('a3c2eba9-fd68-4d6a-851c-41ac05bd77d3', 'Miodrag', '123456', 'profesija', 'Miodragovic',
+VALUES ('a3c2eba9-fd68-4d6a-851c-41ac05bd77d3', 'Miodrag', '+381628387347', 'profesija', 'Miodragovic',
         'b7b0e323-7ce7-4724-8696-9c8b7bb70734');
 
 INSERT INTO public.account

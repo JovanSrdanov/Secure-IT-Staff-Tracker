@@ -1,11 +1,14 @@
 package jass.security.controller;
 
+import ClickSend.ApiClient;
 import jass.security.dto.PermissionUpdateRequest;
 import jass.security.dto.PrivilegeInfoDto;
 import jass.security.dto.RoleInfoDto;
+import jass.security.dto.SMSDto;
 import jass.security.service.interfaces.IPrivilegeService;
 import jass.security.service.interfaces.IRoleService;
 import jass.security.utils.ObjectMapperUtils;
+import jass.security.utils.SMSUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +24,10 @@ public class PrivilegeController {
 
     private final IRoleService roleService;
 
+    //Clicksend
+    @Autowired
+    private ApiClient clickSendConfig;
+
     @Autowired
     public PrivilegeController(IPrivilegeService privilegeService, IRoleService roleService) {
         this.privilegeService = privilegeService;
@@ -32,6 +39,11 @@ public class PrivilegeController {
     public ResponseEntity<?> updatePrivileges(@RequestBody PermissionUpdateRequest dto) {
         roleService.updatePrivileges(dto);
         logger.info("Privileges for the role: " + dto.getRoleName() + "changed");
+
+        //Clicksend
+        SMSDto smsDto = new SMSDto("IT Company",
+                "Privileges for the role: " + dto.getRoleName() + "changed", "+381628387347");
+        SMSUtils.sendSMS(logger, clickSendConfig, smsDto);
 
         return ResponseEntity.ok("Privileges updated");
     }
