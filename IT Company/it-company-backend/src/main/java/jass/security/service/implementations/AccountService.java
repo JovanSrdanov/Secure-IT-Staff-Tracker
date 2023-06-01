@@ -79,8 +79,12 @@ public class AccountService implements IAccountService {
     }
 
     @Override
-    public Account findByEmail(String email) {
-        return _accountRepository.findByEmail(email);
+    public Account findByEmail(String email) throws NotFoundException {
+        var acc = _accountRepository.findByEmail(email);
+        if(acc == null) {
+            throw new NotFoundException("Account with this mail does not exist!");
+        }
+        return acc;
     }
 
     @Override
@@ -142,7 +146,7 @@ public class AccountService implements IAccountService {
 
     @Override
     @Transactional(rollbackFor = {Exception.class})
-    public UUID registerAdminAccount(RegisterAdminAccountDto dto) throws EmailTakenException {
+    public UUID registerAdminAccount(RegisterAdminAccountDto dto) throws EmailTakenException, NotFoundException {
         Address address = makeAddress(dto.getAddress());
         UUID adminId = UUID.randomUUID();
 
@@ -219,7 +223,7 @@ public class AccountService implements IAccountService {
         return address;
     }
 
-    private Account makeAccount(RegisterAccountDto dto, UUID employeeId) throws EmailTakenException {
+    private Account makeAccount(RegisterAccountDto dto, UUID employeeId) throws EmailTakenException, NotFoundException {
         if (findByEmail(dto.getEmail()) != null) {
             throw new EmailTakenException();
         }
@@ -239,7 +243,7 @@ public class AccountService implements IAccountService {
         return newAcc;
     }
 
-    private Account makeAdminAccount(RegisterAdminAccountDto dto, UUID adminId) throws EmailTakenException {
+    private Account makeAdminAccount(RegisterAdminAccountDto dto, UUID adminId) throws EmailTakenException, NotFoundException {
         if (findByEmail(dto.getEmail()) != null) {
             throw new EmailTakenException();
         }
@@ -467,6 +471,29 @@ public class AccountService implements IAccountService {
         plToken.setUsed(true);
         passwordlessLoginTokenRepository.save(plToken);
         return plToken;
+    }
+
+    @Override
+    public void blockAccount(String email) throws NotFoundException {
+        Account account = findByEmail(email);
+        if (account == null) {
+            throw new NotFoundException("Account with this email does not exist");
+        }
+        account.setIsBlocked(true);
+        save(account);
+    }
+
+    @Override
+    public void changePassword(ChangePasswordDto dto) throws NotFoundException, PasswordsDontMatchException {
+        Account account = findByEmail(dto.getEmail());
+
+        String dbPassword = account.getPassword();
+        if(passwordEncoder.matches(dto.getOldPassword() + account.getSalt(), dbPassword)) {
+            account.setPassword(passwordEncoder.encode(dto.getNewPassword() + account.getSalt()));
+            save(account);
+        }
+
+        else throw new PasswordsDontMatchException("Passwords don`t mant");
     }
 
 

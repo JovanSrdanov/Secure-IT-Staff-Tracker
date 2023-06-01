@@ -1,6 +1,8 @@
 package jass.security.service.implementations;
 
 import jass.security.dto.employee.EmployeeProfileInfoDto;
+import jass.security.dto.swengineer.SearchSwEngineerDto;
+import jass.security.dto.swengineer.SearchSwResponseDto;
 import jass.security.dto.swengineer.SkillDto;
 import jass.security.exception.NotFoundException;
 import jass.security.model.Employee;
@@ -86,5 +88,10 @@ public class SoftwareEngineerService implements ISoftwareEngineerService {
         oldEmployee.update(dto);
 
         return _softwareEngineerRepository.save(oldEmployee);
+    }
+
+    @Override
+    public List<SearchSwResponseDto> searchSw(SearchSwEngineerDto dto) {
+        return _softwareEngineerRepository.searchSw(dto);
     }
 }

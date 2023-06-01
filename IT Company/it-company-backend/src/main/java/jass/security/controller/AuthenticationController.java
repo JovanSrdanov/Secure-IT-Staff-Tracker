@@ -58,9 +58,18 @@ public class AuthenticationController {
             @RequestBody JwtAuthenticationRequest authenticationRequest, HttpServletResponse response) {
         // Ukoliko kredencijali nisu ispravni, logovanje nece biti uspesno, desice se
         // AuthenticationException
-        Account acc = accountService.findByEmail(authenticationRequest.getEmail());
+        Account acc = null;
+        try {
+            acc = accountService.findByEmail(authenticationRequest.getEmail());
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("This account does not exist!");
+        }
         if (acc == null) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not found");
+        }
+
+        if (acc.getIsBlocked()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Accont is blocked");
         }
 
         if (acc.getStatus() != RegistrationRequestStatus.APPROVED) {
@@ -87,7 +96,12 @@ public class AuthenticationController {
         // Kreiraj token za tog korisnika
         //TODO Strahinja: Zasto ovde baca error?
         //Account user = (Account) authentication.getPrincipal();
-        Account account = accountService.findByEmail(authenticationRequest.getEmail());
+        Account account = null;
+        try {
+            account = accountService.findByEmail(authenticationRequest.getEmail());
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("This account does not exist!");
+        }
         var roles = new ArrayList<Role>(account.getRoles());
 
         String jwt = tokenUtils.generateToken(authenticationRequest.getEmail(), roles.get(0).getName());
@@ -104,6 +118,12 @@ public class AuthenticationController {
             if (tokenUtils.validateRefreshToken(token.getToken())) {
                 String email = tokenUtils.getUsernameFromToken(token.getToken());
                 Account account = accountService.findByEmail(email);
+
+                if(account.getIsBlocked()) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Account is blocked");
+                }
+
+
                 var roles = new ArrayList<>(account.getRoles());
                 String jwt = tokenUtils.generateToken(email, roles.get(0).getName());
                 int expiresIn = tokenUtils.getExpiredIn();
@@ -111,6 +131,8 @@ public class AuthenticationController {
             }
         } catch (ExpiredJwtException | TokenExpiredException ex) {
             return ResponseEntity.status(HttpStatus.GONE).body("Token expired");
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("This account does not exist!");
         }
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Token not valid");
@@ -139,6 +161,8 @@ public class AuthenticationController {
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (EmailTakenException e) {
             return new ResponseEntity<>("This e-mail is taken!", HttpStatus.CONFLICT);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("This account does not exist!");
         }
     }
 

@@ -31,6 +31,7 @@ public class Account {
 
     private UUID employeeId;
     private Boolean isActivated;
+    private Boolean isBlocked;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
