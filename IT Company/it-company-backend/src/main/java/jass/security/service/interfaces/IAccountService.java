@@ -25,6 +25,6 @@ public interface IAccountService extends ICrudService<Account> {
 
     void blockAccount(String email) throws NotFoundException;
 
-    void changePassword(ChangePasswordDto dto) throws NotFoundException;
+    void changePassword(ChangePasswordDto dto) throws NotFoundException, PasswordsDontMatchException;
 
     }

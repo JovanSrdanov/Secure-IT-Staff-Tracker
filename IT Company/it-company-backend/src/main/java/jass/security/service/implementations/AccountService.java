@@ -484,8 +484,16 @@ public class AccountService implements IAccountService {
     }
 
     @Override
-    public void changePassword(ChangePasswordDto dto) throws NotFoundException {
+    public void changePassword(ChangePasswordDto dto) throws NotFoundException, PasswordsDontMatchException {
         Account account = findByEmail(dto.getEmail());
+
+        String dbPassword = account.getPassword();
+        if(passwordEncoder.matches(dto.getOldPassword() + account.getSalt(), dbPassword)) {
+            account.setPassword(passwordEncoder.encode(dto.getNewPassword() + account.getSalt()));
+            save(account);
+        }
+
+        else throw new PasswordsDontMatchException("Passwords don`t mant");
     }
 
 

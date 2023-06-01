@@ -1,8 +1,11 @@
 package jass.security.controller;
 
+import jakarta.validation.Valid;
 import jass.security.dto.AccountApprovalDto;
+import jass.security.dto.ChangePasswordDto;
 import jass.security.dto.RegisterEmployeeDto;
 import jass.security.exception.NotFoundException;
+import jass.security.exception.PasswordsDontMatchException;
 import jass.security.model.Account;
 import jass.security.model.RegistrationRequestStatus;
 import jass.security.service.interfaces.IAccountService;
@@ -53,6 +56,18 @@ public class AccountController {
             return ResponseEntity.ok("Account blocked!");
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("This account does not exist!");
+        }
+    }
+
+    @PostMapping("/changePassword")
+    public ResponseEntity<?> changePassword(@RequestBody @Valid ChangePasswordDto dto) {
+        try {
+            _accountService.changePassword(dto);
+            return ResponseEntity.ok("Password changed");
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("This account does not exist!");
+        } catch (PasswordsDontMatchException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Passwords don`t match");
         }
     }
 
