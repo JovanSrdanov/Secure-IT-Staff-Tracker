@@ -33,7 +33,7 @@ values ('9d0dc40b-a0c6-4610-ac51-23ed75b94a9a', 'jovansrdanov2000+1@gmail.com', 
        ('2eeff05d-924f-49ce-b5db-43b18096e00a', 'jovansrdanov2000+4@gmail.com', 'a3c2eba9-fd68-4d6a-851c-41ac05bd77d3',
         '$2y$10$lFp.7xd3uHzrVnftpUcCFOPlEdsU8n76eUy4A/e8c0Eg/.AAc9M8y', 'a', 1, true, false),
        -- TODO zameni mail
-       ('a7c0173e-0bcc-4df7-96b4-481d582dea60', 'jovansrdanov2000+2@gmail.com', 'c390e0cf-9c9d-41b7-80f9-b55939cc11e8',
+       ('a7c0173e-0bcc-4df7-96b4-481d582dea60', 'karte32114+1@gmail.com', 'c390e0cf-9c9d-41b7-80f9-b55939cc11e8',
         '$2y$10$lFp.7xd3uHzrVnftpUcCFOPlEdsU8n76eUy4A/e8c0Eg/.AAc9M8y', 'a', 1, true, false);
 
 

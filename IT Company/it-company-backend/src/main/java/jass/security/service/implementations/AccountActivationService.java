@@ -84,6 +84,7 @@ public class AccountActivationService implements IAccountActivationService {
 
         Account account = accountService.findByEmail(accountActivation.getEmail());
         account.setIsActivated(true);
+        accountService.save(account);
 
         deleteById(accountActivation.getId());
     }

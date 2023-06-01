@@ -1,8 +1,8 @@
 package jass.security.service.implementations;
 
+import jass.security.exception.EmailActivationExpiredException;
 import jass.security.exception.NotFoundException;
 import jass.security.model.Account;
-import jass.security.model.AccountActivation;
 import jass.security.model.AccountRecovery;
 import jass.security.repository.IAccountRecoveryRepository;
 import jass.security.service.interfaces.IAccountRecoveryService;
@@ -12,6 +12,7 @@ import jass.security.utils.HashUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.InvalidKeyException;
@@ -27,13 +28,16 @@ public class AccountRecoveryService implements IAccountRecoveryService {
 
     private final IAccountService accountService;
 
+    private PasswordEncoder passwordEncoder;
+
     @Value("${hmacSecret}")
     private String hmacSecret;
 
     @Autowired
-    public AccountRecoveryService(IAccountRecoveryRepository accountRecoveryRepository, IAccountService accountService) {
+    public AccountRecoveryService(IAccountRecoveryRepository accountRecoveryRepository, IAccountService accountService, PasswordEncoder passwordEncoder) {
         this.accountRecoveryRepository = accountRecoveryRepository;
         this.accountService = accountService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -74,5 +78,28 @@ public class AccountRecoveryService implements IAccountRecoveryService {
         save(accountRecovery);
 
         return "https://localhost:4430/account/recover/" + hash;
+    }
+
+    @Override
+    public void recoverAccount(String token, String newPassword) throws NotFoundException, EmailActivationExpiredException {
+        AccountRecovery accountRecovery = findByToken(token);
+        if (accountRecovery == null) {
+            throw new NotFoundException("This recovery does not exist");
+        }
+        if (accountRecovery.getExpireyDate().before(new Date())) {
+            delete(accountRecovery.getId());
+            throw new EmailActivationExpiredException();
+        }
+
+        Account account = accountService.findByEmail(accountRecovery.getEmail());
+        account.setPassword(passwordEncoder.encode(newPassword + account.getSalt()));
+        accountService.save(account);
+
+        delete(accountRecovery.getId());
+    }
+
+    @Override
+    public AccountRecovery findByToken(String token) {
+        return accountRecoveryRepository.findByToken(token);
     }
 }

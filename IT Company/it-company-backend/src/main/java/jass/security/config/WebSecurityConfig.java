@@ -96,7 +96,7 @@ public class WebSecurityConfig {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
-                .requestMatchers(HttpMethod.POST, "/auth/login", "auth/register", "/account/changePassword")
+                .requestMatchers(HttpMethod.POST, "/auth/login", "auth/register", "/account/changePassword", "/account/recover/**")
                 .requestMatchers(HttpMethod.GET, "/auth/activate/**", "account/reqest-recovery/**", "/", "/webjars/**", "/*.html", "favicon.ico", "/*/*.html", "/*/*.css", "/*/*.js");
     }
 

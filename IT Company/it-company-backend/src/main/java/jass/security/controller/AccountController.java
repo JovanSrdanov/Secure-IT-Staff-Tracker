@@ -2,11 +2,14 @@ package jass.security.controller;
 
 import jakarta.validation.Valid;
 import jass.security.dto.ChangePasswordDto;
+import jass.security.dto.RecoverAccountDto;
 import jass.security.dto.RegisterEmployeeDto;
+import jass.security.exception.EmailActivationExpiredException;
 import jass.security.exception.NotFoundException;
 import jass.security.exception.PasswordsDontMatchException;
 import jass.security.model.Account;
 import jass.security.model.RegistrationRequestStatus;
+import jass.security.service.implementations.MailSenderService;
 import jass.security.service.interfaces.IAccountRecoveryService;
 import jass.security.service.interfaces.IAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +29,13 @@ public class AccountController {
 
     private final IAccountRecoveryService accountRecoveryService;
 
+    private MailSenderService mailSenderService;
+
     @Autowired
-    public AccountController(IAccountService _accountService, IAccountRecoveryService accountRecoveryService) {
+    public AccountController(IAccountService _accountService, IAccountRecoveryService accountRecoveryService, MailSenderService mailSenderService) {
         this._accountService = _accountService;
         this.accountRecoveryService = accountRecoveryService;
+        this.mailSenderService = mailSenderService;
     }
 
     @PostMapping("")
@@ -78,9 +84,24 @@ public class AccountController {
     @GetMapping("/reqest-recovery/{email}")
     public ResponseEntity<?> reqestRecvoery(@PathVariable String email) {
         try {
-            return ResponseEntity.ok(accountRecoveryService.createRecoveryLink(email));
+            String link = accountRecoveryService.createRecoveryLink(email);
+            String htmlLink = "Click this <a href="+ link + ">link</a> to recover account";
+            mailSenderService.sendHtmlMail(email, "IT COMPANY", htmlLink);
+            return ResponseEntity.ok("Email sent " + link);
         } catch (NotFoundException | NoSuchAlgorithmException | InvalidKeyException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Account does not exist or other error");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Account does not exist or other error with hashing");
+        }
+    }
+
+    @PostMapping("/recover/{token}")
+    public ResponseEntity<?> recoverAccount(@PathVariable String token, @RequestBody @Valid RecoverAccountDto dto) {
+        try {
+            accountRecoveryService.recoverAccount(token, dto.getNewPassword());
+            return ResponseEntity.ok("New password set");
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Account does not exist");
+        } catch (EmailActivationExpiredException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Link expired");
         }
     }
 
