@@ -36,7 +36,12 @@ public class SoftwareEngineerController {
     @PreAuthorize("hasAuthority('getAllSkillSwEngineer')")
     public ResponseEntity<?> GetAllSkills(Principal principal) {
         String swEngineerEmail = principal.getName();
-        Account swEngineer = _accountService.findByEmail(swEngineerEmail);
+        Account swEngineer = null;
+        try {
+            swEngineer = _accountService.findByEmail(swEngineerEmail);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("This account does not exist!");
+        }
 
         var skills = _softwareEngineerService.GetAllSkills(swEngineer.getEmployeeId());
         return new ResponseEntity<>(skills, HttpStatus.OK);
@@ -55,7 +60,12 @@ public class SoftwareEngineerController {
     @PreAuthorize("hasAuthority('addSkillSwEngineer')")
     public ResponseEntity<?> AddSkill(@RequestBody AddSkillDto dto, Principal principal) {
         String swEngineerEmail = principal.getName();
-        Account swEngineer = _accountService.findByEmail(swEngineerEmail);
+        Account swEngineer = null;
+        try {
+            swEngineer = _accountService.findByEmail(swEngineerEmail);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("This account does not exist!");
+        }
 
         try {
             var skill = _softwareEngineerService.AddSkill(swEngineer.getEmployeeId(), ObjectMapperUtils.map(dto, Skill.class));
@@ -69,7 +79,12 @@ public class SoftwareEngineerController {
     @PreAuthorize("hasAuthority('removeSkillSwEngineer')")
     public ResponseEntity<?> RemoveSkill(@PathVariable("id") UUID skillId, Principal principal) {
         String swEngineerEmail = principal.getName();
-        Account swEngineer = _accountService.findByEmail(swEngineerEmail);
+        Account swEngineer = null;
+        try {
+            swEngineer = _accountService.findByEmail(swEngineerEmail);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("This account does not exist!");
+        }
 
         try {
             _softwareEngineerService.RemoveSkill(swEngineer.getEmployeeId(), skillId);

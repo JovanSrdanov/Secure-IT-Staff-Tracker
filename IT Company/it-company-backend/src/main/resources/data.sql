@@ -25,16 +25,16 @@ VALUES ('a3c2eba9-fd68-4d6a-851c-41ac05bd77d3', 'Miodrag', '123456', 'profesija'
         'b7b0e323-7ce7-4724-8696-9c8b7bb70734');
 
 INSERT INTO public.account
-    (id, email, employee_id, "password", salt, status, is_activated)
+    (id, email, employee_id, "password", salt, status, is_activated, is_blocked)
 values ('9d0dc40b-a0c6-4610-ac51-23ed75b94a9a', 'jovansrdanov2000+1@gmail.com', '6b977f75-db33-44fd-8b8f-19bf87d82c65',
-        '$2y$10$lFp.7xd3uHzrVnftpUcCFOPlEdsU8n76eUy4A/e8c0Eg/.AAc9M8y', 'a', 1, true),
+        '$2y$10$lFp.7xd3uHzrVnftpUcCFOPlEdsU8n76eUy4A/e8c0Eg/.AAc9M8y', 'a', 1, true, false),
        ('be256f3c-48a3-449d-86e5-4bb1165122b3', 'jovansrdanov2000+3@gmail.com', 'cf11ba92-dea3-4d80-b2f0-8187060cb831',
-        '$2y$10$lFp.7xd3uHzrVnftpUcCFOPlEdsU8n76eUy4A/e8c0Eg/.AAc9M8y', 'a', 1, true),
+        '$2y$10$lFp.7xd3uHzrVnftpUcCFOPlEdsU8n76eUy4A/e8c0Eg/.AAc9M8y', 'a', 1, true, false),
        ('2eeff05d-924f-49ce-b5db-43b18096e00a', 'jovansrdanov2000+4@gmail.com', 'a3c2eba9-fd68-4d6a-851c-41ac05bd77d3',
-        '$2y$10$lFp.7xd3uHzrVnftpUcCFOPlEdsU8n76eUy4A/e8c0Eg/.AAc9M8y', 'a', 1, true),
+        '$2y$10$lFp.7xd3uHzrVnftpUcCFOPlEdsU8n76eUy4A/e8c0Eg/.AAc9M8y', 'a', 1, true, false),
        -- TODO zameni mail
        ('a7c0173e-0bcc-4df7-96b4-481d582dea60', 'jovansrdanov2000+2@gmail.com', 'c390e0cf-9c9d-41b7-80f9-b55939cc11e8',
-        '$2y$10$lFp.7xd3uHzrVnftpUcCFOPlEdsU8n76eUy4A/e8c0Eg/.AAc9M8y', 'a', 1, true);
+        '$2y$10$lFp.7xd3uHzrVnftpUcCFOPlEdsU8n76eUy4A/e8c0Eg/.AAc9M8y', 'a', 1, true, false);
 
 
 INSERT INTO public.privilege
@@ -71,7 +71,8 @@ values ('fc784caa-1a09-459f-9fef-d2ce4b1b89e6', 'changeAccStatusAccept'),
        ('1ebf0eda-ac58-4548-9cf0-69d33508a5a0', 'getPrManagersProjectsById'),
        ('9edb2d3e-3ad5-45d5-bca9-d69b4161988d', 'getSwEngineersProjectsById'),
        ('437bfba6-7add-4e5c-8354-d3bee0d09e0c', 'getAllSkillSwEngineerById'),
-       ('a8bc9435-22b3-45d0-8d74-a28f64f388da', 'getAllSkillSwEngineer');
+       ('a8bc9435-22b3-45d0-8d74-a28f64f388da', 'getAllSkillSwEngineer'),
+       ('cc1ac5a2-2782-47f0-b2d4-1a5a1e704e2a', 'blockAccount');
 
 
 
@@ -85,7 +86,7 @@ values ('79113e08-0b50-41ee-a8ea-42559259d44e', 'ROLE_ENGINEER'),
 
 INSERT INTO public.users_roles
     (user_id, role_id)
-values ('9d0dc40b-a0c6-4610-ac51-23ed75b94a9a', '153c2366-eb2d-4ce2-b55e-42c83609da8a'),
+values ('9d0dc40b-a0c6-4610-ac51-23ed75b94a9a', '037bbd08-1f2c-4f9d-80af-1710d90efb01'),
        ('be256f3c-48a3-449d-86e5-4bb1165122b3', '2cdfba8e-78a3-46a9-b414-96a41d1a5c62'),
        ('2eeff05d-924f-49ce-b5db-43b18096e00a', '407d5496-2b68-4052-9219-f87ed4126fc9'),
        ('a7c0173e-0bcc-4df7-96b4-481d582dea60', '79113e08-0b50-41ee-a8ea-42559259d44e');
@@ -117,6 +118,7 @@ values
 ('037bbd08-1f2c-4f9d-80af-1710d90efb01', '85deb19a-6bbb-4a97-93f1-7d118f17c014'),
 ('037bbd08-1f2c-4f9d-80af-1710d90efb01', 'b3adb8f2-4ea3-41c2-a3e1-709b9e7ba7a8'),
 ('037bbd08-1f2c-4f9d-80af-1710d90efb01', '9f82f05e-1e85-4c4b-b112-6701c8993929'),
+('037bbd08-1f2c-4f9d-80af-1710d90efb01', 'cc1ac5a2-2782-47f0-b2d4-1a5a1e704e2a'),
 -- PR MANAGER
 ('2cdfba8e-78a3-46a9-b414-96a41d1a5c62', 'f60d3289-526a-4aae-b720-5409f472cd2b'),
 ('2cdfba8e-78a3-46a9-b414-96a41d1a5c62', 'c4640c3d-e9fe-40b3-9158-004fb119b8f6'),

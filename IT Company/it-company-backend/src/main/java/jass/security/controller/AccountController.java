@@ -2,6 +2,7 @@ package jass.security.controller;
 
 import jass.security.dto.AccountApprovalDto;
 import jass.security.dto.RegisterEmployeeDto;
+import jass.security.exception.NotFoundException;
 import jass.security.model.Account;
 import jass.security.model.RegistrationRequestStatus;
 import jass.security.service.interfaces.IAccountService;
@@ -42,6 +43,17 @@ public class AccountController {
     @PreAuthorize("hasAuthority('allPendingApproval')")
     public ResponseEntity<?> findAllPendingApproval() {
         return ResponseEntity.ok(_accountService.findAllByStatusInfo(RegistrationRequestStatus.PENDING));
+    }
+
+    @GetMapping("/block/{email}")
+    @PreAuthorize("hasAuthority('blockAccount')")
+    public ResponseEntity<?> blockAccount(@PathVariable String email) {
+        try {
+            _accountService.blockAccount(email);
+            return ResponseEntity.ok("Account blocked!");
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("This account does not exist!");
+        }
     }
 
 
