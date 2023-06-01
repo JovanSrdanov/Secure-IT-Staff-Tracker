@@ -9,6 +9,8 @@ import jass.security.service.interfaces.IAccountActivationService;
 import jass.security.service.interfaces.IAccountService;
 import jass.security.utils.DateUtils;
 import jass.security.utils.HashUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
@@ -25,7 +27,7 @@ import java.util.UUID;
 public class AccountActivationService implements IAccountActivationService {
 
     private final IAccountActivationRepository accountActivationRepository;
-
+    private static final Logger logger = LoggerFactory.getLogger(AccountActivationService.class);
     private final IAccountService accountService;
 
     @Value("${hmacSecret}")
@@ -75,16 +77,22 @@ public class AccountActivationService implements IAccountActivationService {
     public void activateAccount(String hash) throws EmailActivationExpiredException, NotFoundException {
         AccountActivation accountActivation = findByToken(hash);
         if (accountActivation == null) {
+            logger.warn("Failed to activate an account with activation hash: " + hash +
+                    ", reason: account activation for the given hash does not exist");
             throw new NotFoundException("This activation does not exist");
         }
         if (accountActivation.getExpireyDate().before(new Date())) {
             deleteById(accountActivation.getId());
+            logger.warn("Failed to activate an account with activation hash: " + hash +
+                    ", reason: activation link expired");
             throw new EmailActivationExpiredException();
         }
 
         Account account = accountService.findByEmail(accountActivation.getEmail());
         account.setIsActivated(true);
 
+        logger.info("Account with an ID: " + account.getId() +
+                ", successfully activated");
         deleteById(accountActivation.getId());
     }
 
