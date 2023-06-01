@@ -1,6 +1,9 @@
 package jass.security.controller;
 
+import jakarta.validation.Valid;
 import jass.security.dto.swengineer.AddSkillDto;
+import jass.security.dto.swengineer.SearchSwEngineerDto;
+import jass.security.dto.swengineer.SearchSwResponseDto;
 import jass.security.dto.swengineer.SeniorityDTO;
 import jass.security.exception.NotFoundException;
 import jass.security.model.Account;
@@ -16,6 +19,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -106,6 +110,12 @@ public class SoftwareEngineerController {
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
+    }
+
+    @PostMapping("/search")
+    @PreAuthorize("hasAuthority('searchSwEngineer')")
+    public List<SearchSwResponseDto> searchSwEngineer(@RequestBody SearchSwEngineerDto dto) {
+        return _softwareEngineerService.searchSw(dto);
     }
 
 }

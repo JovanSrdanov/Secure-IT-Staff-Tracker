@@ -33,7 +33,7 @@ values ('9d0dc40b-a0c6-4610-ac51-23ed75b94a9a', 'jovansrdanov2000+1@gmail.com', 
        ('2eeff05d-924f-49ce-b5db-43b18096e00a', 'jovansrdanov2000+4@gmail.com', 'a3c2eba9-fd68-4d6a-851c-41ac05bd77d3',
         '$2y$10$lFp.7xd3uHzrVnftpUcCFOPlEdsU8n76eUy4A/e8c0Eg/.AAc9M8y', 'a', 1, true, false),
        -- TODO zameni mail
-       ('a7c0173e-0bcc-4df7-96b4-481d582dea60', 'karte32114+1@gmail.com', 'c390e0cf-9c9d-41b7-80f9-b55939cc11e8',
+       ('a7c0173e-0bcc-4df7-96b4-481d582dea60', 'jovansrdanov2000+2@gmail.com', 'c390e0cf-9c9d-41b7-80f9-b55939cc11e8',
         '$2y$10$lFp.7xd3uHzrVnftpUcCFOPlEdsU8n76eUy4A/e8c0Eg/.AAc9M8y', 'a', 1, true, false);
 
 
@@ -72,6 +72,7 @@ values ('fc784caa-1a09-459f-9fef-d2ce4b1b89e6', 'changeAccStatusAccept'),
        ('9edb2d3e-3ad5-45d5-bca9-d69b4161988d', 'getSwEngineersProjectsById'),
        ('437bfba6-7add-4e5c-8354-d3bee0d09e0c', 'getAllSkillSwEngineerById'),
        ('a8bc9435-22b3-45d0-8d74-a28f64f388da', 'getAllSkillSwEngineer'),
+       ('3566b57e-d696-4ce3-bd4b-64b429894f8f', 'searchSwEngineer'),
        ('cc1ac5a2-2782-47f0-b2d4-1a5a1e704e2a', 'blockAccount');
 
 
@@ -119,6 +120,7 @@ values
 ('037bbd08-1f2c-4f9d-80af-1710d90efb01', 'b3adb8f2-4ea3-41c2-a3e1-709b9e7ba7a8'),
 ('037bbd08-1f2c-4f9d-80af-1710d90efb01', '9f82f05e-1e85-4c4b-b112-6701c8993929'),
 ('037bbd08-1f2c-4f9d-80af-1710d90efb01', 'cc1ac5a2-2782-47f0-b2d4-1a5a1e704e2a'),
+('037bbd08-1f2c-4f9d-80af-1710d90efb01', '3566b57e-d696-4ce3-bd4b-64b429894f8f'),
 -- PR MANAGER
 ('2cdfba8e-78a3-46a9-b414-96a41d1a5c62', 'f60d3289-526a-4aae-b720-5409f472cd2b'),
 ('2cdfba8e-78a3-46a9-b414-96a41d1a5c62', 'c4640c3d-e9fe-40b3-9158-004fb119b8f6'),
@@ -150,3 +152,7 @@ values
 
 INSERT INTO public.project (id, start_date, end_date, "name")
 VALUES ('6eeb9244-9c87-4545-a940-fe39bf3a268f', '2023-05-25 02:00:00', '2023-09-25 02:00:00', 'TEST PROJECT');
+
+INSERT INTO public.skill
+(id, "level", "name", sw_engineer_id)
+VALUES('a66d7fba-3028-4c0e-b21c-00f999ae8692', 69, 'gasSkill', 'c390e0cf-9c9d-41b7-80f9-b55939cc11e8');
