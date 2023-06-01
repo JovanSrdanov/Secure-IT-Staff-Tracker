@@ -13,7 +13,7 @@ public interface IEmployeeRepository extends JpaRepository<Employee, UUID> {
     @Query("select new jass.security.dto.employee.EmployeeInfoDto(engineer.id, account.email,  'Software engineer'," +
             " engineer.address.country, engineer.address.city," +
             "engineer.address.street, engineer.address.streetNumber, engineer.name, engineer.phoneNumber," +
-            " engineer.profession, engineer.surname) " +
+            " engineer.profession, engineer.surname, account.isBlocked) " +
             "from SoftwareEngineer engineer left join Account account " +
             "on engineer.id = account.employeeId " +
             "where account.status = 1 " +
@@ -23,7 +23,7 @@ public interface IEmployeeRepository extends JpaRepository<Employee, UUID> {
             "select new jass.security.dto.employee.EmployeeInfoDto(prManager.id, account.email,  'Project manager'," +
             " prManager.address.country, prManager.address.city," +
             "prManager.address.street, prManager.address.streetNumber, prManager.name, prManager.phoneNumber," +
-            " prManager.profession, prManager.surname) " +
+            " prManager.profession, prManager.surname, account.isBlocked) " +
             "from ProjectManager prManager left join Account account " +
             "on prManager.id = account.employeeId " +
             "where account.status = 1 " +
@@ -34,7 +34,7 @@ public interface IEmployeeRepository extends JpaRepository<Employee, UUID> {
             "select new jass.security.dto.employee.EmployeeInfoDto(hrManager.id, account.email,  'HR manager'," +
             " hrManager.address.country, hrManager.address.city," +
             "hrManager.address.street, hrManager.address.streetNumber, hrManager.name, hrManager.phoneNumber," +
-            " hrManager.profession, hrManager.surname) " +
+            " hrManager.profession, hrManager.surname, account.isBlocked) " +
             "from HrManager hrManager left join Account account " +
             "on hrManager.id = account.employeeId " +
             "where account.status = 1"
@@ -59,7 +59,7 @@ public interface IEmployeeRepository extends JpaRepository<Employee, UUID> {
     @Query("select new jass.security.dto.employee.EmployeeInfoDto(engineer.id, account.email,  'Software engineer'," +
             " engineer.address.country, engineer.address.city," +
             "engineer.address.street, engineer.address.streetNumber, engineer.name, engineer.phoneNumber," +
-            " engineer.profession, engineer.surname) " +
+            " engineer.profession, engineer.surname, account.isBlocked) " +
             "from SoftwareEngineer engineer left join Account account " +
             "on engineer.id = account.employeeId " +
             "where engineer.id not in :employeeIds and account.status = 1 ")
@@ -69,7 +69,7 @@ public interface IEmployeeRepository extends JpaRepository<Employee, UUID> {
     @Query("select new jass.security.dto.employee.EmployeeInfoDto(prManager.id, account.email,  'Project manager'," +
             " prManager.address.country, prManager.address.city," +
             "prManager.address.street, prManager.address.streetNumber, prManager.name, prManager.phoneNumber," +
-            " prManager.profession, prManager.surname) " +
+            " prManager.profession, prManager.surname, account.isBlocked) " +
             "from ProjectManager prManager left join Account account " +
             "on prManager.id = account.employeeId " +
             "where prManager.id not in :employeeIds and account.status = 1")
