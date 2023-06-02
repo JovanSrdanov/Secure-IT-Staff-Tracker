@@ -161,6 +161,7 @@ public class AccountService implements IAccountService {
         //TODO Strahinja: Da li ovo ovako ili nekako bolje da se salju ove role sa fronta?
         var roles = new ArrayList<Role>();
         roles.add(role);
+        newAcc.setIsBlocked(false);
         newAcc.setRoles(roles);
         role.getUsers().add(newAcc);
 
