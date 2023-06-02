@@ -319,6 +319,7 @@ public class AccountService implements IAccountService {
             RejectedMail rejectedMail = new RejectedMail(UUID.randomUUID(), email, date);
             rejectedMailService.save(rejectedMail);
 
+            logger.info("Account with ID: " + acc.getId() + " successfully rejected");
         }
     }
 

@@ -95,7 +95,8 @@ public class AuthenticationController {
 //        Message.creator(new PhoneNumber("0628387347"),
 //                        new PhoneNumber(TWILIO_PHONE_NUMBER), "Test").create();
 
-        //Clicksend
+        //Clicksend TEST
+        // TODO Stefan: only for testing purposes, remove later
         SMSDto smsDto = new SMSDto("IT Company", "TEST", "+381628387347");
         SMSUtils.sendSMS(logger, clickSendConfig, smsDto);
 
@@ -106,12 +107,14 @@ public class AuthenticationController {
         }
 
         if (acc.getStatus() != RegistrationRequestStatus.APPROVED) {
-            logger.warn("User failed to log in from IP: " + IPUtils.getIPAddressFromHttpRequest(request) + ", reason: registration is not yet accepted by admin");
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Registration is not yet accepted by admin");
+            logger.warn("User failed to log in from IP: " + IPUtils.getIPAddressFromHttpRequest(request) +
+                    ", reason: registration is not yet accepted by an admin");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Registration is not yet accepted by an admin");
         }
 
         if (!acc.getIsActivated()) {
-            logger.warn("User failed to log in from IP: " + IPUtils.getIPAddressFromHttpRequest(request) + ", reason: account not activated");
+            logger.warn("User failed to log in from IP: " + IPUtils.getIPAddressFromHttpRequest(request) +
+                    ", reason: account not activated");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Account not activated");
         }
 
@@ -121,7 +124,8 @@ public class AuthenticationController {
                     authenticationRequest.getEmail(), authenticationRequest.getPassword() + acc.getSalt()));
             logger.info("User with IP: " + IPUtils.getIPAddressFromHttpRequest(request) + " successfully authenticated");
         } catch (BadCredentialsException e) {
-            logger.warn("User failed to log in from IP: " + IPUtils.getIPAddressFromHttpRequest(request) + ", reason: authentication failed: incorrect credentials");
+            logger.warn("User failed to log in from IP: " + IPUtils.getIPAddressFromHttpRequest(request) +
+                    ", reason: authentication failed: incorrect credentials");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Auth failed");
         }
 
@@ -154,16 +158,19 @@ public class AuthenticationController {
                 var roles = new ArrayList<>(account.getRoles());
                 String jwt = tokenUtils.generateToken(email, roles.get(0).getName());
                 int expiresIn = tokenUtils.getExpiredIn();
-                logger.info("User successfully refreshed their authentication token, from IP: " + IPUtils.getIPAddressFromHttpRequest(request));
+                logger.info("User successfully refreshed their authentication token, from IP: " +
+                        IPUtils.getIPAddressFromHttpRequest(request));
                 return ResponseEntity.ok(new UserTokenState(jwt, token.getToken(), expiresIn));
             }
         } catch (ExpiredJwtException | TokenExpiredException ex) {
-            logger.warn("User failed to refresh their authentication token, from IP: " + IPUtils.getIPAddressFromHttpRequest(request),
+            logger.warn("User failed to refresh their authentication token, from IP: " +
+                            IPUtils.getIPAddressFromHttpRequest(request),
                     " reason: authentication token expired");
             return ResponseEntity.status(HttpStatus.GONE).body("Token expired");
         }
 
-        logger.warn("User failed to refresh their authentication token, from IP: " + IPUtils.getIPAddressFromHttpRequest(request),
+        logger.warn("User failed to refresh their authentication token, from IP: " +
+                        IPUtils.getIPAddressFromHttpRequest(request),
                 " reason: authentication token is invalid");
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Token not valid");
 
@@ -189,7 +196,8 @@ public class AuthenticationController {
                     " reason: given email is temporarily blocked");
 
             //Clicksend
-            SMSDto smsDto = new SMSDto("IT Company", "User with an IP: " + IPUtils.getIPAddressFromHttpRequest(request)
+            SMSDto smsDto = new SMSDto("IT Company", "User with an IP: " +
+                    IPUtils.getIPAddressFromHttpRequest(request)
                     + " tried to register with a blocked email: " + dto.getEmail(), "+381628387347");
             SMSUtils.sendSMS(logger, clickSendConfig, smsDto);
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Email is blocked temporarily!");
@@ -204,8 +212,8 @@ public class AuthenticationController {
             logger.info("Admin successfully registered, from IP: " + IPUtils.getIPAddressFromHttpRequest(request));
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (EmailTakenException e) {
-            logger.warn("User failed to register the admin, from IP: " + IPUtils.getIPAddressFromHttpRequest(request),
-                    " reason: given email is taken");
+            logger.warn("User failed to register an admin, from IP: " + IPUtils.getIPAddressFromHttpRequest(request),
+                    " reason: provided email is already taken");
             return new ResponseEntity<>("This e-mail is taken!", HttpStatus.CONFLICT);
         }
     }
@@ -217,8 +225,8 @@ public class AuthenticationController {
         try {
             accountService.approveAccount(mail, true);
         } catch (NotFoundException e) {
-            logger.warn("Failed to accept registration with email: " + mail,
-                    " reason: given email is taken");
+            logger.warn("Failed to accept an account registration with an email: " + mail,
+                    " reason: an account with a provided email does not exist");
             return ResponseEntity.ok("Account with this mail does not exist");
         }
 
@@ -235,7 +243,8 @@ public class AuthenticationController {
         String htmlLink = "Click this <a href="+ link + ">link</a> to activate account";
         mailSenderService.sendHtmlMail(mail, "IT COMPANY", htmlLink);
 
-        logger.info("Registration for an account with an ID: " + account.getId() + ", successfully approved");
+        logger.info("Email with an registration approved message successfully sent to an account with an ID: "
+                + account.getId());
         return ResponseEntity.ok("Registration approved");
     }
 
@@ -246,14 +255,15 @@ public class AuthenticationController {
             accountService.approveAccount(dto.getMail(), false);
         } catch (NotFoundException e) {
             logger.warn("Failed to accept registration with email: " + dto.getMail(),
-                    " reason: an account with given email does not exist");
+                    " reason: an account with the given email does not exist");
             return ResponseEntity.ok("Account with this mail does not exist");
         }
 
         Account account = accountService.findByEmail(dto.getMail());
         mailSenderService.sendSimpleEmail(dto.getMail(), "Account rejected", dto.getReason());
 
-        logger.info("Registration for an account with an ID: " + account.getId() + "successfully rejected");
+        logger.info("Email with an registration rejection message successfully sent to an account with an ID: "
+                + account.getId());
         return ResponseEntity.ok("Registration rejected");
     }
 
@@ -287,7 +297,7 @@ public class AuthenticationController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (NotFoundException e) {
             logger.warn("Admin user failed to change the password, from IP: " +
-                    IPUtils.getIPAddressFromHttpRequest(request) + ", reason: provided email not found");
+                    IPUtils.getIPAddressFromHttpRequest(request) + ", reason: an account with a provided email not found");
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
@@ -302,7 +312,7 @@ public class AuthenticationController {
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (NotFoundException e) {
             logger.warn("Request for a passwordless login token failed, from IP: " +
-                    IPUtils.getIPAddressFromHttpRequest(request) + ", reason: provided email not found");
+                    IPUtils.getIPAddressFromHttpRequest(request) + ", reason: an account with a provided email not found");
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
@@ -319,14 +329,15 @@ public class AuthenticationController {
             int expiresIn = tokenUtils.getExpiredIn();
 
             logger.info("User with IP: " +
-                    IPUtils.getIPAddressFromHttpRequest(request) + " successfully did a passwordless login");
+                    IPUtils.getIPAddressFromHttpRequest(request) + " successfully logged in using the passwordless " +
+                    "method");
             return new ResponseEntity<>(new UserTokenState(jwt, resfresh, expiresIn), HttpStatus.OK);
         } catch (NotFoundException e) {
-            logger.warn("User failed to log in from IP: " +
+            logger.warn("User failed to log in using the passwordless method from IP: " +
                     IPUtils.getIPAddressFromHttpRequest(request) + ", reason: invalid token");
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (PlTokenUsedException | TokenExpiredException e) {
-            logger.warn("User failed to log in from IP: " +
+            logger.warn("User failed to log in using the passwordless method from IP: " +
                     IPUtils.getIPAddressFromHttpRequest(request) + ", reason: token expired");
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }

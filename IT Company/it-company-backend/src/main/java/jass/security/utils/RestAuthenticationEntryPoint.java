@@ -28,11 +28,11 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest request,
                          HttpServletResponse response,
                          AuthenticationException authException) throws IOException {
-        logger.warn("Unauthorized attempt from IP: " + request.getRemoteAddr());
+        logger.warn("Unauthorized access attempt from IP: " + request.getRemoteAddr());
 
         //Clicksend
         SMSDto smsDto = new SMSDto("IT Company",
-                "Unauthorized attempt from IP: " + authException.getMessage(), "+381628387347");
+                "Unauthorized access attempt from IP: " + request.getRemoteAddr(), "+381628387347");
         SMSUtils.sendSMS(logger, clickSendConfig, smsDto);
 
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
@@ -44,6 +44,4 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
 //        logger.warn("AAAAAAAAAAAAAA Authorization Failed : " + accessDeniedException.getMessage());
 //        response.sendError(HttpServletResponse.SC_FORBIDDEN, "Authorization Failed : " + accessDeniedException.getMessage());
 //    }
-
-
 }
