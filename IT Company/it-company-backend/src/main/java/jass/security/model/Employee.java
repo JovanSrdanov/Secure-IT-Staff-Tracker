@@ -3,6 +3,7 @@ package jass.security.model;
 import jakarta.persistence.*;
 import jass.security.dto.employee.EmployeeProfileInfoDto;
 import lombok.*;
+import org.hibernate.annotations.ColumnTransformer;
 
 import java.util.UUID;
 
@@ -16,15 +17,30 @@ import java.util.UUID;
 public class Employee {
     @Id
     private UUID id;
-    @Column(nullable = false)
+
+
+    @ColumnTransformer( read = "pgp_sym_decrypt( name, current_setting('encrypt.key') )",
+            write = " pgp_sym_encrypt( ?, current_setting('encrypt.key') )")
+    @Column(nullable = false, columnDefinition = "bytea")
     private String name;
-    @Column(nullable = false)
+
+    @ColumnTransformer( read = "pgp_sym_decrypt( surname, current_setting('encrypt.key') )",
+            write = " pgp_sym_encrypt( ?, current_setting('encrypt.key') )")
+    @Column(nullable = false, columnDefinition = "bytea")
     private String surname;
+
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Address address;
-    @Column(nullable = false)
+
+    @ColumnTransformer( read = "pgp_sym_decrypt( phone_number, current_setting('encrypt.key') )",
+            write = " pgp_sym_encrypt( ?, current_setting('encrypt.key') )")
+    @Column(nullable = false, columnDefinition = "bytea")
     private String phoneNumber;
-    @Column(nullable = false)
+
+
+    @ColumnTransformer( read = "pgp_sym_decrypt( profession, current_setting('encrypt.key') )",
+            write = " pgp_sym_encrypt( ?, current_setting('encrypt.key') )")
+    @Column(nullable = false, columnDefinition = "bytea")
     private String profession; //zvanje
 
     public void update(EmployeeProfileInfoDto dto) {
