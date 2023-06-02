@@ -78,7 +78,12 @@ function RecoverPasswordPage(props) {
                         onChange={handlePasswordChange}
                     />
                     <Button
-                        disabled={newPassword.length >= 255 || newPassword === "|"}
+                        disabled={!(newPassword.length >= 8 &&
+                            newPassword.length <= 255 &&
+                            /[A-Z]/.test(newPassword) &&
+                            /[a-z]/.test(newPassword) &&
+                            /\d/.test(newPassword) &&
+                            /[_!@#$%^&*(),.?":{}|<>]/.test(newPassword))}
                         variant="contained" color="primary" endIcon={<LoginIcon/>}
                         onClick={updatePasswordClick}
                     >Update password
