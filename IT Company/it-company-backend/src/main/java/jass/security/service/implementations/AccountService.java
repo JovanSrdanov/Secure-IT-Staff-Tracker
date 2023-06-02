@@ -228,6 +228,7 @@ public class AccountService implements IAccountService {
             findByEmail(dto.getEmail());
             throw new EmailTakenException();
         } catch (NotFoundException ignored) {
+            int a = 69696;
         }
 
         Account newAcc = new Account();
