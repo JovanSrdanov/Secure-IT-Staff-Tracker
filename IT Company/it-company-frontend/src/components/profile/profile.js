@@ -46,7 +46,7 @@ function Profile() {
             user.address.city.length <= 255 &&
             user.address.street.length <= 255 &&
             user.address.streetNumber.length <= 255 &&
-       
+
 
             user.name !== "" &&
             user.phoneNumber !== "" &&
@@ -76,19 +76,20 @@ function Profile() {
 
     const handleChangePassword = () => {
 
-        console.log({oldPassword, newPassword})
-
-        // interceptor.put('api-1/account-credentials/change-password', {oldPassword, newPassword})
-        //     .then((response) => {
-        //         setOldPassword("");
-        //         setNewPassword("");
-        //         setPasswordDialogShow(false);
-        //         setSuccessDialogShow(true)
-        //     })
-        //     .catch((error) => {
-        //         setErrorDialogShow(true)
-        //         setPasswordDialogShow(false);
-        //     });
+        interceptor.post('account/change-password', {
+            oldPassword: oldPassword,
+            newPassword: newPassword
+        })
+            .then((response) => {
+                setOldPassword("");
+                setNewPassword("");
+                setPasswordDialogShow(false);
+                setSuccessDialogShow(true)
+            })
+            .catch((error) => {
+                setErrorDialogShow(true)
+                setPasswordDialogShow(false);
+            });
 
     };
     const handleErrorClose = () => {

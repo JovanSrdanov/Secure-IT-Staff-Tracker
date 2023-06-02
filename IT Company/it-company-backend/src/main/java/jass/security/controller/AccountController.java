@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.Principal;
 import java.util.UUID;
 
 @RestController
@@ -29,7 +30,7 @@ public class AccountController {
 
     private final IAccountRecoveryService accountRecoveryService;
 
-    private MailSenderService mailSenderService;
+    private final MailSenderService mailSenderService;
 
     @Autowired
     public AccountController(IAccountService _accountService, IAccountRecoveryService accountRecoveryService, MailSenderService mailSenderService) {
@@ -69,9 +70,12 @@ public class AccountController {
         }
     }
 
+
     @PostMapping("/change-password")
-    public ResponseEntity<?> changePassword(@RequestBody @Valid ChangePasswordDto dto) {
+    @PreAuthorize("hasAuthority('changePassword')")
+    public ResponseEntity<?> changePassword(@RequestBody @Valid ChangePasswordDto dto, Principal principal) {
         try {
+            dto.setEmail(principal.getName());
             _accountService.changePassword(dto);
             return ResponseEntity.ok("Password changed");
         } catch (NotFoundException e) {
@@ -85,7 +89,7 @@ public class AccountController {
     public ResponseEntity<?> reqestRecvoery(@PathVariable String email) {
         try {
             String link = accountRecoveryService.createRecoveryLink(email);
-            String htmlLink = "Click this <a href="+ link + ">link</a> to recover account";
+            String htmlLink = "Click this <a href=" + link + ">link</a> to recover account";
             mailSenderService.sendHtmlMail(email, "IT COMPANY", htmlLink);
             return ResponseEntity.ok("Email sent " + link);
         } catch (NotFoundException | NoSuchAlgorithmException | InvalidKeyException e) {

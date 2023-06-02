@@ -28,7 +28,7 @@ public class AccountRecoveryService implements IAccountRecoveryService {
 
     private final IAccountService accountService;
 
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     @Value("${hmacSecret}")
     private String hmacSecret;
@@ -47,7 +47,7 @@ public class AccountRecoveryService implements IAccountRecoveryService {
 
     @Override
     public AccountRecovery findById(UUID id) throws NotFoundException {
-        if(accountRecoveryRepository.findById(id).isPresent())
+        if (accountRecoveryRepository.findById(id).isPresent())
             return accountRecoveryRepository.findById(id).get();
         else
             throw new NotFoundException("This account does not exist");
@@ -77,7 +77,7 @@ public class AccountRecoveryService implements IAccountRecoveryService {
 
         save(accountRecovery);
 
-        return "https://localhost:4430/account/recover/" + hash;
+        return "https://localhost:4430/recover?token=" + hash;
     }
 
     @Override
