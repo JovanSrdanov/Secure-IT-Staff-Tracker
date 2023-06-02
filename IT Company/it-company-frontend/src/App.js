@@ -31,6 +31,7 @@ import WorkedOnProjectsPage from "./pages/engineer-pages/worked-on-projects-page
 import AdminPasswordChangePage from "./pages/admin-pages/admin-password-change-page";
 import PasswordlessLoginPage from "./pages/unauthenticated-pages/passwordless-login-page";
 import EmployeesInfoPage from './pages/hr-manager-pages/employees-info-page';
+import SearchEngineersPage from "./pages/admin-pages/search-engineers-page";
 
 function App() {
     const navigate = useNavigate()
@@ -286,7 +287,7 @@ function App() {
                                 path="/registration-approval"
                                 element={<RegistrationApprovalPage/>}
                             />
-                            <Route path="/search-engineers" element={<PermissionsPage/>}/>
+                            <Route path="/search-engineers" element={<SearchEngineersPage/>}/>
                             <Route path="/employees" element={<EmployeesPage/>}/>
                             <Route path="/all-projects" element={<ProjectsPage/>}/>
                             <Route
