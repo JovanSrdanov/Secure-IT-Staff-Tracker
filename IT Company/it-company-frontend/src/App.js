@@ -32,6 +32,7 @@ import AdminPasswordChangePage from "./pages/admin-pages/admin-password-change-p
 import PasswordlessLoginPage from "./pages/unauthenticated-pages/passwordless-login-page";
 import EmployeesInfoPage from './pages/hr-manager-pages/employees-info-page';
 import SearchEngineersPage from "./pages/admin-pages/search-engineers-page";
+import RecoverPasswordPage from "./pages/unauthenticated-pages/recover-password-page";
 
 function App() {
     const navigate = useNavigate()
@@ -356,6 +357,12 @@ function App() {
                                 path="/passwordless-login"
                                 element={<PasswordlessLoginPage/>}
                             />
+
+                            <Route
+                                path="/recover"
+                                element={<RecoverPasswordPage/>}
+                            />
+
                             <Route path="/*" element={<Navigate to="/login"/>}/>
                         </>
                     )}
