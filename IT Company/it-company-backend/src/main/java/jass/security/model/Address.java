@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnTransformer;
 
 import java.util.UUID;
 
@@ -20,13 +21,28 @@ import java.util.UUID;
 public class Address {
     @Id
     private UUID id;
-    @Column(nullable = false)
+
+
+    @ColumnTransformer( read = "pgp_sym_decrypt( country, current_setting('encrypt.key') )",
+            write = " pgp_sym_encrypt( ?, current_setting('encrypt.key') )")
+    @Column(nullable = false, columnDefinition = "bytea")
     private String country;
-    @Column(nullable = false)
+
+    @ColumnTransformer( read = "pgp_sym_decrypt( city, current_setting('encrypt.key') )",
+            write = " pgp_sym_encrypt( ?, current_setting('encrypt.key') )")
+    @Column(nullable = false, columnDefinition = "bytea")
     private String city;
-    @Column(nullable = false)
+
+
+    @ColumnTransformer( read = "pgp_sym_decrypt( street, current_setting('encrypt.key') )",
+            write = " pgp_sym_encrypt( ?, current_setting('encrypt.key') )")
+    @Column(nullable = false, columnDefinition = "bytea")
     private String street;
-    @Column(nullable = false)
+
+
+    @ColumnTransformer( read = "pgp_sym_decrypt( street_number, current_setting('encrypt.key') )",
+            write = " pgp_sym_encrypt( ?, current_setting('encrypt.key') )")
+    @Column(nullable = false, columnDefinition = "bytea")
     private String streetNumber;
 
     public void update(AddressDto dto) {

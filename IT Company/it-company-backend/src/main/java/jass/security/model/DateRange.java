@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnTransformer;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -18,6 +19,6 @@ import java.util.Date;
 public class DateRange implements Serializable {
     @Column(nullable = false)
     private Date startDate;
-    @Column(nullable = true)
+
     private Date endDate;
 }

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnTransformer;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -18,7 +19,9 @@ import java.util.UUID;
 public class Account {
     @Id
     private UUID id;
-    @Column(unique = true, nullable = false)
+    @ColumnTransformer( read = "pgp_sym_decrypt( email, current_setting('encrypt.key') )",
+            write = " pgp_sym_encrypt( ?, current_setting('encrypt.key') )")
+    @Column(unique = true, nullable = false, columnDefinition = "bytea")
     private String email;
     @Column(nullable = false)
     private String password;
