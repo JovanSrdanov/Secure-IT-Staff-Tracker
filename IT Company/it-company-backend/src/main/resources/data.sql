@@ -74,7 +74,7 @@ values ('fc784caa-1a09-459f-9fef-d2ce4b1b89e6', 'changeAccStatusAccept'),
        ('a8bc9435-22b3-45d0-8d74-a28f64f388da', 'getAllSkillSwEngineer'),
        ('3566b57e-d696-4ce3-bd4b-64b429894f8f', 'searchSwEngineer'),
        ('15bb5d8f-2b6c-4e53-9010-e17f7752c186', 'changePassword'),
-       ('cc1ac5a2-2782-47f0-b2d4-1a5a1e704e2a', 'blockAccount');
+       ('cc1ac5a2-2782-47f0-b2d4-1a5a1e704e2a', 'blockUnblockAccount');
 
 
 

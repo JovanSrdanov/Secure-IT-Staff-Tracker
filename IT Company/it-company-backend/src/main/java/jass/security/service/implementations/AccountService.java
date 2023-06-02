@@ -81,7 +81,7 @@ public class AccountService implements IAccountService {
     @Override
     public Account findByEmail(String email) throws NotFoundException {
         var acc = _accountRepository.findByEmail(email);
-        if(acc == null) {
+        if (acc == null) {
             throw new NotFoundException("Account with this mail does not exist!");
         }
         return acc;
@@ -161,6 +161,7 @@ public class AccountService implements IAccountService {
         //TODO Strahinja: Da li ovo ovako ili nekako bolje da se salju ove role sa fronta?
         var roles = new ArrayList<Role>();
         roles.add(role);
+        newAcc.setIsBlocked(false);
         newAcc.setRoles(roles);
         role.getUsers().add(newAcc);
 
@@ -228,7 +229,7 @@ public class AccountService implements IAccountService {
             findByEmail(dto.getEmail());
             throw new EmailTakenException();
         } catch (NotFoundException ignored) {
-            int a = 69696;
+
         }
 
         Account newAcc = new Account();
@@ -247,8 +248,11 @@ public class AccountService implements IAccountService {
     }
 
     private Account makeAdminAccount(RegisterAdminAccountDto dto, UUID adminId) throws EmailTakenException, NotFoundException {
-        if (findByEmail(dto.getEmail()) != null) {
+        try {
+            findByEmail(dto.getEmail());
             throw new EmailTakenException();
+        } catch (NotFoundException ignored) {
+
         }
 
         Account newAcc = new Account();
@@ -477,12 +481,12 @@ public class AccountService implements IAccountService {
     }
 
     @Override
-    public void blockAccount(String email) throws NotFoundException {
+    public void blockUnblockAccount(String email) throws NotFoundException {
         Account account = findByEmail(email);
         if (account == null) {
             throw new NotFoundException("Account with this email does not exist");
         }
-        account.setIsBlocked(true);
+        account.setIsBlocked(!account.getIsBlocked());
         save(account);
     }
 
@@ -491,12 +495,10 @@ public class AccountService implements IAccountService {
         Account account = findByEmail(dto.getEmail());
 
         String dbPassword = account.getPassword();
-        if(passwordEncoder.matches(dto.getOldPassword() + account.getSalt(), dbPassword)) {
+        if (passwordEncoder.matches(dto.getOldPassword() + account.getSalt(), dbPassword)) {
             account.setPassword(passwordEncoder.encode(dto.getNewPassword() + account.getSalt()));
             save(account);
-        }
-
-        else throw new PasswordsDontMatchException("Passwords don`t mant");
+        } else throw new PasswordsDontMatchException("Passwords don`t mant");
     }
 
 
