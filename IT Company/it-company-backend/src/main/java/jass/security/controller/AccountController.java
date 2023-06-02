@@ -59,11 +59,11 @@ public class AccountController {
         return ResponseEntity.ok(_accountService.findAllByStatusInfo(RegistrationRequestStatus.PENDING));
     }
 
-    @GetMapping("/block/{email}")
-    @PreAuthorize("hasAuthority('blockAccount')")
-    public ResponseEntity<?> blockAccount(@PathVariable String email) {
+    @GetMapping("/blockUnblockAccount/{email}")
+    @PreAuthorize("hasAuthority('blockUnblockAccount')")
+    public ResponseEntity<?> blockUnblockAccount(@PathVariable String email) {
         try {
-            _accountService.blockAccount(email);
+            _accountService.blockUnblockAccount(email);
             return ResponseEntity.ok("Account blocked!");
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("This account does not exist!");

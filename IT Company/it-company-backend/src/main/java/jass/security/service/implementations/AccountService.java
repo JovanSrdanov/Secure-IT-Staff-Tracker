@@ -81,7 +81,7 @@ public class AccountService implements IAccountService {
     @Override
     public Account findByEmail(String email) throws NotFoundException {
         var acc = _accountRepository.findByEmail(email);
-        if(acc == null) {
+        if (acc == null) {
             throw new NotFoundException("Account with this mail does not exist!");
         }
         return acc;
@@ -474,12 +474,12 @@ public class AccountService implements IAccountService {
     }
 
     @Override
-    public void blockAccount(String email) throws NotFoundException {
+    public void blockUnblockAccount(String email) throws NotFoundException {
         Account account = findByEmail(email);
         if (account == null) {
             throw new NotFoundException("Account with this email does not exist");
         }
-        account.setIsBlocked(true);
+        account.setIsBlocked(!account.getIsBlocked());
         save(account);
     }
 
@@ -488,12 +488,10 @@ public class AccountService implements IAccountService {
         Account account = findByEmail(dto.getEmail());
 
         String dbPassword = account.getPassword();
-        if(passwordEncoder.matches(dto.getOldPassword() + account.getSalt(), dbPassword)) {
+        if (passwordEncoder.matches(dto.getOldPassword() + account.getSalt(), dbPassword)) {
             account.setPassword(passwordEncoder.encode(dto.getNewPassword() + account.getSalt()));
             save(account);
-        }
-
-        else throw new PasswordsDontMatchException("Passwords don`t mant");
+        } else throw new PasswordsDontMatchException("Passwords don`t mant");
     }
 
 

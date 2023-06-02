@@ -34,7 +34,7 @@ function Employees(props) {
 
     const getAllEmployees = () => {
         interceptor.get("employee").then((res) => {
-            console.log(res.data)
+
             setAllEmployees(res.data)
         }).catch((err) => {
             console.log(err)
@@ -45,6 +45,14 @@ function Employees(props) {
         getAllEmployees();
     }, []);
 
+    const handleBlockUnblockAccount = (mail) => {
+        interceptor.get("account/blockUnblockAccount/" + mail).then((res) => {
+            getAllEmployees();
+        }).catch((err) => {
+            console.log(err)
+        })
+
+    };
     return (
         <>
             <div className="wrapper">
@@ -65,6 +73,8 @@ function Employees(props) {
                                                 }}>
                                                     <li>Email: {item.mail}</li>
                                                     <li>Role: {item.role.replace(/^ROLE_/, '').replace(/_/g, ' ')}</li>
+                                                    <li>Account
+                                                        status: {item.isBlocked ? 'BLOCKED' : 'NOT BLOCKED'}</li>
                                                 </Box>
                                             </StyledTableCell>
                                             <StyledTableCell>
@@ -94,11 +104,32 @@ function Employees(props) {
                                             </StyledTableCell>
                                             <StyledTableCell>
                                                 <Box m={1}>
-                                                    <Box m={1}>
-                                                        <Button fullWidth variant="outlined"
-                                                                color="error"
-                                                        >Block
-                                                        </Button>
+                                                    <Box m={1} sx={{
+                                                        overflowX: 'auto',
+                                                        width: 100,
+                                                        height: 100,
+                                                        overflowy: 'auto'
+                                                    }}>
+                                                        {item.isBlocked && (
+                                                            <Button fullWidth variant="outlined"
+                                                                    color="success"
+                                                                    onClick={() => {
+                                                                        handleBlockUnblockAccount(item.mail)
+                                                                    }}
+                                                            >Unblock
+                                                            </Button>
+                                                        )
+                                                        }
+                                                        {!item.isBlocked && (
+                                                            <Button fullWidth variant="outlined"
+                                                                    color="error"
+                                                                    onClick={() => {
+                                                                        handleBlockUnblockAccount(item.mail)
+                                                                    }}
+                                                            >Block
+                                                            </Button>
+                                                        )
+                                                        }
                                                     </Box>
 
                                                 </Box>
