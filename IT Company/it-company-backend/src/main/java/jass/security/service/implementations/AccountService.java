@@ -224,8 +224,10 @@ public class AccountService implements IAccountService {
     }
 
     private Account makeAccount(RegisterAccountDto dto, UUID employeeId) throws EmailTakenException, NotFoundException {
-        if (findByEmail(dto.getEmail()) != null) {
+        try {
+            findByEmail(dto.getEmail());
             throw new EmailTakenException();
+        } catch (NotFoundException ignored) {
         }
 
         Account newAcc = new Account();
