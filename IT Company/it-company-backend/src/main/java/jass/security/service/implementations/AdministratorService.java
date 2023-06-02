@@ -25,7 +25,7 @@ public class AdministratorService implements IAdministratorService {
 
     @Override
     public List<Administrator> findAll() {
-        return null;
+        return _administratorRepository.findAll();
     }
 
     @Override

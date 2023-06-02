@@ -22,7 +22,7 @@ public class SMSUtils {
 
         try {
             //smsApi.smsSendPost(smsCollection);
-            logger.info("SMS sent successfully");
+            logger.info("SMS sent successfully to a recipient with a phone number: " + smsDto.getRecipient());
         }catch (Exception e) {
             logger.error("Error while trying to send an sms with Clicksend API");
         }

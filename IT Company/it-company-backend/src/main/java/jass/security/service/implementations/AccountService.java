@@ -478,5 +478,8 @@ public class AccountService implements IAccountService {
         return plToken;
     }
 
-
+    @Override
+    public List<Account> findAllAccountsByRole(String role) {
+        return _accountRepository.findByRolesName(role);
+    }
 }

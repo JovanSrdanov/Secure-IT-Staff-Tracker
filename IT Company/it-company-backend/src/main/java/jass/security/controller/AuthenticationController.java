@@ -1,12 +1,6 @@
 package jass.security.controller;
 
-import ClickSend.Api.SmsApi;
 import ClickSend.ApiClient;
-import ClickSend.Model.SmsMessage;
-import ClickSend.Model.SmsMessageCollection;
-import com.twilio.Twilio;
-import com.twilio.rest.api.v2010.account.Message;
-import com.twilio.type.PhoneNumber;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,6 +10,8 @@ import jass.security.exception.*;
 import jass.security.model.Account;
 import jass.security.model.RegistrationRequestStatus;
 import jass.security.model.Role;
+import jass.security.service.implementations.AdministratorService;
+import jass.security.service.implementations.EmployeeService;
 import jass.security.service.implementations.MailSenderService;
 import jass.security.service.interfaces.IAccountActivationService;
 import jass.security.service.interfaces.IAccountService;
@@ -77,6 +73,9 @@ public class AuthenticationController {
     @Autowired
     private MailSenderService mailSenderService;
 
+    @Autowired
+    private AdministratorService administratorService;
+
     // Prvi endpoint koji pogadja korisnik kada se loguje.
     // Tada zna samo svoje korisnicko ime i lozinku i to prosledjuje na backend.
     @PostMapping("/login")
@@ -97,8 +96,13 @@ public class AuthenticationController {
 
         //Clicksend TEST
         // TODO Stefan: only for testing purposes, remove later
-        SMSDto smsDto = new SMSDto("IT Company", "TEST", "+381628387347");
-        SMSUtils.sendSMS(logger, clickSendConfig, smsDto);
+        var admins = administratorService.findAll();
+        if (admins != null) {
+            for (var admin : admins) {
+                SMSDto smsDto = new SMSDto("IT Company", "TEST", admin.getPhoneNumber());
+                SMSUtils.sendSMS(logger, clickSendConfig, smsDto);
+            }
+        }
 
         Account acc = accountService.findByEmail(authenticationRequest.getEmail());
         if (acc == null) {
@@ -196,10 +200,16 @@ public class AuthenticationController {
                     " reason: given email is temporarily blocked");
 
             //Clicksend
-            SMSDto smsDto = new SMSDto("IT Company", "User with an IP: " +
-                    IPUtils.getIPAddressFromHttpRequest(request)
-                    + " tried to register with a blocked email: " + dto.getEmail(), "+381628387347");
-            SMSUtils.sendSMS(logger, clickSendConfig, smsDto);
+            var admins = administratorService.findAll();
+            if (admins != null) {
+                for (var admin : admins) {
+                    SMSDto smsDto = new SMSDto("IT Company", "User with an IP: " +
+                            IPUtils.getIPAddressFromHttpRequest(request)
+                            + " tried to register with a blocked email: " + dto.getEmail(), admin.getPhoneNumber());
+                    SMSUtils.sendSMS(logger, clickSendConfig, smsDto);
+                }
+            }
+
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Email is blocked temporarily!");
         }
     }
@@ -243,8 +253,7 @@ public class AuthenticationController {
         String htmlLink = "Click this <a href="+ link + ">link</a> to activate account";
         mailSenderService.sendHtmlMail(mail, "IT COMPANY", htmlLink);
 
-        logger.info("Email with an registration approved message successfully sent to an account with an ID: "
-                + account.getId());
+        logger.info("Email with an registration approved message successfully sent");
         return ResponseEntity.ok("Registration approved");
     }
 
@@ -262,8 +271,7 @@ public class AuthenticationController {
         Account account = accountService.findByEmail(dto.getMail());
         mailSenderService.sendSimpleEmail(dto.getMail(), "Account rejected", dto.getReason());
 
-        logger.info("Email with an registration rejection message successfully sent to an account with an ID: "
-                + account.getId());
+        logger.info("Email with an registration rejection message successfully sent");
         return ResponseEntity.ok("Registration rejected");
     }
 

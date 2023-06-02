@@ -1,14 +1,14 @@
 package jass.security.service.implementations;
 
 import jass.security.dto.employee.EmployeeInfoDto;
-import jass.security.dto.employee.EmployeeProfileInfoDto;
-import jass.security.exception.NotFoundException;
 import jass.security.model.Employee;
 import jass.security.repository.IEmployeeRepository;
+import jass.security.service.interfaces.IAccountService;
 import jass.security.service.interfaces.IEmployeeService;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,9 +16,11 @@ import java.util.UUID;
 @Primary
 public class EmployeeService implements IEmployeeService {
     private final IEmployeeRepository _employeeRepository;
+    private final IAccountService _accountService;
 
-    public EmployeeService(IEmployeeRepository employeeRepository) {
+    public EmployeeService(IEmployeeRepository employeeRepository, IAccountService accountService) {
         _employeeRepository = employeeRepository;
+        _accountService = accountService;
     }
 
     @Override

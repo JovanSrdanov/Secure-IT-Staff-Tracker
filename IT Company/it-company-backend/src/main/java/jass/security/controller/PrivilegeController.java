@@ -5,6 +5,7 @@ import jass.security.dto.PermissionUpdateRequest;
 import jass.security.dto.PrivilegeInfoDto;
 import jass.security.dto.RoleInfoDto;
 import jass.security.dto.SMSDto;
+import jass.security.service.interfaces.IAdministratorService;
 import jass.security.service.interfaces.IPrivilegeService;
 import jass.security.service.interfaces.IRoleService;
 import jass.security.utils.ObjectMapperUtils;
@@ -21,29 +22,35 @@ import org.springframework.web.bind.annotation.*;
 public class PrivilegeController {
     private static final Logger logger = LoggerFactory.getLogger(PrivilegeController.class);
     private final IPrivilegeService privilegeService;
-
     private final IRoleService roleService;
+    private final IAdministratorService administratorService;
 
     //Clicksend
     @Autowired
     private ApiClient clickSendConfig;
 
     @Autowired
-    public PrivilegeController(IPrivilegeService privilegeService, IRoleService roleService) {
+    public PrivilegeController(IPrivilegeService privilegeService, IRoleService roleService, IAdministratorService administratorService) {
         this.privilegeService = privilegeService;
         this.roleService = roleService;
+        this.administratorService = administratorService;
     }
 
     @PostMapping("/update")
     @PreAuthorize("hasAuthority('updatePrivilege')")
     public ResponseEntity<?> updatePrivileges(@RequestBody PermissionUpdateRequest dto) {
         roleService.updatePrivileges(dto);
-        logger.info("Privileges for the role: " + dto.getRoleName() + "changed");
+        logger.info("Privileges for the role: " + dto.getRoleName() + " changed");
 
         //Clicksend
-        SMSDto smsDto = new SMSDto("IT Company",
-                "Privileges for the role: " + dto.getRoleName() + "changed", "+381628387347");
-        SMSUtils.sendSMS(logger, clickSendConfig, smsDto);
+        var admins = administratorService.findAll();
+        if (admins != null) {
+            for (var admin : admins) {
+                SMSDto smsDto = new SMSDto("IT Company",
+                        "Privileges for the role: " + dto.getRoleName() + " changed", admin.getPhoneNumber());
+                SMSUtils.sendSMS(logger, clickSendConfig, smsDto);
+            }
+        }
 
         return ResponseEntity.ok("Privileges updated");
     }

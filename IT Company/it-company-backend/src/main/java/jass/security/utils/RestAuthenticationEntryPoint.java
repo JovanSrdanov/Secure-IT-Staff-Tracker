@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jass.security.controller.PrivilegeController;
 import jass.security.dto.SMSDto;
+import jass.security.service.interfaces.IAdministratorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,9 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Autowired
     private ApiClient clickSendConfig;
 
+    @Autowired
+    private IAdministratorService administratorService;
+
     //Metoda koja se izvrsava ukoliko za prosledjene kredencijale korisnik pokusa da pristupi zasticenom REST servisu
     //Metoda vraca 401 Unauthorized response, ukoliko postoji Login Page u aplikaciji, pozeljno je da se korisnik redirektuje na tu stranicu
     @Override
@@ -31,9 +35,15 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
         logger.warn("Unauthorized access attempt from IP: " + request.getRemoteAddr());
 
         //Clicksend
-        SMSDto smsDto = new SMSDto("IT Company",
-                "Unauthorized access attempt from IP: " + request.getRemoteAddr(), "+381628387347");
-        SMSUtils.sendSMS(logger, clickSendConfig, smsDto);
+        var admins = administratorService.findAll();
+        if (admins != null) {
+            for (var admin : admins) {
+                SMSDto smsDto = new SMSDto("IT Company",
+                        "Unauthorized access attempt from IP: " + request.getRemoteAddr(),
+                        admin.getPhoneNumber());
+                SMSUtils.sendSMS(logger, clickSendConfig, smsDto);
+            }
+        }
 
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
     }

@@ -8,8 +8,10 @@ import jass.security.exception.*;
 import jass.security.model.Account;
 import jass.security.model.PasswordlessLoginToken;
 import jass.security.model.RegistrationRequestStatus;
+import jass.security.model.Role;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public interface IAccountService extends ICrudService<Account> {
@@ -26,5 +28,5 @@ public interface IAccountService extends ICrudService<Account> {
      void generatePasswordlessLoginToken(String email) throws NotFoundException;
     PasswordlessLoginToken usePLToken(String token) throws NotFoundException, PlTokenUsedException, TokenExpiredException;
 
-
-    }
+    List<Account> findAllAccountsByRole(String role);
+}
