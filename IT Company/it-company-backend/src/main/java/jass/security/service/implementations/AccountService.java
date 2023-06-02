@@ -228,7 +228,7 @@ public class AccountService implements IAccountService {
             findByEmail(dto.getEmail());
             throw new EmailTakenException();
         } catch (NotFoundException ignored) {
-            int a = 69696;
+
         }
 
         Account newAcc = new Account();
@@ -247,8 +247,11 @@ public class AccountService implements IAccountService {
     }
 
     private Account makeAdminAccount(RegisterAdminAccountDto dto, UUID adminId) throws EmailTakenException, NotFoundException {
-        if (findByEmail(dto.getEmail()) != null) {
+        try {
+            findByEmail(dto.getEmail());
             throw new EmailTakenException();
+        } catch (NotFoundException ignored) {
+
         }
 
         Account newAcc = new Account();
