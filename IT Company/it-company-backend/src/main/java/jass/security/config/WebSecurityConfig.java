@@ -97,7 +97,7 @@ public class WebSecurityConfig {
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
                 .requestMatchers(HttpMethod.POST, "/auth/login", "auth/register")
-                .requestMatchers(HttpMethod.GET, "/auth/activate/**", "/", "/webjars/**", "/*.html", "favicon.ico", "/*/*.html", "/*/*.css", "/*/*.js");
+                .requestMatchers(HttpMethod.GET, "/auth/activate/**", "/logs/get-all-logs", "/", "/webjars/**", "/*.html", "favicon.ico", "/*/*.html", "/*/*.css", "/*/*.js");
     }
 
 }

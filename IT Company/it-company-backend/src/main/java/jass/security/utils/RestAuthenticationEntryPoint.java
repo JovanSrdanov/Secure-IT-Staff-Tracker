@@ -47,11 +47,4 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
     }
-
-//    @ExceptionHandler (value = {AccessDeniedException.class})
-//    public void commence(HttpServletRequest request, HttpServletResponse response,
-//                         AccessDeniedException accessDeniedException) throws IOException {
-//        logger.warn("AAAAAAAAAAAAAA Authorization Failed : " + accessDeniedException.getMessage());
-//        response.sendError(HttpServletResponse.SC_FORBIDDEN, "Authorization Failed : " + accessDeniedException.getMessage());
-//    }
 }
