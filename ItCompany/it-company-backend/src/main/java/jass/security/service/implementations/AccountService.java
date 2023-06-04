@@ -153,7 +153,7 @@ public class AccountService implements IAccountService {
 
     @Override
     @Transactional(rollbackFor = {Exception.class})
-    public UUID registerAdminAccount(RegisterAdminAccountDto dto) throws EmailTakenException, NotFoundException {
+    public UUID registerAdminAccount(RegisterAdminAccountDto dto) throws EmailTakenException {
         Address address = makeAddress(dto.getAddress());
         UUID adminId = UUID.randomUUID();
 
@@ -254,7 +254,7 @@ public class AccountService implements IAccountService {
         return newAcc;
     }
 
-    private Account makeAdminAccount(RegisterAdminAccountDto dto, UUID adminId) throws EmailTakenException, NotFoundException {
+    private Account makeAdminAccount(RegisterAdminAccountDto dto, UUID adminId) throws EmailTakenException {
         try {
             findByEmail(dto.getEmail());
             throw new EmailTakenException();

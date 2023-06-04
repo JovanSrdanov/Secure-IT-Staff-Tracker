@@ -3,15 +3,12 @@ package jass.security.controller;
 import ClickSend.ApiClient;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jass.security.dto.*;
 import jass.security.exception.*;
 import jass.security.model.Account;
 import jass.security.model.RegistrationRequestStatus;
-import jass.security.model.Role;
 import jass.security.service.implementations.AdministratorService;
-import jass.security.service.implementations.EmployeeService;
 import jass.security.service.implementations.MailSenderService;
 import jass.security.service.interfaces.IAccountActivationService;
 import jass.security.service.interfaces.IAccountService;
@@ -21,7 +18,6 @@ import jass.security.utils.TokenUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -39,7 +35,6 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.util.ArrayList;
-import java.util.List;
 
 //Kontroler zaduzen za autentifikaciju korisnika
 @RestController
@@ -80,8 +75,7 @@ public class AuthenticationController {
     // Tada zna samo svoje korisnicko ime i lozinku i to prosledjuje na backend.
     @PostMapping("/login")
     public ResponseEntity<?> createAuthenticationToken(
-            @RequestBody JwtAuthenticationRequest authenticationRequest, HttpServletRequest request,
-            HttpServletResponse response) {
+            @RequestBody JwtAuthenticationRequest authenticationRequest, HttpServletRequest request) {
         // Ukoliko kredencijali nisu ispravni, logovanje nece biti uspesno, desice se
         // AuthenticationException
 
@@ -104,10 +98,13 @@ public class AuthenticationController {
             }
         }
 
-        Account acc = accountService.findByEmail(authenticationRequest.getEmail());
-        if (acc == null) {
-            logger.warn("User failed to log in from IP: " + IPUtils.getIPAddressFromHttpRequest(request) + ", reason: email not found");
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not found");
+        Account acc;
+        try {
+            acc = accountService.findByEmail(authenticationRequest.getEmail());
+        } catch (NotFoundException e) {
+            logger.warn("User failed to log in from IP: " + IPUtils.getIPAddressFromHttpRequest(request) +
+                    ", reason: an account with the given email does not exist");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("This account does not exist!");
         }
 
         if (acc.getStatus() != RegistrationRequestStatus.APPROVED) {
@@ -122,7 +119,7 @@ public class AuthenticationController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Account not activated");
         }
 
-        Authentication authentication = null;
+        Authentication authentication;
         try {
             authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                     authenticationRequest.getEmail(), authenticationRequest.getPassword() + acc.getSalt()));
@@ -141,8 +138,7 @@ public class AuthenticationController {
         // Kreiraj token za tog korisnika
         //TODO Strahinja: Zasto ovde baca error?
         //Account user = (Account) authentication.getPrincipal();
-        Account account = accountService.findByEmail(authenticationRequest.getEmail());
-        var roles = new ArrayList<Role>(account.getRoles());
+        var roles = new ArrayList<>(acc.getRoles());
 
         String jwt = tokenUtils.generateToken(authenticationRequest.getEmail(), roles.get(0).getName());
         String resfresh = tokenUtils.generateRefreshToken(authenticationRequest.getEmail());
@@ -171,6 +167,11 @@ public class AuthenticationController {
                             IPUtils.getIPAddressFromHttpRequest(request),
                     " reason: authentication token expired");
             return ResponseEntity.status(HttpStatus.GONE).body("Token expired");
+        } catch (NotFoundException e) {
+            logger.warn("User failed to refresh their authentication token, from IP: " +
+                            IPUtils.getIPAddressFromHttpRequest(request),
+                    " reason: an account with the given email does not exisst");
+            throw new RuntimeException(e);
         }
 
         logger.warn("User failed to refresh their authentication token, from IP: " +
@@ -241,14 +242,20 @@ public class AuthenticationController {
         }
 
         //Posalji mail
-        String link = "nolink";
-        Account account = accountService.findByEmail(mail);
+        String link;
+
+        Account account = null;
         try {
+            account = accountService.findByEmail(mail);
             link = accountActivationService.createAcctivationLink(mail);
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
             logger.warn("Failed to create an activation link for the account with an ID: " + account.getId()
                    + ", invalid signing key");
             return ResponseEntity.ok("Error while hashing!");
+        } catch (NotFoundException e) {
+            logger.warn("Failed to create an activation link with an email: " + mail
+                    + ", an account with the given email does not exist");
+            return new ResponseEntity<>("An account with the given email does not exist", HttpStatus.NOT_FOUND);
         }
         String htmlLink = "Click this <a href="+ link + ">link</a> to activate account";
         mailSenderService.sendHtmlMail(mail, "IT COMPANY", htmlLink);
@@ -268,7 +275,6 @@ public class AuthenticationController {
             return ResponseEntity.ok("Account with this mail does not exist");
         }
 
-        Account account = accountService.findByEmail(dto.getMail());
         mailSenderService.sendSimpleEmail(dto.getMail(), "Account rejected", dto.getReason());
 
         logger.info("Email with an registration rejection message successfully sent");
@@ -330,7 +336,7 @@ public class AuthenticationController {
         try {
             var plToken = accountService.usePLToken(token);
             Account account = accountService.findByEmail(plToken.getEmail());
-            var roles = new ArrayList<Role>(account.getRoles());
+            var roles = new ArrayList<>(account.getRoles());
 
             String jwt = tokenUtils.generateToken(plToken.getEmail(), roles.get(0).getName());
             String resfresh = tokenUtils.generateRefreshToken(plToken.getEmail());

@@ -16,7 +16,7 @@ public interface IAccountService extends ICrudService<Account> {
 
     UUID registerAccount(RegisterAccountDto dto) throws EmailTakenException, NotFoundException, EmailRejectedException;
 
-    UUID registerAdminAccount(RegisterAdminAccountDto dto) throws EmailTakenException, NotFoundException;
+    UUID registerAdminAccount(RegisterAdminAccountDto dto) throws EmailTakenException;
 
     void approveAccount(String email, Boolean approve) throws NotFoundException;
 
