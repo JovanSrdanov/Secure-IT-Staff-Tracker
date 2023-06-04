@@ -89,14 +89,13 @@ public CvService(@Value("${cvAesKey}") String secretKeyStr, ICvRepository cvRepo
 
     @Override
     public byte[] read(UUID engineerId) throws IOException, NotFoundException {
-        String filePath = getCvDir() + "cv_" + engineerId.toString();
-
-
         var engineerResult =  swEngineerRepository.findById(engineerId);
         if(engineerResult.isEmpty()){
             throw new NotFoundException("Engineer not found");
         }
         byte[] aesInitVector = engineerResult.get().getCv().getAesInitVector();
+
+        String filePath = getCvDir() + "cv_" + engineerId.toString();
         byte[] encryptedCv =  Files.readAllBytes(Path.of(filePath));
 
         return decrypt(new CvAesDto(encryptedCv, aesInitVector));
