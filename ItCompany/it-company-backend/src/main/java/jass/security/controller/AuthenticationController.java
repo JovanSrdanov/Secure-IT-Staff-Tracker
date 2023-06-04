@@ -87,17 +87,6 @@ public class AuthenticationController {
 //
 //        Message.creator(new PhoneNumber("0628387347"),
 //                        new PhoneNumber(TWILIO_PHONE_NUMBER), "Test").create();
-
-        //Clicksend TEST
-        // TODO Stefan: only for testing purposes, remove later
-        var admins = administratorService.findAll();
-        if (admins != null) {
-            for (var admin : admins) {
-                SMSDto smsDto = new SMSDto("IT Company", "TEST", admin.getPhoneNumber());
-                SMSUtils.sendSMS(logger, clickSendConfig, smsDto);
-            }
-        }
-
         Account acc;
         try {
             acc = accountService.findByEmail(authenticationRequest.getEmail());
