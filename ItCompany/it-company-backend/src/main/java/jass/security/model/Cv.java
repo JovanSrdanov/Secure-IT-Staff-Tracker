@@ -21,5 +21,5 @@ public class Cv {
     @Id
     private UUID id;
     @Column(nullable = false)
-    private String fileSystemPath;
+    private byte[] aesInitVector;
 }

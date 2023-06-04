@@ -166,7 +166,7 @@ public class SoftwareEngineerController {
         }
     }
 
-    private ResponseEntity getCvPdfResponse(UUID engineerId) throws IOException {
+    private ResponseEntity getCvPdfResponse(UUID engineerId) throws IOException, NotFoundException {
 
         byte[] cvBytes = cvService.read(engineerId);
 
@@ -225,7 +225,7 @@ public class SoftwareEngineerController {
         catch (IOException e) {
             return new ResponseEntity("cv not found", HttpStatus.NOT_FOUND);
         } catch (NotFoundException e) {
-            return new ResponseEntity("user not found", HttpStatus.NOT_FOUND);
+            return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
         }
 
     }
