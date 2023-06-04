@@ -84,7 +84,7 @@ public class SoftwareEngineerController {
             return new ResponseEntity<>(skill, HttpStatus.CREATED);
         } catch (NotFoundException e) {
             logger.warn("Failed attempt to add a skill to " +
-                            "an engineer, from IP: " + IPUtils.getIPAddressFromHttpRequest(request),
+                            "an engineer, from IP: " + IPUtils.getIPAddressFromHttpRequest(request) +
                     " reason: given engineer email does not exist");
 
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -111,7 +111,7 @@ public class SoftwareEngineerController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (NotFoundException e) {
             logger.warn("Failed attempt to remove a skill from " +
-                            "an engineer, from IP: " + IPUtils.getIPAddressFromHttpRequest(request),
+                            "an engineer, from IP: " + IPUtils.getIPAddressFromHttpRequest(request) +
                     " reason: given engineer email does not exist");
 
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

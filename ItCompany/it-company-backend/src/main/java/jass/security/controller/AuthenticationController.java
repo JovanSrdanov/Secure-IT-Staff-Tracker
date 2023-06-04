@@ -189,15 +189,15 @@ public class AuthenticationController {
                     " awaiting admin approval");
             return ResponseEntity.ok("Account created, waiting admin approval");
         } catch (EmailTakenException e) {
-            logger.warn("User failed to register, from IP: " + IPUtils.getIPAddressFromHttpRequest(request),
+            logger.warn("User failed to register, from IP: " + IPUtils.getIPAddressFromHttpRequest(request) +
                     " reason: given email is taken");
             return ResponseEntity.status(HttpStatus.CONFLICT).body("This e-mail is taken!");
         } catch (NotFoundException e) {
-            logger.warn("User failed to register, from IP: " + IPUtils.getIPAddressFromHttpRequest(request),
+            logger.warn("User failed to register, from IP: " + IPUtils.getIPAddressFromHttpRequest(request) +
                     " reason: given role does not exist");
             return ResponseEntity.status(HttpStatus.CONFLICT).body("This role does not exist!");
         } catch (EmailRejectedException e) {
-            logger.warn("User failed to register, from IP: " + IPUtils.getIPAddressFromHttpRequest(request),
+            logger.warn("User failed to register, from IP: " + IPUtils.getIPAddressFromHttpRequest(request) +
                     " reason: given email is temporarily blocked");
 
             //Clicksend
@@ -236,7 +236,7 @@ public class AuthenticationController {
         try {
             accountService.approveAccount(mail, true);
         } catch (NotFoundException e) {
-            logger.warn("Failed to accept an account registration with an email: " + mail,
+            logger.warn("Failed to accept an account registration with an email: " + mail +
                     " reason: an account with a provided email does not exist");
             return ResponseEntity.ok("Account with this mail does not exist");
         }
@@ -270,7 +270,7 @@ public class AuthenticationController {
         try {
             accountService.approveAccount(dto.getMail(), false);
         } catch (NotFoundException e) {
-            logger.warn("Failed to accept registration with email: " + dto.getMail(),
+            logger.warn("Failed to accept registration with email: " + dto.getMail() +
                     " reason: an account with the given email does not exist");
             return ResponseEntity.ok("Account with this mail does not exist");
         }

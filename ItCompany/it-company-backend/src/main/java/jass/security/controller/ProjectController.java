@@ -65,7 +65,7 @@ public class ProjectController {
                     HttpStatus.OK
             );
         } catch (NotFoundException e) {
-            logger.warn("User failed to update a project, from IP: " + IPUtils.getIPAddressFromHttpRequest(request),
+            logger.warn("User failed to update a project, from IP: " + IPUtils.getIPAddressFromHttpRequest(request) +
                     " reason: project with an ID: " + projectId + " does not exist");
 
             return new ResponseEntity<>(
@@ -73,7 +73,7 @@ public class ProjectController {
                     HttpStatus.NOT_FOUND
             );
         } catch (InvalidDateException e) {
-            logger.warn("User failed to update a project, from IP: " + IPUtils.getIPAddressFromHttpRequest(request),
+            logger.warn("User failed to update a project, from IP: " + IPUtils.getIPAddressFromHttpRequest(request) +
                     " reason: project end date must be after it's start date");
 
             return new ResponseEntity<>(
@@ -97,7 +97,7 @@ public class ProjectController {
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (NotFoundException e) {
             logger.warn("User failed to add an engineer to a project with an ID: " + projectId + ", from IP: " +
-                            IPUtils.getIPAddressFromHttpRequest(request),
+                            IPUtils.getIPAddressFromHttpRequest(request) +
                     " reason: the project does not exist");
 
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
@@ -118,7 +118,7 @@ public class ProjectController {
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (NotFoundException e) {
             logger.warn("User failed to remove a project manager from a project with an ID: " + projectId + ", from IP: " +
-                            IPUtils.getIPAddressFromHttpRequest(request),
+                            IPUtils.getIPAddressFromHttpRequest(request) +
                     " reason: the project does not exist");
 
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
@@ -139,7 +139,7 @@ public class ProjectController {
         } catch (NotFoundException e) {
             logger.warn("User failed to dismiss an engineer with an ID: " + dto.getWorkerId() +
                     ", from a project with an ID: " + projectId +
-                    ", from IP: " + IPUtils.getIPAddressFromHttpRequest(request),
+                    ", from IP: " + IPUtils.getIPAddressFromHttpRequest(request) +
                     " reason: the project does not exist");
 
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
@@ -161,7 +161,7 @@ public class ProjectController {
         } catch (NotFoundException e) {
             logger.warn("User failed to dismiss a project manager with an ID: " + dto.getWorkerId() +
                             ", from a project with an ID: " + projectId +
-                            ", from IP: " + IPUtils.getIPAddressFromHttpRequest(request),
+                            ", from IP: " + IPUtils.getIPAddressFromHttpRequest(request) +
                     " reason: the project does not exist");
 
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
@@ -239,14 +239,14 @@ public class ProjectController {
         try {
             _projectService.ChangeSwEngineersJobDescription(projectId, swEngineer.getEmployeeId(), dto.getNewJobDescription());
             logger.warn("User with an account ID: " + swEngineer.getId() + ", from IP: " +
-                            IPUtils.getIPAddressFromHttpRequest(request),
+                            IPUtils.getIPAddressFromHttpRequest(request) +
                     " successfully changed their job description on a project with an ID: " +
                     projectId);
 
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (NotFoundException e) {
             logger.warn("User failed to change their job description, from IP: " +
-                            IPUtils.getIPAddressFromHttpRequest(request),
+                            IPUtils.getIPAddressFromHttpRequest(request) +
                     " reason: an engineer with a given email does not exist");
 
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
