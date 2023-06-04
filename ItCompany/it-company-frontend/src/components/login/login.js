@@ -59,7 +59,13 @@ function Login() {
     };
 
     function handleresetPassword() {
-        console.log(resetPasswordEmail)
+        interceptor.get("account/reqest-recovery/" + resetPasswordEmail).then((res) => {
+
+        }).catch((err) => {
+            console.log(err)
+        })
+
+
     }
 
     const [successDialogShow, setSuccessDialogShow] = useState(false);

@@ -86,8 +86,12 @@ public class AccountService implements IAccountService {
     }
 
     @Override
-    public Account findByEmail(String email) {
-        return _accountRepository.findByEmail(email);
+    public Account findByEmail(String email) throws NotFoundException {
+        var acc = _accountRepository.findByEmail(email);
+        if (acc == null) {
+            throw new NotFoundException("Account with this mail does not exist!");
+        }
+        return acc;
     }
 
     @Override
@@ -149,7 +153,7 @@ public class AccountService implements IAccountService {
 
     @Override
     @Transactional(rollbackFor = {Exception.class})
-    public UUID registerAdminAccount(RegisterAdminAccountDto dto) throws EmailTakenException {
+    public UUID registerAdminAccount(RegisterAdminAccountDto dto) throws EmailTakenException, NotFoundException {
         Address address = makeAddress(dto.getAddress());
         UUID adminId = UUID.randomUUID();
 
@@ -164,6 +168,7 @@ public class AccountService implements IAccountService {
         //TODO Strahinja: Da li ovo ovako ili nekako bolje da se salju ove role sa fronta?
         var roles = new ArrayList<Role>();
         roles.add(role);
+        newAcc.setIsBlocked(false);
         newAcc.setRoles(roles);
         role.getUsers().add(newAcc);
 
@@ -226,9 +231,12 @@ public class AccountService implements IAccountService {
         return address;
     }
 
-    private Account makeAccount(RegisterAccountDto dto, UUID employeeId) throws EmailTakenException {
-        if (findByEmail(dto.getEmail()) != null) {
+    private Account makeAccount(RegisterAccountDto dto, UUID employeeId) throws EmailTakenException, NotFoundException {
+        try {
+            findByEmail(dto.getEmail());
             throw new EmailTakenException();
+        } catch (NotFoundException ignored) {
+
         }
 
         Account newAcc = new Account();
@@ -246,9 +254,12 @@ public class AccountService implements IAccountService {
         return newAcc;
     }
 
-    private Account makeAdminAccount(RegisterAdminAccountDto dto, UUID adminId) throws EmailTakenException {
-        if (findByEmail(dto.getEmail()) != null) {
+    private Account makeAdminAccount(RegisterAdminAccountDto dto, UUID adminId) throws EmailTakenException, NotFoundException {
+        try {
+            findByEmail(dto.getEmail());
             throw new EmailTakenException();
+        } catch (NotFoundException ignored) {
+
         }
 
         Account newAcc = new Account();
@@ -481,5 +492,26 @@ public class AccountService implements IAccountService {
     @Override
     public List<Account> findAllAccountsByRole(String role) {
         return _accountRepository.findByRolesName(role);
+    }
+
+    @Override
+    public void blockUnblockAccount(String email) throws NotFoundException {
+        Account account = findByEmail(email);
+        if (account == null) {
+            throw new NotFoundException("Account with this email does not exist");
+        }
+        account.setIsBlocked(!account.getIsBlocked());
+        save(account);
+    }
+
+    @Override
+    public void changePassword(ChangePasswordDto dto) throws NotFoundException, PasswordsDontMatchException {
+        Account account = findByEmail(dto.getEmail());
+
+        String dbPassword = account.getPassword();
+        if (passwordEncoder.matches(dto.getOldPassword() + account.getSalt(), dbPassword)) {
+            account.setPassword(passwordEncoder.encode(dto.getNewPassword() + account.getSalt()));
+            save(account);
+        } else throw new PasswordsDontMatchException("Passwords don`t mant");
     }
 }

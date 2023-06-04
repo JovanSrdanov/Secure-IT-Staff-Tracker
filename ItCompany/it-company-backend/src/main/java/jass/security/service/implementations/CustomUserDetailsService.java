@@ -1,5 +1,6 @@
 package jass.security.service.implementations;
 
+import jass.security.exception.NotFoundException;
 import jass.security.model.Account;
 import jass.security.model.Privilege;
 import jass.security.model.Role;
@@ -30,7 +31,12 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email)
             throws UsernameNotFoundException {
-        Account account = accountService.findByEmail(email);
+        Account account = null;
+        try {
+            account = accountService.findByEmail(email);
+        } catch (NotFoundException e) {
+            throw new UsernameNotFoundException("This account odes not exist!");
+        }
 
         //TODO Strahinja: Ako je acc pendind da li to proveriti ovde ili?
         if (account == null) {
@@ -39,6 +45,10 @@ public class CustomUserDetailsService implements UserDetailsService {
                     " ", " ", true, true, true, true,
                     getAuthorities(Arrays.asList(
                             roleService.findByName("ROLE_USER"))));*/
+        }
+
+        if(account.getIsBlocked()) {
+            throw new UsernameNotFoundException("User is blocked!");
         }
 
         return new org.springframework.security.core.userdetails.User(

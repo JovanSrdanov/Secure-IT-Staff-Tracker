@@ -29,6 +29,13 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
 public class WebSecurityConfig {
 
+    // Handler za vracanje 401 kada klijent sa neodogovarajucim korisnickim imenom i lozinkom pokusa da pristupi resursu
+    @Autowired
+    private RestAuthenticationEntryPoint restAuthenticationEntryPoint;
+    // Injektujemo implementaciju iz TokenUtils klase kako bismo mogli da koristimo njene metode za rad sa JWT u TokenAuthenticationFilteru
+    @Autowired
+    private TokenUtils tokenUtils;
+
     // Servis koji se koristi za citanje podataka o korisnicima aplikacije
     @Bean
     public UserDetailsService userDetailsService() {
@@ -41,7 +48,6 @@ public class WebSecurityConfig {
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
@@ -56,22 +62,11 @@ public class WebSecurityConfig {
         return authProvider;
     }
 
-
-
-    // Handler za vracanje 401 kada klijent sa neodogovarajucim korisnickim imenom i lozinkom pokusa da pristupi resursu
-    @Autowired
-    private RestAuthenticationEntryPoint restAuthenticationEntryPoint;
-
-
     // Registrujemo authentication manager koji ce da uradi autentifikaciju korisnika za nas
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
-
-    // Injektujemo implementaciju iz TokenUtils klase kako bismo mogli da koristimo njene metode za rad sa JWT u TokenAuthenticationFilteru
-    @Autowired
-    private TokenUtils tokenUtils;
 
     // Definisemo prava pristupa za zahteve ka odredjenim URL-ovima/rutama
     @Bean
@@ -96,8 +91,8 @@ public class WebSecurityConfig {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
-                .requestMatchers(HttpMethod.POST, "/auth/login", "auth/register")
-                .requestMatchers(HttpMethod.GET, "/auth/activate/**", "/", "/webjars/**", "/*.html", "favicon.ico", "/*/*.html", "/*/*.css", "/*/*.js");
+                .requestMatchers(HttpMethod.POST, "/auth/login", "auth/register", "/account/recover/**")
+                .requestMatchers(HttpMethod.GET, "/auth/activate/**", "account/reqest-recovery/**");
     }
 
 }

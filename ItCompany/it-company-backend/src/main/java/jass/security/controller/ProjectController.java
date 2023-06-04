@@ -184,7 +184,7 @@ public class ProjectController {
 
     @GetMapping("pr-manager")
     @PreAuthorize("hasAuthority('getPrManagersProjects')")
-    public ResponseEntity<?> GetPrManagersProjects(Principal principal) {
+    public ResponseEntity<?> GetPrManagersProjects(Principal principal) throws NotFoundException {
         String projectManagerEmail = principal.getName();
         Account prManager = _accountService.findByEmail(projectManagerEmail);
 
@@ -204,7 +204,12 @@ public class ProjectController {
     @PreAuthorize("hasAuthority('getSwEngineersProjects')")
     public ResponseEntity<?> GetSwEngineersProjects(Principal principal) {
         String swEngineerEmail = principal.getName();
-        Account swEngineer = _accountService.findByEmail(swEngineerEmail);
+        Account swEngineer = null;
+        try {
+            swEngineer = _accountService.findByEmail(swEngineerEmail);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("This account does not exist!");
+        }
         var projects = _projectService.GetSwEngineersProjects(swEngineer.getEmployeeId());
         return new ResponseEntity<>(projects, HttpStatus.OK);
     }
@@ -224,7 +229,12 @@ public class ProjectController {
                                                              @PathVariable("id") UUID projectId,
                                                              HttpServletRequest request) {
         String swEngineerEmail = principal.getName();
-        Account swEngineer = _accountService.findByEmail(swEngineerEmail);
+        Account swEngineer = null;
+        try {
+            swEngineer = _accountService.findByEmail(swEngineerEmail);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("This account does not exist!");
+        }
 
         try {
             _projectService.ChangeSwEngineersJobDescription(projectId, swEngineer.getEmployeeId(), dto.getNewJobDescription());

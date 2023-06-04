@@ -78,7 +78,12 @@ public class EmployeeController {
     @PreAuthorize("hasAuthority('getLoggedInInfo')")
     public ResponseEntity<?> getLoggedInInfo(Principal principal) {
         String employeeEmail = principal.getName();
-        Account employeeCredentials = _accountService.findByEmail(employeeEmail);
+        Account employeeCredentials = null;
+        try {
+            employeeCredentials = _accountService.findByEmail(employeeEmail);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("This account does not exist!");
+        }
         String role = TokenUtils.extractRoleFromAuthenticationHeader((Authentication) principal);
 
         try {
@@ -131,7 +136,12 @@ public class EmployeeController {
     public ResponseEntity<?> updateLoggedInInfo(@Valid @RequestBody EmployeeProfileInfoDto dto, Principal principal,
                                                 HttpServletRequest request) {
         String employeeEmail = principal.getName();
-        Account employeeCredentials = _accountService.findByEmail(employeeEmail);
+        Account employeeCredentials = null;
+        try {
+            employeeCredentials = _accountService.findByEmail(employeeEmail);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("This account does not exist!");
+        }
         String role = TokenUtils.extractRoleFromAuthenticationHeader((Authentication) principal);
 
         try {

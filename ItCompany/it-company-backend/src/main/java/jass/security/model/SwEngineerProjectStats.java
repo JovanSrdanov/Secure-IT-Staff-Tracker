@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnTransformer;
 
 import java.io.Serializable;
 
@@ -17,8 +18,12 @@ import java.io.Serializable;
 public class SwEngineerProjectStats implements Serializable {
     @Id
     private SwEngineerProjectStatsId id;
-    @Column(nullable = false)
+
+    @ColumnTransformer( read = "pgp_sym_decrypt(job_description, current_setting('encrypt.key') )",
+            write = " pgp_sym_encrypt( ?, current_setting('encrypt.key') )")
+    @Column(nullable = false, columnDefinition = "bytea")
     private String jobDescription;
+
     @Column(nullable = false)
     private DateRange workingPeriod;
 
@@ -33,12 +38,3 @@ public class SwEngineerProjectStats implements Serializable {
     @JoinColumn(name = "project _id")
     private Project project;
 }
-
-
-
-
-
-
-
-
-
