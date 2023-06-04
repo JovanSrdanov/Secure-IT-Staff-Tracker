@@ -8,4 +8,5 @@ import java.util.UUID;
 
 public interface IProjectManagerService extends ICrudService<ProjectManager>{
     ProjectManager update(UUID id, EmployeeProfileInfoDto dto) throws NotFoundException;
+    boolean isSuperior(UUID prManagerId, UUID engineerId);
 }

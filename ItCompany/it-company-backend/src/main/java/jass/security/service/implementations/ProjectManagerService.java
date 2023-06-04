@@ -55,4 +55,9 @@ public class ProjectManagerService implements IProjectManagerService {
 
         return projectManagerRepository.save(oldEmployee);
     }
+
+    @Override
+    public boolean isSuperior(UUID prManagerId, UUID engineerId) {
+        return  projectManagerRepository.getSubordinateIds(prManagerId, engineerId).contains(engineerId);
+    }
 }
