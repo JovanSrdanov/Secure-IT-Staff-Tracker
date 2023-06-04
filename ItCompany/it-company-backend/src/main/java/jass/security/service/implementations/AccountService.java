@@ -1,5 +1,7 @@
 package jass.security.service.implementations;
 
+import jass.security.controller.AccountController;
+import jass.security.controller.AuthenticationController;
 import jass.security.dto.*;
 import jass.security.exception.*;
 import jass.security.model.*;
@@ -7,8 +9,11 @@ import jass.security.repository.*;
 import jass.security.service.interfaces.IAccountService;
 import jass.security.service.interfaces.IRejectedMailService;
 import jass.security.utils.DateUtils;
+import jass.security.utils.IPUtils;
 import jass.security.utils.ObjectMapperUtils;
 import jass.security.utils.RandomPasswordGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,6 +26,7 @@ import java.util.*;
 @Service
 @Primary
 public class AccountService implements IAccountService {
+    private static final Logger logger = LoggerFactory.getLogger(AccountService.class);
     private final IAccountRepository _accountRepository;
 
     private final IRoleRepository _roleRespository;
@@ -70,6 +76,7 @@ public class AccountService implements IAccountService {
         if (entity.getId() == null) {
             entity.setId(UUID.randomUUID());
         }
+        logger.info("Account with an ID: " + entity.getId() + ", successfully created");
         return _accountRepository.save(entity);
     }
 
@@ -96,9 +103,9 @@ public class AccountService implements IAccountService {
         }
 
 
-        //make adres
+        //make address
         Address address = makeAddress(dto.getAddress());
-        //make employye
+        //make employee
         UUID employeeId;
         Role role;
 
@@ -146,7 +153,7 @@ public class AccountService implements IAccountService {
 
     @Override
     @Transactional(rollbackFor = {Exception.class})
-    public UUID registerAdminAccount(RegisterAdminAccountDto dto) throws EmailTakenException, NotFoundException {
+    public UUID registerAdminAccount(RegisterAdminAccountDto dto) throws EmailTakenException {
         Address address = makeAddress(dto.getAddress());
         UUID adminId = UUID.randomUUID();
 
@@ -167,7 +174,7 @@ public class AccountService implements IAccountService {
 
         save(newAcc);
         _roleRespository.save(role);
-
+        logger.info("Admin successfully registered, from user ID: " + adminId);
         return newAcc.getId();
     }
 
@@ -247,7 +254,7 @@ public class AccountService implements IAccountService {
         return newAcc;
     }
 
-    private Account makeAdminAccount(RegisterAdminAccountDto dto, UUID adminId) throws EmailTakenException, NotFoundException {
+    private Account makeAdminAccount(RegisterAdminAccountDto dto, UUID adminId) throws EmailTakenException {
         try {
             findByEmail(dto.getEmail());
             throw new EmailTakenException();
@@ -291,6 +298,7 @@ public class AccountService implements IAccountService {
             }
 
             save(account);
+            logger.info("Account with ID: " + account.getId() + " successfully approved");
         } else {
             //account.setStatus(RegistrationRequestStatus.REJECTED);
 
@@ -322,6 +330,7 @@ public class AccountService implements IAccountService {
             RejectedMail rejectedMail = new RejectedMail(UUID.randomUUID(), email, date);
             rejectedMailService.save(rejectedMail);
 
+            logger.info("Account with ID: " + acc.getId() + " successfully rejected");
         }
     }
 
@@ -481,6 +490,11 @@ public class AccountService implements IAccountService {
     }
 
     @Override
+    public List<Account> findAllAccountsByRole(String role) {
+        return _accountRepository.findByRolesName(role);
+    }
+
+    @Override
     public void blockUnblockAccount(String email) throws NotFoundException {
         Account account = findByEmail(email);
         if (account == null) {
@@ -500,6 +514,4 @@ public class AccountService implements IAccountService {
             save(account);
         } else throw new PasswordsDontMatchException("Passwords don`t mant");
     }
-
-
 }

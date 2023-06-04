@@ -7,6 +7,8 @@ import jass.security.model.*;
 import jass.security.repository.*;
 import jass.security.service.interfaces.IProjectService;
 import jass.security.utils.DateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,7 @@ public class ProjectService implements IProjectService {
     private final IProjectManagerRepository _projectManagerRepository;
     private final ISwEngineerProjectStatsRepository _swEngineerProjectStatsRepository;
     private final IPrManagerProjectStatsRepository _prManagerProjectStatsRepository;
+    private static final Logger logger = LoggerFactory.getLogger(ProjectService.class);
 
     @Autowired
     public ProjectService(IProjectRepository projectRepository, ISwEngineerRepository swEngineerRepository, IProjectManagerRepository projectManagerRepository, ISwEngineerProjectStatsRepository swEngineerProjectStatsRepository, IPrManagerProjectStatsRepository prManagerProjectStatsRepository) {
@@ -52,6 +55,8 @@ public class ProjectService implements IProjectService {
     @Override
     public Project save(Project entity) {
         entity.setId(UUID.randomUUID());
+        logger.info("Project with an ID: " + entity.getId() + ", successfully created");
+
         return _projectRepository.save(entity);
     }
 

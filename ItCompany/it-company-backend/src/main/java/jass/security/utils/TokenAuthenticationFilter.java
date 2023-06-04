@@ -16,8 +16,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
-
-    protected final Log LOGGER = LogFactory.getLog(getClass());
     private final TokenUtils tokenUtils;
     private final UserDetailsService userDetailsService;
 

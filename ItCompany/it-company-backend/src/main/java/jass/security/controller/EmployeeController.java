@@ -1,12 +1,17 @@
 package jass.security.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jass.security.dto.employee.EmployeeProfileInfoDto;
 import jass.security.exception.NotFoundException;
 import jass.security.model.*;
+import jass.security.service.implementations.AccountService;
 import jass.security.service.interfaces.*;
+import jass.security.utils.IPUtils;
 import jass.security.utils.ObjectMapperUtils;
 import jass.security.utils.TokenUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
@@ -33,6 +38,7 @@ public class EmployeeController {
     private final IAdministratorService _administratorService;
     private final IProjectManagerService _projectManagerService;
     private final IHumanResourcesManagerService _humanResourcesManagerService;
+    private static final Logger logger = LoggerFactory.getLogger(EmployeeController.class);
 
     @Autowired
     public EmployeeController(IEmployeeService employeeService, IAccountService accountService,
@@ -129,7 +135,8 @@ public class EmployeeController {
 
     @PutMapping("/logged-in-info")
     @PreAuthorize("hasAuthority('updateLoggedInInfo')")
-    public ResponseEntity<?> updateLoggedInInfo(@Valid @RequestBody EmployeeProfileInfoDto dto, Principal principal) {
+    public ResponseEntity<?> updateLoggedInInfo(@Valid @RequestBody EmployeeProfileInfoDto dto, Principal principal,
+                                                HttpServletRequest request) {
         String employeeEmail = principal.getName();
         Account employeeCredentials = null;
         try {
@@ -143,6 +150,9 @@ public class EmployeeController {
             switch (role) {
                 case "ROLE_ENGINEER" -> {
                     var updatedInfo = _softwareEngineerService.update(employeeCredentials.getEmployeeId(), dto);
+                    logger.info("Account with an ID: " + employeeCredentials.getId() + " successfully changed" +
+                            " their profile information");
+
                     return new ResponseEntity<>(
                             ObjectMapperUtils.map(updatedInfo, EmployeeProfileInfoDto.class),
                             HttpStatus.OK
@@ -150,6 +160,9 @@ public class EmployeeController {
                 }
                 case "ROLE_ADMIN" -> {
                     var updatedInfo = _administratorService.update(employeeCredentials.getEmployeeId(), dto);
+                    logger.info("Account with an ID: " + employeeCredentials.getId() + " successfully changed" +
+                            " their profile information");
+
                     return new ResponseEntity<>(
                             ObjectMapperUtils.map(updatedInfo, EmployeeProfileInfoDto.class),
                             HttpStatus.OK
@@ -157,6 +170,9 @@ public class EmployeeController {
                 }
                 case "ROLE_PROJECT_MANAGER" -> {
                     var updatedInfo = _projectManagerService.update(employeeCredentials.getEmployeeId(), dto);
+                    logger.info("Account with an ID: " + employeeCredentials.getId() + " successfully changed" +
+                            " their profile information");
+
                     return new ResponseEntity<>(
                             ObjectMapperUtils.map(updatedInfo, EmployeeProfileInfoDto.class),
                             HttpStatus.OK
@@ -164,29 +180,46 @@ public class EmployeeController {
                 }
                 case "ROLE_HR_MANAGER" -> {
                     var updatedInfo = _humanResourcesManagerService.update(employeeCredentials.getEmployeeId(), dto);
+                    logger.info("Account with an ID: " + employeeCredentials.getId() + " successfully changed" +
+                            " their profile information");
+
                     return new ResponseEntity<>(
                             ObjectMapperUtils.map(updatedInfo, EmployeeProfileInfoDto.class),
                             HttpStatus.OK
                     );
                 }
                 default -> {
+                    logger.warn("Account with an ID: " + employeeCredentials.getId() + " failed to update " +
+                            " their profile information, reason: invalid role");
                     return new ResponseEntity<>(
-                            "employee with that role not found",
-                            HttpStatus.BAD_REQUEST
+                            "invalid role: employee with that role not found",
+                            HttpStatus.UNAUTHORIZED
                     );
                 }
             }
         } catch (NotFoundException e) {
+            logger.warn("User failed to update their profile info, from IP: " +
+                            IPUtils.getIPAddressFromHttpRequest(request),
+                    " reason: account with the given email does not exist");
+
             return new ResponseEntity<>(
                     "cannot find employee info",
                     HttpStatus.NOT_FOUND
             );
         } catch (IllegalArgumentException e) {
+            logger.warn("User failed to update their profile info, from IP: " +
+                            IPUtils.getIPAddressFromHttpRequest(request),
+                    " reason: provided updated profile information is null");
+
             return new ResponseEntity<>(
                     "failed to update info, argument is null",
                     HttpStatus.BAD_REQUEST
             );
         } catch (OptimisticLockingFailureException e) {
+            logger.error("User failed to update their profile info, from IP: " +
+                            IPUtils.getIPAddressFromHttpRequest(request),
+                    " reason: error in database due to optimistic locking");
+
             return new ResponseEntity<>(
                     "failed to update info due to optimistic locking",
                     HttpStatus.INTERNAL_SERVER_ERROR

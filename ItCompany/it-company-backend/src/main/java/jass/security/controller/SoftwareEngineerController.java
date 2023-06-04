@@ -1,5 +1,7 @@
 package jass.security.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import jass.security.dto.swengineer.AddSkillDto;
 import jass.security.dto.swengineer.SearchSwEngineerDto;
 import jass.security.dto.swengineer.SearchSwResponseDto;
@@ -12,7 +14,10 @@ import jass.security.service.interfaces.IAccountService;
 import jass.security.service.interfaces.ICvService;
 import jass.security.service.interfaces.IProjectManagerService;
 import jass.security.service.interfaces.ISoftwareEngineerService;
+import jass.security.utils.IPUtils;
 import jass.security.utils.ObjectMapperUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
@@ -36,6 +41,7 @@ public class SoftwareEngineerController {
 
     private final IAccountService _accountService;
     private final ISoftwareEngineerService _softwareEngineerService;
+    private static final Logger logger = LoggerFactory.getLogger(SoftwareEngineerController.class);
     private final IProjectManagerService projectManagerService;
     private final ICvService cvService;
 
@@ -74,7 +80,7 @@ public class SoftwareEngineerController {
 
     @PostMapping("skill")
     @PreAuthorize("hasAuthority('addSkillSwEngineer')")
-    public ResponseEntity<?> AddSkill(@RequestBody AddSkillDto dto, Principal principal) {
+    public ResponseEntity<?> AddSkill(@RequestBody AddSkillDto dto, Principal principal, HttpServletRequest request) {
         String swEngineerEmail = principal.getName();
         Account swEngineer = null;
         try {
@@ -85,15 +91,23 @@ public class SoftwareEngineerController {
 
         try {
             var skill = _softwareEngineerService.AddSkill(swEngineer.getEmployeeId(), ObjectMapperUtils.map(dto, Skill.class));
+            logger.info("Successful attempt to add a skill to an engineer with an account ID: " +
+                    swEngineer.getId() + ", from an IP: " + IPUtils.getIPAddressFromHttpRequest(request));
+
             return new ResponseEntity<>(skill, HttpStatus.CREATED);
         } catch (NotFoundException e) {
+            logger.warn("Failed attempt to add a skill to " +
+                            "an engineer, from IP: " + IPUtils.getIPAddressFromHttpRequest(request) +
+                    " reason: given engineer email does not exist");
+
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
     @DeleteMapping("skill/{id}")
     @PreAuthorize("hasAuthority('removeSkillSwEngineer')")
-    public ResponseEntity<?> RemoveSkill(@PathVariable("id") UUID skillId, Principal principal) {
+    public ResponseEntity<?> RemoveSkill(@PathVariable("id") UUID skillId, Principal principal,
+                                         HttpServletRequest request) {
         String swEngineerEmail = principal.getName();
         Account swEngineer = null;
         try {
@@ -104,8 +118,15 @@ public class SoftwareEngineerController {
 
         try {
             _softwareEngineerService.RemoveSkill(swEngineer.getEmployeeId(), skillId);
+            logger.info("Successful attempt to remove a skill from an engineer with an account ID: " +
+                    swEngineer.getId() + ", from an IP: " + IPUtils.getIPAddressFromHttpRequest(request));
+
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (NotFoundException e) {
+            logger.warn("Failed attempt to remove a skill from " +
+                            "an engineer, from IP: " + IPUtils.getIPAddressFromHttpRequest(request) +
+                    " reason: given engineer email does not exist");
+
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
