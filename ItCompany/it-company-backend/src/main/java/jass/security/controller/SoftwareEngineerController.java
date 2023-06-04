@@ -11,17 +11,26 @@ import jass.security.model.Account;
 import jass.security.model.Skill;
 import jass.security.model.SoftwareEngineer;
 import jass.security.service.interfaces.IAccountService;
+import jass.security.service.interfaces.ICvService;
+import jass.security.service.interfaces.IProjectManagerService;
 import jass.security.service.interfaces.ISoftwareEngineerService;
 import jass.security.utils.IPUtils;
 import jass.security.utils.ObjectMapperUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
@@ -33,12 +42,16 @@ public class SoftwareEngineerController {
     private final IAccountService _accountService;
     private final ISoftwareEngineerService _softwareEngineerService;
     private static final Logger logger = LoggerFactory.getLogger(SoftwareEngineerController.class);
+    private final IProjectManagerService projectManagerService;
+    private final ICvService cvService;
 
     @Autowired
     public SoftwareEngineerController(IAccountService _accountService,
-                                      ISoftwareEngineerService softwareEngineerService) {
+                                      ISoftwareEngineerService softwareEngineerService, IProjectManagerService projectManagerService, ICvService cvService) {
         this._accountService = _accountService;
         _softwareEngineerService = softwareEngineerService;
+        this.projectManagerService = projectManagerService;
+        this.cvService = cvService;
     }
 
     @GetMapping("skill")
@@ -137,5 +150,83 @@ public class SoftwareEngineerController {
     public List<SearchSwResponseDto> searchSwEngineer(@RequestBody SearchSwEngineerDto dto) {
         return _softwareEngineerService.searchSw(dto);
     }
+    @PreAuthorize("hasAuthority('uploadCv')")
+    @PostMapping(path = "/cv", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<?> uploadCV(@RequestParam MultipartFile cv, Principal principal){
+        try {
+            String swEngineerEmail = principal.getName();
+            Account acc = _accountService.findByEmail(swEngineerEmail);
 
+            cvService.save(cv, acc.getEmployeeId());
+            return new ResponseEntity("Cv uploaded", HttpStatus.OK);
+        } catch (IOException e) {
+            return new ResponseEntity("Saving file failed", HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (NotFoundException e) {
+            return new ResponseEntity("Engineer not found", HttpStatus.NOT_FOUND);
+        }
+    }
+
+    private ResponseEntity getCvPdfResponse(UUID engineerId) throws IOException {
+
+        byte[] cvBytes = cvService.read(engineerId);
+
+        // Create a ByteArrayResource from the byte array
+        ByteArrayResource resource = new ByteArrayResource(cvBytes);
+
+        // Set the headers
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=cv.pdf");
+        headers.setContentType(MediaType.APPLICATION_PDF);
+
+        // Return the response entity with the PDF file contents
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentLength(cvBytes.length)
+                .body(resource);
+    }
+    @PreAuthorize("hasAuthority('readCv')")
+    @GetMapping(path = "/cv")
+    public ResponseEntity<?> getCv(Principal principal){
+        try {
+            String swEngineerEmail = principal.getName();
+            Account acc = _accountService.findByEmail(swEngineerEmail);
+
+            return getCvPdfResponse(acc.getEmployeeId());
+
+        }
+        catch (NotFoundException e) {
+            return new ResponseEntity("Cv not found", HttpStatus.NOT_FOUND);
+        } catch (IOException e) {
+            return new ResponseEntity( HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PreAuthorize("hasAuthority('readCv')")
+    @GetMapping(path = "/cv/{id}")
+    public ResponseEntity<?> getCvThirdParty(Principal principal, @PathVariable("id") UUID engineerId){
+        try {
+            String email = principal.getName();
+            Account acc = _accountService.findByEmail(email);
+
+            Authentication authentication = (Authentication) principal;
+            List<String> authorities = authentication.getAuthorities()
+                    .stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .toList();
+            var role = authorities.get(0);
+
+            if(role.equals("ROLE_HR_MANAGER") || projectManagerService.isSuperior(acc.getEmployeeId(), engineerId))
+            {
+                    return getCvPdfResponse(engineerId);
+            }
+
+            return new ResponseEntity("access to this Cv is forbidden for current user", HttpStatus.FORBIDDEN);
+        }
+        catch (IOException e) {
+            return new ResponseEntity("cv not found", HttpStatus.NOT_FOUND);
+        } catch (NotFoundException e) {
+            return new ResponseEntity("user not found", HttpStatus.NOT_FOUND);
+        }
+
+    }
 }
