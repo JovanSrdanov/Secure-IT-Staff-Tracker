@@ -22,7 +22,7 @@ public class LogsController {
     }
 
     @GetMapping("/get-all-logs")
-    //@PreAuthorize("hasAuthority('getAllLogs')")
+    @PreAuthorize("hasAuthority('getAllLogs')")
     public ResponseEntity<?> getAllLogs() {
         try {
             return new ResponseEntity<>(_logsService.getAllLogs(), HttpStatus.OK);

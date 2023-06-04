@@ -11,7 +11,6 @@ import java.time.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
-import java.time.format.DateTimeFormatter;
 
 @Service
 @Primary
@@ -38,7 +37,7 @@ public class LogsService implements ILogsService {
         return logs;
     }
 
-    private static String getLogsFolderFullPath() {
+    private String getLogsFolderFullPath() {
         return Paths.get(System.getProperty("user.dir"), "logs").normalize().toString();
     }
 
@@ -47,7 +46,7 @@ public class LogsService implements ILogsService {
         // gets the time when the current log was last changed, should only be the date of it's creation
         LocalDateTime fileLastModifiedTime = getFileLastModifiedTime(logFile);
         // checks if the log is older than 12 hours
-        if (isNewerThanHours(fileLastModifiedTime)) {
+        if (isNewerThanTwelveHours(fileLastModifiedTime)) {
             BufferedReader reader = new BufferedReader(new FileReader(logFile));
             String line;
             while ((line = reader.readLine()) != null) {
@@ -62,9 +61,8 @@ public class LogsService implements ILogsService {
         if (compressedLogs != null) {
             for (File compressedLog : compressedLogs) {
                 if (isNewerThanTwoDays(compressedLog)) {
-                    System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
                     LocalDateTime fileLastModifiedTime = getFileLastModifiedTime(compressedLog);
-                    if (isNewerThanHours(fileLastModifiedTime)) {
+                    if (isNewerThanTwelveHours(fileLastModifiedTime)) {
                         GZIPInputStream gzipInputStream = new GZIPInputStream(new FileInputStream(compressedLog));
                         BufferedReader reader = new BufferedReader
                                 (new InputStreamReader(gzipInputStream, StandardCharsets.UTF_8));
@@ -83,12 +81,9 @@ public class LogsService implements ILogsService {
         String[] parts = fileName.split("-");
 
         if (parts.length >= 4) {
-            String dayString = parts[2];
-            String monthString = parts[3];
-            String yearString = parts[4];
-            int day = Integer.parseInt(dayString);
-            int month = convertMonthStringToNumber(monthString);
-            int year = Integer.parseInt(yearString);
+            int day = Integer.parseInt(parts[2]);
+            int month = convertMonthStringToNumber(parts[3]);
+            int year = Integer.parseInt(parts[4]);
             LocalDateTime fileLastModifiedTime = LocalDateTime.of(year, month, day, 0, 0);
             LocalDateTime currentTime = LocalDateTime.now();
             return Duration.between(fileLastModifiedTime, currentTime).compareTo(Duration.ofDays(1)) <= 0;
@@ -117,7 +112,7 @@ public class LogsService implements ILogsService {
         return LocalDateTime.ofInstant(Instant.ofEpochMilli(compressedLog.lastModified()), ZoneId.systemDefault());
     }
 
-    private Boolean isNewerThanHours(LocalDateTime fileLastModifiedTime) {
+    private Boolean isNewerThanTwelveHours(LocalDateTime fileLastModifiedTime) {
         LocalDateTime currentTime = LocalDateTime.now();
         return Duration.between(fileLastModifiedTime, currentTime).compareTo(Duration.ofHours(12)) <= 0;
     }
