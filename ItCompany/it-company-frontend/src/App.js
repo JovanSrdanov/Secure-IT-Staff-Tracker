@@ -33,7 +33,8 @@ import PasswordlessLoginPage from "./pages/unauthenticated-pages/passwordless-lo
 import EmployeesInfoPage from './pages/hr-manager-pages/employees-info-page';
 import SearchEngineersPage from "./pages/admin-pages/search-engineers-page";
 import RecoverPasswordPage from "./pages/unauthenticated-pages/recover-password-page";
-
+import FormatAlignJustifyIcon from '@mui/icons-material/FormatAlignJustify';
+import ViewLogsPage from "./pages/admin-pages/view-logs-page";
 function App() {
     const navigate = useNavigate()
 
@@ -166,6 +167,17 @@ function App() {
                                         Register admins
                                     </Button>
                                 </Tooltip>
+                                <Tooltip title="View logs" arrow>
+                                    <Button
+                                        startIcon={<FormatAlignJustifyIcon/>}
+                                        sx={{color: "inherit"}}
+                                        onClick={() => {
+                                            navigate("/view-logs");
+                                        }}
+                                    >
+                                        View logs
+                                    </Button>
+                                </Tooltip>
                             </>
                         )}
                         {ROLE === "ROLE_ENGINEER" && (
@@ -289,6 +301,7 @@ function App() {
                                 element={<RegistrationApprovalPage/>}
                             />
                             <Route path="/search-engineers" element={<SearchEngineersPage/>}/>
+                            <Route path="/view-logs" element={<ViewLogsPage/>}/>
                             <Route path="/employees" element={<EmployeesPage/>}/>
                             <Route path="/all-projects" element={<ProjectsPage/>}/>
                             <Route

@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import {Flex} from "reflexbox";
 import interceptor from "../../interceptor/interceptor";
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 
 const StyledTableCell = styled(TableCell)(({theme}) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -38,6 +39,9 @@ const StyledTableRow = styled(TableRow)(({theme}) => ({
 function Skills(props) {
     const [mySkills, setMySkills] = React.useState(null);
     const [seniority, setSeniority] = React.useState(null);
+
+
+    const [CV, setCV] = React.useState(null);
 
     const [showAddNewSkillDialog, setShowAddNewSkillDialog] = React.useState(false);
     const [skillName, setSkillName] = React.useState("");
@@ -91,6 +95,35 @@ function Skills(props) {
         }).catch((err) => {
             console.log(err)
         })
+    };
+
+    const handleFileChange = (event) => {
+        const file = event.target.files[0];
+        const allowedTypes = ['application/pdf'];
+
+        if (file && allowedTypes.includes(file.type)) {
+            setCV(file);
+        }
+    };
+
+    const handleCVUpload = () => {
+        if (CV) {
+            const formData = new FormData();
+            formData.append('cv', CV);
+
+            interceptor
+                .post('sw-engineer/cv', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                })
+                .then((res) => {
+                    console.log(res.data);
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+        }
     };
     return (
         <>
@@ -159,7 +192,7 @@ function Skills(props) {
                 </Flex>
                 {mySkills != null && mySkills.length > 0 && (
                     <TableContainer component={Paper}
-                                    sx={{maxHeight: 500, height: 500, overflowY: 'scroll'}}>
+                                    sx={{maxHeight: 500, height: 250, overflowY: 'scroll'}}>
                         <Table>
                             <TableBody>
                                 {mySkills.map((item) => (
@@ -200,6 +233,36 @@ function Skills(props) {
                         }}
                 >Add skill
                 </Button>
+
+                <Flex justifyContent="center">
+                    <Box m={1}>
+                        <Button fullWidth variant="outlined"
+                                color="warning"
+                        >Download current CV
+                        </Button>
+                    </Box>
+                    <Box m={1}>
+
+                        <Button variant="outlined" color="info" component="label"
+                                endIcon={<PictureAsPdfIcon/>}>
+                            Import new CV
+                            <input
+                                type="file"
+                                accept=".pdf"
+                                onChange={handleFileChange}
+                                style={{display: 'none'}}
+                            />
+                        </Button>
+                    </Box>
+                    <Box m={1}>
+                        <Button fullWidth variant="outlined"
+                                color="success"
+                                disabled={CV === null}
+                                onClick={handleCVUpload}
+                        >Confirm upload
+                        </Button>
+                    </Box>
+                </Flex>
 
             </div>
 
