@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
     Box,
     Button,
@@ -40,8 +40,6 @@ function Skills(props) {
     const [mySkills, setMySkills] = React.useState(null);
     const [seniority, setSeniority] = React.useState(null);
 
-
-    const [CV, setCV] = React.useState(null);
 
     const [showAddNewSkillDialog, setShowAddNewSkillDialog] = React.useState(false);
     const [skillName, setSkillName] = React.useState("");
@@ -96,7 +94,9 @@ function Skills(props) {
             console.log(err)
         })
     };
+    const [errorDialogShow, setErrorDialogShow] = useState(false)
 
+    const [CV, setCV] = React.useState(null);
     const handleFileChange = (event) => {
         const file = event.target.files[0];
         const allowedTypes = ['application/pdf'];
@@ -105,6 +105,7 @@ function Skills(props) {
             setCV(file);
         }
     };
+
 
     const handleCVUpload = () => {
         if (CV) {
@@ -117,16 +118,70 @@ function Skills(props) {
                         'Content-Type': 'multipart/form-data',
                     },
                 })
-                .then((res) => {
-                    console.log(res.data);
+                .then((response) => {
+                    console.log(response.data);
                 })
-                .catch((err) => {
-                    console.log(err);
+                .catch((error) => {
+                    console.error('Error uploading CV:', error);
                 });
         }
     };
+
+
+    const handleDownload = () => {
+        interceptor('sw-engineer/cv') // Replace with the actual endpoint URL
+            .then((response) => {
+                if (response.ok) {
+                    // Extract the filename from the response headers
+                    const contentDisposition = response.headers.get('content-disposition');
+                    const filename = contentDisposition
+                        .split(';')
+                        .find((part) => part.trim().startsWith('filename='))
+                        .split('=')[1];
+
+                    // Convert the response to blob
+                    return response.blob().then((blob) => {
+                        // Create a URL for the blob
+                        const url = window.URL.createObjectURL(blob);
+
+                        // Create a link element
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = filename;
+
+                        // Simulate a click on the link to start the download
+                        link.click();
+
+                        // Clean up the URL and link
+                        window.URL.revokeObjectURL(url);
+                        link.remove();
+                    });
+                } else {
+                    throw new Error('CV not found');
+                }
+            })
+            .catch((error) => {
+                console.error('Error downloading CV:', error);
+            });
+    }
+
+    const handleErrorClose = () => {
+        setErrorDialogShow(false)
+    };
+
     return (
         <>
+            <Dialog onClose={handleErrorClose} open={errorDialogShow}>
+                <DialogTitle>Error</DialogTitle>
+                <DialogActions>
+                    <Button onClick={handleErrorClose}
+                            variant="contained"
+                    >
+                        Close
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
             <Dialog onClose={handleCloseAddNewSkillsDialog} open={showAddNewSkillDialog}>
                 <DialogTitle>Reason for rejection:</DialogTitle>
                 <DialogContent>
@@ -238,6 +293,7 @@ function Skills(props) {
                     <Box m={1}>
                         <Button fullWidth variant="outlined"
                                 color="warning"
+                                onClick={handleDownload}
                         >Download current CV
                         </Button>
                     </Box>
