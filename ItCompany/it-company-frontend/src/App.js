@@ -1,7 +1,7 @@
 import ParticlesBg from 'particles-bg'
 import "./particles.css"
 import {AppBar, Box, Button, Toolbar, Tooltip} from "@mui/material";
-import React from "react";
+import React, {useEffect} from "react";
 import LoginIcon from '@mui/icons-material/Login';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import ComputerIcon from '@mui/icons-material/Computer';
@@ -35,8 +35,21 @@ import SearchEngineersPage from "./pages/admin-pages/search-engineers-page";
 import RecoverPasswordPage from "./pages/unauthenticated-pages/recover-password-page";
 import FormatAlignJustifyIcon from '@mui/icons-material/FormatAlignJustify';
 import ViewLogsPage from "./pages/admin-pages/view-logs-page";
+import SockJS from 'sockjs-client';
+import {Stomp} from "@stomp/stompjs";
+
+
 function App() {
     const navigate = useNavigate()
+    const handleLogout = () => {
+        removeTokens()
+        navigate('/login');
+    };
+
+    function removeTokens() {
+        document.cookie = 'accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        document.cookie = 'refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    }
 
     function getCookieValue(name) {
         const cookies = document.cookie.split(';');
@@ -74,16 +87,20 @@ function App() {
         return decodedToken.role;
     }
 
-    function removeTokens() {
-        document.cookie = 'accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        document.cookie = 'refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-    }
 
     const ROLE = getRoleFromToken();
-    const handleLogout = () => {
-        removeTokens()
-        navigate('/login');
-    };
+    useEffect(() => {
+
+        const socket = new SockJS('https://localhost:4430/socket');
+        const stompClient = Stomp.over(socket);
+        stompClient.connect({}, () => {
+            stompClient.subscribe('/socket-publisher', (message) => {
+                console.log(message)
+            });
+        });
+
+    },);
+
 
     return (
         <div>
