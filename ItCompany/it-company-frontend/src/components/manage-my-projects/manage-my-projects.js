@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import interceptor from "../../interceptor/interceptor";
 import {
     Box,
@@ -210,8 +210,49 @@ function Projects(props) {
 
     };
 
+    const viewCV = (item) => {
+        interceptor.get('sw-engineer/cv/' + item.swEngineer.id, {responseType: 'blob'}).then((res) => {
+            const blob = new Blob([res.data], {type: 'application/pdf'});
+            const url = URL.createObjectURL(blob);
+
+            // Download the file
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'cv.pdf';
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Open the file in a new tab
+            window.open(url, '_blank');
+
+        }).catch((err) => {
+            console.log(err);
+            setErrorMessage("No available CV at the moment")
+            setErrorDialogShow(true)
+        });
+    };
+
+    const [errorDialogShow, setErrorDialogShow] = useState(false)
+    const [errorMessage, setErrorMessage] = useState("")
+    const handleErrorClose = () => {
+        setErrorDialogShow(false)
+    };
+
+
     return (
         <>
+            <Dialog onClose={handleErrorClose} open={errorDialogShow}>
+                <DialogTitle>{errorMessage}</DialogTitle>
+                <DialogActions>
+                    <Button onClick={handleErrorClose}
+                            variant="contained"
+                    >
+                        Close
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
 
             <Dialog onClose={handleCloseUpdatingProjectDialog} open={showUpdateProjectDialog}>
@@ -303,7 +344,7 @@ function Projects(props) {
                             <Table>
                                 <TableBody>
                                     {allEngineers.map((item) => (
-                                        <React.Fragment key={`${item.employeeId}-row`}>
+                                        <React.Fragment key={`${item.swEngineer.id}-row`}>
                                             <StyledTableRow>
                                                 <StyledTableCell>
                                                     <Box m={1} sx={{
@@ -338,6 +379,16 @@ function Projects(props) {
                                                                 }}
                                                         >
                                                             Remove from project
+                                                        </Button>
+                                                    </Box>
+                                                    <Box m={1}>
+                                                        <Button fullWidth variant="outlined" color="warning"
+
+                                                                onClick={() => {
+                                                                    viewCV(item)
+                                                                }}
+                                                        >
+                                                            View CV
                                                         </Button>
                                                     </Box>
                                                 </StyledTableCell>

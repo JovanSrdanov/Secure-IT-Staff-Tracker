@@ -1,20 +1,20 @@
 import React, {useEffect, useState} from "react";
 import interceptor from "../../interceptor/interceptor";
 import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Paper,
-  styled,
-  Table,
-  TableBody,
-  TableCell,
-  tableCellClasses,
-  TableContainer,
-  TableRow,
+    Box,
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Paper,
+    styled,
+    Table,
+    TableBody,
+    TableCell,
+    tableCellClasses,
+    TableContainer,
+    TableRow,
 } from "@mui/material";
 import {Flex} from "reflexbox";
 
@@ -112,10 +112,53 @@ function EmployeesInfo(props) {
         setviewEngineerProjectsDialog(false);
         setProjects(null);
 
-        console.log("aaaaaaaaaa")
     };
+
+    const viewCV = (item) => {
+        interceptor.get('sw-engineer/cv/' + item.employeeId, {responseType: 'blob'}).then((res) => {
+            const blob = new Blob([res.data], {type: 'application/pdf'});
+            const url = URL.createObjectURL(blob);
+
+            // Download the file
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'cv.pdf';
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Open the file in a new tab
+            window.open(url, '_blank');
+
+        }).catch((err) => {
+            console.log(err);
+            setErrorMessage("No available CV at the moment")
+            setErrorDialogShow(true)
+        });
+    };
+
+
+    const handleErrorClose = () => {
+        setErrorDialogShow(false)
+    };
+    const [errorDialogShow, setErrorDialogShow] = useState(false)
+    const [errorMessage, setErrorMessage] = useState("")
+
     return (
         <>
+
+            <Dialog onClose={handleErrorClose} open={errorDialogShow}>
+                <DialogTitle>{errorMessage}</DialogTitle>
+                <DialogActions>
+                    <Button onClick={handleErrorClose}
+                            variant="contained"
+                    >
+                        Close
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
 
             <Dialog onClose={handleCloseSkillsDialog} open={viewSkillsDialog}>
                 <DialogTitle>Skills:</DialogTitle>
@@ -349,8 +392,12 @@ function EmployeesInfo(props) {
                                                                 </Button>
                                                             </Box>
                                                             <Box m={1}>
-                                                                <Button fullWidth variant="contained" color="success">
-                                                                    Download cv TBA
+                                                                <Button fullWidth variant="outlined" color="warning"
+                                                                        onClick={() => {
+                                                                            viewCV(item)
+                                                                        }}
+                                                                >
+                                                                    Download cv
                                                                 </Button>
                                                             </Box>
                                                         </>

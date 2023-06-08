@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -55,10 +56,10 @@ public CvService(@Value("${cvAesKey}") String secretKeyStr, ICvRepository cvRepo
         return new SecretKeySpec(secretKeyByte, 0, secretKeyByte.length, "AES");
     }
 
-    private String getCvDir(){
-        String runtimeDir = getClass().getResource("").getPath();
-        String rootDir = runtimeDir.substring(0, runtimeDir.indexOf("target/classes"));
-        return rootDir + "/cv/";
+    private String getCvDir() {
+        String runtimeDir = new File(getClass().getResource("").getPath()).getPath();
+        String rootDir = runtimeDir.substring(0, runtimeDir.indexOf("target" + File.separator + "classes"));
+        return rootDir + "cv" + File.separator;
     }
 
     @Override
