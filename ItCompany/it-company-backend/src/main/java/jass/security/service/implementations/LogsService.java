@@ -48,10 +48,7 @@ public class LogsService implements ILogsService {
         // checks if the log is older than 12 hours
         if (isNewerThanTwelveHours(fileLastModifiedTime)) {
             BufferedReader reader = new BufferedReader(new FileReader(logFile));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                logs.add(line);
-            }
+            filterAndAddLogs(logs, reader);
         }
     }
 
@@ -66,14 +63,30 @@ public class LogsService implements ILogsService {
                         GZIPInputStream gzipInputStream = new GZIPInputStream(new FileInputStream(compressedLog));
                         BufferedReader reader = new BufferedReader
                                 (new InputStreamReader(gzipInputStream, StandardCharsets.UTF_8));
-                        String line;
-                        while ((line = reader.readLine()) != null) {
-                            logs.add(line);
-                        }
+                        filterAndAddLogs(logs, reader);
                     }   
                 }
             }
         }
+    }
+
+
+    private void filterAndAddLogs(List<String> logs, BufferedReader reader) throws IOException {
+        String line;
+
+        while ((line = reader.readLine()) != null) {
+            if (containsDate(line)) {
+                logs.add(line);
+            }
+            else if (line.contains("Caused by:")) {
+                logs.set(logs.size() - 1, logs.get(logs.size() - 1) + " " + line);
+            }
+        }
+    }
+
+    private Boolean containsDate(String line) {
+        // Check if the line contains a date in the format "yyyy-MM-dd"
+        return line.matches(".*\\d{4}-\\d{2}-\\d{2}.*");
     }
 
     private Boolean isNewerThanTwoDays(File compressedLog) {
