@@ -1,7 +1,10 @@
 package jass.security;
 
 import ClickSend.ApiClient;
+import jass.security.controller.AuthenticationController;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.SpringApplication;
@@ -18,13 +21,13 @@ public class SecurityApplication {
     private String clickSendUsername;
     @Value("${clicksendApiKey}")
     private String clickSendApiKey;
-
+    private static final Logger logger = LoggerFactory.getLogger(SecurityApplication.class);
     public static void main(String[] args) {
         SpringApplication.run(SecurityApplication.class, args);
-        System.Logger logger = System.getLogger(SecurityApplication.class.getName());
-        logger.log(System.Logger.Level.INFO, "Empty search history tells more then full one ~ Confucius");
-        System.out.println("ZNATNO BOLJE NEGO MIRKOSERVISI I GOLANG I DOCKER");
-        System.out.println("Weakness disgusts me");
+        logger.warn("Empty search history tells more then full one ~ Confucius");
+        logger.info("ZNATNO BOLJE NEGO MIRKOSERVISI I GOLANG I DOCKER");
+        logger.error("ERROR ERROR ERROR ERROR ERROR ERROR ERROR ");
+        System.out.println("JSSA");
     }
 
     @Bean
