@@ -9,6 +9,7 @@ import jass.security.service.interfaces.IAdministratorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
@@ -31,6 +32,9 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Autowired
     private IAdministratorService administratorService;
 
+    @Autowired
+    private SimpMessagingTemplate simpMessagingTemplate;
+
     //Metoda koja se izvrsava ukoliko za prosledjene kredencijale korisnik pokusa da pristupi zasticenom REST servisu
     //Metoda vraca 401 Unauthorized response, ukoliko postoji Login Page u aplikaciji, pozeljno je da se korisnik redirektuje na tu stranicu
     @Override
@@ -40,6 +44,8 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
         logger.warn("Unauthorized access attempt from IP: " + request.getRemoteAddr());
 
         //Clicksend
+
+        this.simpMessagingTemplate.convertAndSend("/socket-publisher", "Unauthorized access attempt from IP: " + request.getRemoteAddr());
         var admins = administratorService.findAll();
         if (admins != null) {
             for (var admin : admins) {

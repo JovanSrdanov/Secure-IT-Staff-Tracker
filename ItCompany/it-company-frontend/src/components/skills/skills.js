@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
     Box,
     Button,
@@ -40,8 +40,6 @@ function Skills(props) {
     const [mySkills, setMySkills] = React.useState(null);
     const [seniority, setSeniority] = React.useState(null);
 
-
-    const [CV, setCV] = React.useState(null);
 
     const [showAddNewSkillDialog, setShowAddNewSkillDialog] = React.useState(false);
     const [skillName, setSkillName] = React.useState("");
@@ -96,6 +94,8 @@ function Skills(props) {
             console.log(err)
         })
     };
+    const [errorDialogShow, setErrorDialogShow] = useState(false)
+    const [errorMessage, setErrorMessage] = useState("")
 
     const handleFileChange = (event) => {
         const file = event.target.files[0];
@@ -106,27 +106,96 @@ function Skills(props) {
         }
     };
 
+    const [CV, setCV] = React.useState(null);
     const handleCVUpload = () => {
         if (CV) {
             const formData = new FormData();
             formData.append('cv', CV);
-
             interceptor
                 .post('sw-engineer/cv', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
                 })
-                .then((res) => {
-                    console.log(res.data);
+                .then((response) => {
+                    console.log(response.data);
+                    setCV(null)
+                    setSuccessDialogShow(true)
+                    const fileInput = document.getElementById('cv-input');
+                    if (fileInput) {
+                        fileInput.value = '';
+                    }
+
+
                 })
-                .catch((err) => {
-                    console.log(err);
+                .catch((error) => {
+                    console.error('Error uploading CV:', error);
+                    setCV(null)
+                    setErrorMessage("Problem uploading the CV. Please try again")
+                    setErrorDialogShow(true)
                 });
         }
     };
+
+
+    const handleDownload = () => {
+        interceptor.get('sw-engineer/cv', {responseType: 'blob'}).then((res) => {
+            const blob = new Blob([res.data], {type: 'application/pdf'});
+            const url = URL.createObjectURL(blob);
+
+            // Download the file
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'cv.pdf';
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Open the file in a new tab
+            window.open(url, '_blank');
+
+        }).catch((err) => {
+            console.log(err);
+            setErrorMessage("No available CV at the moment")
+            setErrorDialogShow(true)
+        });
+    }
+    const handleErrorClose = () => {
+        setErrorDialogShow(false)
+    };
+    const [successDialogShow, setSuccessDialogShow] = useState(false)
+    const handleClose = () => {
+        setSuccessDialogShow(false)
+    };
+
+
     return (
         <>
+
+            <Dialog onClose={handleClose} open={successDialogShow}>
+                <DialogTitle>Upload Successful!</DialogTitle>
+                <DialogActions>
+                    <Button onClick={handleClose}
+                            variant="contained"
+                    >
+                        Close
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+
+            <Dialog onClose={handleErrorClose} open={errorDialogShow}>
+                <DialogTitle>{errorMessage}</DialogTitle>
+                <DialogActions>
+                    <Button onClick={handleErrorClose}
+                            variant="contained"
+                    >
+                        Close
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
             <Dialog onClose={handleCloseAddNewSkillsDialog} open={showAddNewSkillDialog}>
                 <DialogTitle>Reason for rejection:</DialogTitle>
                 <DialogContent>
@@ -238,6 +307,7 @@ function Skills(props) {
                     <Box m={1}>
                         <Button fullWidth variant="outlined"
                                 color="warning"
+                                onClick={handleDownload}
                         >Download current CV
                         </Button>
                     </Box>
@@ -247,6 +317,7 @@ function Skills(props) {
                                 endIcon={<PictureAsPdfIcon/>}>
                             Import new CV
                             <input
+                                id="cv-input"
                                 type="file"
                                 accept=".pdf"
                                 onChange={handleFileChange}

@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -70,6 +71,9 @@ public class AuthenticationController {
 
     @Autowired
     private AdministratorService administratorService;
+
+    @Autowired
+    private SimpMessagingTemplate simpMessagingTemplate;
 
     // Prvi endpoint koji pogadja korisnik kada se loguje.
     // Tada zna samo svoje korisnicko ime i lozinku i to prosledjuje na backend.
@@ -190,6 +194,11 @@ public class AuthenticationController {
                     " reason: given email is temporarily blocked");
 
             //Clicksend
+
+            this.simpMessagingTemplate.convertAndSend("/socket-publisher", "User with an IP: " +
+                    IPUtils.getIPAddressFromHttpRequest(request)
+                    + " tried to register with a blocked email: " + dto.getEmail());
+
             var admins = administratorService.findAll();
             if (admins != null) {
                 for (var admin : admins) {
