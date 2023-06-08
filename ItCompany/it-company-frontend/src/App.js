@@ -1,7 +1,7 @@
 import ParticlesBg from 'particles-bg'
 import "./particles.css"
 import {AppBar, Box, Button, Snackbar, Toolbar, Tooltip} from "@mui/material";
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import LoginIcon from '@mui/icons-material/Login';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import ComputerIcon from '@mui/icons-material/Computer';
@@ -35,9 +35,9 @@ import SearchEngineersPage from "./pages/admin-pages/search-engineers-page";
 import RecoverPasswordPage from "./pages/unauthenticated-pages/recover-password-page";
 import FormatAlignJustifyIcon from '@mui/icons-material/FormatAlignJustify';
 import ViewLogsPage from "./pages/admin-pages/view-logs-page";
-import SockJS from 'sockjs-client';
-import {Stomp} from "@stomp/stompjs";
 import MuiAlert from '@mui/material/Alert';
+import SockJS from "sockjs-client";
+import {Stomp} from "@stomp/stompjs";
 
 const Alert = React.forwardRef(function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -46,15 +46,14 @@ const Alert = React.forwardRef(function Alert(props, ref) {
 
 function App() {
     const navigate = useNavigate()
-    const handleLogout = () => {
-        removeTokens()
-        navigate('/login');
+    const [open, setOpen] = useState(false);
+    const [message, setMessage] = useState('');
+    const handleClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setOpen(false);
     };
-
-    function removeTokens() {
-        document.cookie = 'accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        document.cookie = 'refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-    }
 
     function getCookieValue(name) {
         const cookies = document.cookie.split(';');
@@ -67,65 +66,58 @@ function App() {
         return null;
     }
 
+    const handleLogout = () => {
+        removeTokens()
+        window.location.href = '/login';
+    };
+
+    function removeTokens() {
+        document.cookie = 'accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        document.cookie = 'refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    }
+
+    const openWebSocket = (role) => {
+        if (role === "ROLE_ADMIN") {
+            const socket = new SockJS('https://localhost:4430/socket');
+            const stompClient = Stomp.over(socket);
+            stompClient.connect({}, () => {
+                stompClient.subscribe('/socket-publisher', (message) => {
+                    const receivedMessage = message.body;
+                    setMessage(receivedMessage);
+                    setOpen(true);
+                    setTimeout(() => {
+                        setOpen(false);
+                    }, 5000);
+                });
+            });
+            return () => {
+                stompClient.disconnect();
+            };
+        }
+    };
+
     function getRoleFromToken() {
         const token = getCookieValue('accessToken');
         if (!token) {
             removeTokens();
-
             return null;
         }
         const currentTime = Date.now() / 1000;
         const refreshToken = getCookieValue('accessToken');
-
         if (!refreshToken) {
             removeTokens();
-
             return null;
         }
-
         if (jwt_decode(refreshToken).exp < currentTime) {
             removeTokens();
             return null;
         }
         const decodedToken = jwt_decode(token);
-
+        openWebSocket(decodedToken.role)
         return decodedToken.role;
     }
 
-    const [open, setOpen] = useState(false);
-    const [message, setMessage] = useState('');
-
     const ROLE = getRoleFromToken();
-    useEffect(() => {
-
-        const socket = new SockJS('https://localhost:4430/socket');
-        const stompClient = Stomp.over(socket);
-        stompClient.connect({}, () => {
-            stompClient.subscribe('/socket-publisher', (message) => {
-                const receivedMessage = message.body;
-                setMessage(receivedMessage);
-                setOpen(true);
-
-                // Close Snackbar after 2 seconds
-                setTimeout(() => {
-                    setOpen(false);
-                }, 5000);
-            });
-        });
-
-        return () => {
-            // Clean up the connection when component unmounts
-            stompClient.disconnect();
-        };
-    }, []);
-    const handleClose = (event, reason) => {
-        if (reason === 'clickaway') {
-            return;
-        }
-        setOpen(false);
-    };
-
-
     return (
         <div>
             <Snackbar
