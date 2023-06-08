@@ -1,7 +1,7 @@
 import ParticlesBg from 'particles-bg'
 import "./particles.css"
-import {AppBar, Box, Button, Toolbar, Tooltip} from "@mui/material";
-import React, {useEffect} from "react";
+import {AppBar, Box, Button, Snackbar, Toolbar, Tooltip} from "@mui/material";
+import React, {useEffect, useState} from "react";
 import LoginIcon from '@mui/icons-material/Login';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import ComputerIcon from '@mui/icons-material/Computer';
@@ -37,6 +37,11 @@ import FormatAlignJustifyIcon from '@mui/icons-material/FormatAlignJustify';
 import ViewLogsPage from "./pages/admin-pages/view-logs-page";
 import SockJS from 'sockjs-client';
 import {Stomp} from "@stomp/stompjs";
+import MuiAlert from '@mui/material/Alert';
+
+const Alert = React.forwardRef(function Alert(props, ref) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 
 function App() {
@@ -87,6 +92,8 @@ function App() {
         return decodedToken.role;
     }
 
+    const [open, setOpen] = useState(false);
+    const [message, setMessage] = useState('');
 
     const ROLE = getRoleFromToken();
     useEffect(() => {
@@ -95,15 +102,46 @@ function App() {
         const stompClient = Stomp.over(socket);
         stompClient.connect({}, () => {
             stompClient.subscribe('/socket-publisher', (message) => {
-                console.log(message)
+                const receivedMessage = message.body;
+                setMessage(receivedMessage);
+                setOpen(true);
+
+                // Close Snackbar after 2 seconds
+                setTimeout(() => {
+                    setOpen(false);
+                }, 5000);
             });
         });
 
-    },);
+        return () => {
+            // Clean up the connection when component unmounts
+            stompClient.disconnect();
+        };
+    }, []);
+    const handleClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setOpen(false);
+    };
 
 
     return (
         <div>
+            <Snackbar
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'right',
+                }}
+                open={open}
+                autoHideDuration={5000}
+                onClose={() => setOpen(false)}
+                message={message}
+            >
+                <Alert onClose={handleClose} severity="error" sx={{width: '100%'}}>
+                    {message}
+                </Alert>
+            </Snackbar>
             <ParticlesBg color="#000000" type="cobweb" num={250} bg={true}/>
             <Box>
                 <AppBar position="static">
