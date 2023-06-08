@@ -59,17 +59,16 @@ function ViewLogs(props) {
                         <Table>
                             <TableBody>
                                 {logs.map((item) => {
-                                    const parts = item.split('|');
-                                    const text = parts[2].trim(); // Get the text between the second and third '|'
 
-                                    let color = 'white';
-                                    if (text.includes('INFO')) {
+
+                                    let color = 'red';
+                                    if (item.includes('| INFO  |')) {
                                         color = 'lightblue';
-                                    } else if (text.includes('WARN')) {
+                                    } else if (item.includes('| WARN')) {
                                         color = 'orange';
-                                    } else if (text.includes('DEBUG')) {
+                                    } else if (item.includes('| DEBUG')) {
                                         color = 'purple';
-                                    } else if (text.includes('ERROR')) {
+                                    } else if (item.includes('| ERROR')) {
                                         color = 'red';
                                     }
 
