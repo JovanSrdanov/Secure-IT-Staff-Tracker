@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "/logs")
@@ -25,7 +27,9 @@ public class LogsController {
     @PreAuthorize("hasAuthority('getAllLogs')")
     public ResponseEntity<?> getAllLogs() {
         try {
-            return new ResponseEntity<>(_logsService.getAllLogs(), HttpStatus.OK);
+            List<String> logs = _logsService.getAllLogs();
+            Collections.reverse(logs); // Reversing the list
+            return new ResponseEntity<>( logs, HttpStatus.OK);
         } catch (IOException e) {
             return new ResponseEntity<>("Error while reading logs from files", HttpStatus.INTERNAL_SERVER_ERROR);
         }
