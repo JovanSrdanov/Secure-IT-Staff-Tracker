@@ -16,5 +16,4 @@ public interface IAccountActivationService extends ICrudService<AccountActivatio
     AccountActivation findByToken(String token);
 
     void activateAccount(String hash) throws EmailActivationExpiredException, NotFoundException;
-
 }

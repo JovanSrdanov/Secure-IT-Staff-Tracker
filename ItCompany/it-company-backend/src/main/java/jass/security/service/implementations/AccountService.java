@@ -98,7 +98,7 @@ public class AccountService implements IAccountService {
 
     @Override
     @Transactional(rollbackFor = {Exception.class})
-    public byte[] registerAccount(RegisterAccountDto dto) throws EmailTakenException, NotFoundException, EmailRejectedException, IOException, WriterException {
+    public void registerAccount(RegisterAccountDto dto) throws EmailTakenException, NotFoundException, EmailRejectedException, IOException, WriterException {
         //Check if mail is not rejected
         if (rejectedMailService.isMailRejected(dto.getEmail())) {
             throw new EmailRejectedException();
@@ -154,10 +154,6 @@ public class AccountService implements IAccountService {
 
         save(newAcc);
         _roleRespository.save(role);
-
-        // *** 2FA ***
-        String qrCodeString = totpService.getGoogleAuthenticatorBarCode(totpSecretKey,dto.getEmail(), "JSSA");
-        return totpService.createQRCode(qrCodeString);
     }
 
     @Override

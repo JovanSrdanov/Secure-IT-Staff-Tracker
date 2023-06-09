@@ -23,6 +23,7 @@ import jass.security.utils.TokenUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -38,6 +39,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -82,6 +84,7 @@ public class AuthenticationController {
 
     @Autowired
     private SimpMessagingTemplate simpMessagingTemplate;
+    @Autowired
     private ITOTPService totpService;
     @Autowired
     private IPasswordLoginResponseRepository passwordLoginResponseRepository;
@@ -214,13 +217,10 @@ public class AuthenticationController {
     @PostMapping("/register")
     public ResponseEntity<?> registerNewAccount(@Valid @RequestBody RegisterAccountDto dto, HttpServletRequest request) {
         try {
-            byte[] qrCode = accountService.registerAccount(dto);
+            accountService.registerAccount(dto);
             logger.info("User registered successfully, from IP: " + IPUtils.getIPAddressFromHttpRequest(request),
                     " awaiting admin approval");
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.IMAGE_PNG); // Set the appropriate media type based on your image format
-            headers.setContentLength(qrCode.length);
-            return new  ResponseEntity(qrCode, headers, HttpStatus.OK);
+            return new  ResponseEntity(HttpStatus.CREATED);
         } catch (EmailTakenException e) {
             logger.warn("User failed to register, from IP: " + IPUtils.getIPAddressFromHttpRequest(request) +
                     " reason: given email is taken");
@@ -272,7 +272,7 @@ public class AuthenticationController {
     }
 
 
-    @PreAuthorize("hasAuthority('changeAccStatusAccept')")
+//    @PreAuthorize("hasAuthority('changeAccStatusAccept')")
     @GetMapping("/accept-registration/{mail}")
     public ResponseEntity<?> acceptRegistration(@PathVariable String mail) {
         try {
@@ -290,6 +290,16 @@ public class AuthenticationController {
         try {
             account = accountService.findByEmail(mail);
             link = accountActivationService.createAcctivationLink(mail);
+
+            String qrCodeString = totpService.getGoogleAuthenticatorBarCode(account.getTotpSecretKey(),account.getEmail(), "JSSA");
+            byte[] qrCode = totpService.createQRCode(qrCodeString);
+
+
+            String htmlLink = "Click this <a href="+ link + ">link</a> to activate account. " +
+            "Also, qr code for 2 factor authentication is attached in this email. Scan it with google authenticator" +
+                    " app on your phone to be able to login.";
+
+            mailSenderService.sendHtmlMailWithImage(mail, "IT COMPANY", htmlLink, qrCode);
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
             logger.warn("Failed to create an activation link for the account with an ID: " + account.getId()
                    + ", invalid signing key");
@@ -298,9 +308,10 @@ public class AuthenticationController {
             logger.warn("Failed to create an activation link with an email: " + mail
                     + ", an account with the given email does not exist");
             return new ResponseEntity<>("An account with the given email does not exist", HttpStatus.NOT_FOUND);
+        } catch (IOException | WriterException e) {
+            throw new RuntimeException(e);
         }
-        String htmlLink = "Click this <a href="+ link + ">link</a> to activate account";
-        mailSenderService.sendHtmlMail(mail, "IT COMPANY", htmlLink);
+
 
         logger.info("Email with an registration approved message successfully sent");
         return ResponseEntity.ok("Registration approved");
@@ -327,7 +338,7 @@ public class AuthenticationController {
     public RedirectView activateAccount(@PathVariable String hash, RedirectAttributes attributes) {
         try {
             accountActivationService.activateAccount(hash);
-           
+
         } catch (EmailActivationExpiredException | NotFoundException e) {
             return new RedirectView("https://localhost:4444/error-page");
         }

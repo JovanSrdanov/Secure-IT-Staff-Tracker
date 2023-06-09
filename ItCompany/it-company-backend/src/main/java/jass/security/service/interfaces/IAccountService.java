@@ -16,7 +16,7 @@ import java.util.UUID;
 public interface IAccountService extends ICrudService<Account> {
     Account findByEmail(String email) throws NotFoundException;
 
-    byte[] registerAccount(RegisterAccountDto dto) throws EmailTakenException, NotFoundException, EmailRejectedException, IOException, WriterException;
+    void registerAccount(RegisterAccountDto dto) throws EmailTakenException, NotFoundException, EmailRejectedException, IOException, WriterException;
 
     UUID registerAdminAccount(RegisterAdminAccountDto dto) throws EmailTakenException, IOException, WriterException;
 
