@@ -1,15 +1,14 @@
 package jass.security.service.implementations;
 
-import jass.security.controller.AccountController;
-import jass.security.controller.AuthenticationController;
+import com.google.zxing.WriterException;
 import jass.security.dto.*;
 import jass.security.exception.*;
 import jass.security.model.*;
 import jass.security.repository.*;
 import jass.security.service.interfaces.IAccountService;
 import jass.security.service.interfaces.IRejectedMailService;
+import jass.security.service.interfaces.ITOTPService;
 import jass.security.utils.DateUtils;
-import jass.security.utils.IPUtils;
 import jass.security.utils.ObjectMapperUtils;
 import jass.security.utils.RandomPasswordGenerator;
 import org.slf4j.Logger;
@@ -20,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -44,11 +44,11 @@ public class AccountService implements IAccountService {
     private final MailSenderService mailService;
     private final IPasswordlessLoginTokenRepository passwordlessLoginTokenRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
+    private final ITOTPService totpService;
 
     @Autowired
-    public AccountService(IAccountRepository accountRepository, IRoleRepository roleRespository, IHrManagerRepository hrManagerRepository, IProjectManagerRepository projectManagerRepository, ISoftwareEngineerRepository softwareEngineerRepository, IAddressRepository addressRepository, IRejectedMailService rejectedMailService, IAdministratorRepository administratorRepository, MailSenderService mailService, IPasswordlessLoginTokenRepository passwordlessLoginTokenRepository) {
+    public AccountService(IAccountRepository accountRepository, IRoleRepository roleRespository, IHrManagerRepository hrManagerRepository, IProjectManagerRepository projectManagerRepository, ISoftwareEngineerRepository softwareEngineerRepository, IAddressRepository addressRepository, IRejectedMailService rejectedMailService, IAdministratorRepository administratorRepository, MailSenderService mailService, IPasswordlessLoginTokenRepository passwordlessLoginTokenRepository, PasswordEncoder passwordEncoder, ITOTPService totpService) {
         this._accountRepository = accountRepository;
         _roleRespository = roleRespository;
         this.hrManagerRepository = hrManagerRepository;
@@ -59,6 +59,8 @@ public class AccountService implements IAccountService {
         this.administratorRepository = administratorRepository;
         this.mailService = mailService;
         this.passwordlessLoginTokenRepository = passwordlessLoginTokenRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.totpService = totpService;
     }
 
     @Override
@@ -96,7 +98,7 @@ public class AccountService implements IAccountService {
 
     @Override
     @Transactional(rollbackFor = {Exception.class})
-    public UUID registerAccount(RegisterAccountDto dto) throws EmailTakenException, NotFoundException, EmailRejectedException {
+    public byte[] registerAccount(RegisterAccountDto dto) throws EmailTakenException, NotFoundException, EmailRejectedException, IOException, WriterException {
         //Check if mail is not rejected
         if (rejectedMailService.isMailRejected(dto.getEmail())) {
             throw new EmailRejectedException();
@@ -108,6 +110,7 @@ public class AccountService implements IAccountService {
         //make employee
         UUID employeeId;
         Role role;
+
 
         addressRepository.save(address);
 
@@ -135,8 +138,12 @@ public class AccountService implements IAccountService {
         } else {
             throw new NotFoundException("Nepostojeca rola");
         }
+
+        // **** 2FA ****
+        String totpSecretKey = totpService.generateSecretKey();
+        // **** 2FA ****
         //make acc
-        Account newAcc = makeAccount(dto, employeeId);
+        Account newAcc = makeAccount(dto, employeeId, totpSecretKey);
 
 
         //TODO Strahinja: Da li ovo ovako ili nekako bolje da se salju ove role sa fronta?
@@ -148,12 +155,14 @@ public class AccountService implements IAccountService {
         save(newAcc);
         _roleRespository.save(role);
 
-        return newAcc.getId();
+        // *** 2FA ***
+        String qrCodeString = totpService.getGoogleAuthenticatorBarCode(totpSecretKey,dto.getEmail(), "JSSA");
+        return totpService.createQRCode(qrCodeString);
     }
 
     @Override
     @Transactional(rollbackFor = {Exception.class})
-    public UUID registerAdminAccount(RegisterAdminAccountDto dto) throws EmailTakenException {
+    public UUID registerAdminAccount(RegisterAdminAccountDto dto) throws EmailTakenException, IOException, WriterException {
         Address address = makeAddress(dto.getAddress());
         UUID adminId = UUID.randomUUID();
 
@@ -165,7 +174,6 @@ public class AccountService implements IAccountService {
         Account newAcc = makeAdminAccount(dto, adminId);
 
 
-        //TODO Strahinja: Da li ovo ovako ili nekako bolje da se salju ove role sa fronta?
         var roles = new ArrayList<Role>();
         roles.add(role);
         newAcc.setIsBlocked(false);
@@ -231,7 +239,7 @@ public class AccountService implements IAccountService {
         return address;
     }
 
-    private Account makeAccount(RegisterAccountDto dto, UUID employeeId) throws EmailTakenException, NotFoundException {
+    private Account makeAccount(RegisterAccountDto dto, UUID employeeId, String totpSecretKey) throws EmailTakenException, NotFoundException {
         try {
             findByEmail(dto.getEmail());
             throw new EmailTakenException();
@@ -250,17 +258,24 @@ public class AccountService implements IAccountService {
         newAcc.setEmployeeId(employeeId);
         newAcc.setStatus(RegistrationRequestStatus.PENDING);
         newAcc.setIsActivated(false);
+        newAcc.setTotpSecretKey(totpSecretKey);
 
         return newAcc;
     }
 
-    private Account makeAdminAccount(RegisterAdminAccountDto dto, UUID adminId) throws EmailTakenException {
+    private Account makeAdminAccount(RegisterAdminAccountDto dto, UUID adminId) throws EmailTakenException, IOException, WriterException {
         try {
             findByEmail(dto.getEmail());
             throw new EmailTakenException();
         } catch (NotFoundException ignored) {
 
         }
+
+        // **** 2FA ****
+        String totpSecretKey = totpService.generateSecretKey();
+        String qrCodeString = totpService.getGoogleAuthenticatorBarCode(totpSecretKey,dto.getEmail(), "JSSA");
+        byte[] qrCode = totpService.createQRCode(qrCodeString);
+        // *** 2FA ***
 
         Account newAcc = new Account();
 
@@ -274,9 +289,12 @@ public class AccountService implements IAccountService {
         newAcc.setEmployeeId(adminId);
         newAcc.setStatus(RegistrationRequestStatus.APPROVED);
         newAcc.setIsActivated(true);
+        newAcc.setTotpSecretKey(totpSecretKey);
 
-        String mailBody = "Your password is: " + password + "\n You will need to change it after first login.";
-        mailService.sendSimpleEmail(dto.getEmail(), "New registration password", mailBody);
+        String mailBody = "Your password is: " + password + "\n You will need to change it after first login.\n" +
+                "Also, qr code for 2 factor authentication is attached in this email. Scan it with google authenticator" +
+                " app on your phone to be able to login.";
+        mailService.sendHtmlMailWithImage(dto.getEmail(), "New registration password", mailBody, qrCode);
 
         return newAcc;
     }
@@ -512,6 +530,15 @@ public class AccountService implements IAccountService {
         if (passwordEncoder.matches(dto.getOldPassword() + account.getSalt(), dbPassword)) {
             account.setPassword(passwordEncoder.encode(dto.getNewPassword() + account.getSalt()));
             save(account);
-        } else throw new PasswordsDontMatchException("Passwords don`t mant");
+        } else throw new PasswordsDontMatchException("Passwords don`t match");
     }
+
+    @Override
+    public byte[] getTwoFactorAuthQr(String email) throws IOException, WriterException {
+        String totpSecretKey = _accountRepository.findByEmail(email).getTotpSecretKey();
+        var barCode = totpService.getGoogleAuthenticatorBarCode(totpSecretKey, email, "JSSA");
+        return totpService.createQRCode(barCode);
+    }
+
+
 }

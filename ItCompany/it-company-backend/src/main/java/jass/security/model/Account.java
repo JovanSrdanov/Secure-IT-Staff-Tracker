@@ -36,6 +36,7 @@ public class Account {
     private Boolean isActivated;
     private Boolean isBlocked;
 
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "users_roles",
@@ -44,6 +45,12 @@ public class Account {
             inverseJoinColumns = @JoinColumn(
                     name = "role_id", referencedColumnName = "id"))
     private Collection<Role> roles;
+
+
+    @ColumnTransformer( read = "pgp_sym_decrypt(totp_secret_key, current_setting('encrypt.key') )",
+            write = " pgp_sym_encrypt( ?, current_setting('encrypt.key') )")
+    @Column(columnDefinition = "bytea")
+   private String totpSecretKey;
 }
 
 

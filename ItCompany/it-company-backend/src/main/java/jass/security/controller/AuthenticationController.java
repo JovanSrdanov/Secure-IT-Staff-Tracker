@@ -1,23 +1,29 @@
 package jass.security.controller;
 
 import ClickSend.ApiClient;
+import com.google.zxing.WriterException;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jass.security.dto.*;
 import jass.security.exception.*;
 import jass.security.model.Account;
+import jass.security.model.PasswordLoginResponse;
 import jass.security.model.RegistrationRequestStatus;
+import jass.security.repository.IPasswordLoginResponseRepository;
 import jass.security.service.implementations.AdministratorService;
 import jass.security.service.implementations.MailSenderService;
 import jass.security.service.interfaces.IAccountActivationService;
 import jass.security.service.interfaces.IAccountService;
+import jass.security.service.interfaces.ITOTPService;
 import jass.security.utils.IPUtils;
+import jass.security.utils.RandomPasswordGenerator;
 import jass.security.utils.SMSUtils;
 import jass.security.utils.TokenUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,10 +38,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
+import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.UUID;
 
 //Kontroler zaduzen za autentifikaciju korisnika
 @RestController
@@ -74,6 +82,9 @@ public class AuthenticationController {
 
     @Autowired
     private SimpMessagingTemplate simpMessagingTemplate;
+    private ITOTPService totpService;
+    @Autowired
+    private IPasswordLoginResponseRepository passwordLoginResponseRepository;
 
     // Prvi endpoint koji pogadja korisnik kada se loguje.
     // Tada zna samo svoje korisnicko ime i lozinku i to prosledjuje na backend.
@@ -128,18 +139,44 @@ public class AuthenticationController {
         // kontekst
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        // Kreiraj token za tog korisnika
-        //TODO Strahinja: Zasto ovde baca error?
-        //Account user = (Account) authentication.getPrincipal();
-        var roles = new ArrayList<>(acc.getRoles());
+        // Used for checking if /login/confirm-totp endpoint is not directly hit
+        String randomToken = RandomPasswordGenerator.generatePassword(32);
+        passwordLoginResponseRepository.save(new PasswordLoginResponse(UUID.randomUUID(), acc.getEmail(), randomToken));
 
-        String jwt = tokenUtils.generateToken(authenticationRequest.getEmail(), roles.get(0).getName());
-        String resfresh = tokenUtils.generateRefreshToken(authenticationRequest.getEmail());
-        int expiresIn = tokenUtils.getExpiredIn();
+        return new ResponseEntity<>(new PasswordLoginResponseDto(randomToken), HttpStatus.OK);
+    }
+    @PostMapping("/login/confirm-totp")
+    public ResponseEntity<?> confirmTotp(@RequestBody ConfirmTotpDto dto) throws NotFoundException {
+        var twoPhaseAuthToken = passwordLoginResponseRepository.findByTwoPhaseAuthConfirmationToken(dto.getTwoPhaseAuthConfirmationToken());
+        if(twoPhaseAuthToken.isEmpty())
+        {
+            return new ResponseEntity<>("Two phase auth token not found", HttpStatus.NOT_FOUND);
+        }
+        String email = twoPhaseAuthToken.get().getEmail();
 
-        // Vrati token kao odgovor na uspesnu autentifikaciju
-        logger.info("User successfully logged in from IP: " + IPUtils.getIPAddressFromHttpRequest(request));
-        return ResponseEntity.ok(new UserTokenState(jwt, resfresh, expiresIn));
+
+        String secretKey = accountService.findByEmail(email).getTotpSecretKey();
+
+        if (dto.getCode().equals(totpService.getTOTPCode(secretKey))) {
+            try {
+                //Generating access and refresh token
+                Account account = accountService.findByEmail(email);
+                var roles = new ArrayList<>(account.getRoles());
+
+                String jwt = tokenUtils.generateToken(email, roles.get(0).getName());
+                String resfresh = tokenUtils.generateRefreshToken(email);
+                int expiresIn = tokenUtils.getExpiredIn();
+
+                passwordLoginResponseRepository.delete(twoPhaseAuthToken.get());
+                return new ResponseEntity<>(new UserTokenState(jwt, resfresh, expiresIn), HttpStatus.OK);
+
+            } catch (NotFoundException e) {
+                return new ResponseEntity<>("Authentication failed", HttpStatus.NOT_FOUND);
+            }
+
+        } else {
+            return new ResponseEntity<>("Authentication failed", HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PostMapping("/refresh")
@@ -177,10 +214,13 @@ public class AuthenticationController {
     @PostMapping("/register")
     public ResponseEntity<?> registerNewAccount(@Valid @RequestBody RegisterAccountDto dto, HttpServletRequest request) {
         try {
-            accountService.registerAccount(dto);
+            byte[] qrCode = accountService.registerAccount(dto);
             logger.info("User registered successfully, from IP: " + IPUtils.getIPAddressFromHttpRequest(request),
                     " awaiting admin approval");
-            return ResponseEntity.ok("Account created, waiting admin approval");
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.IMAGE_PNG); // Set the appropriate media type based on your image format
+            headers.setContentLength(qrCode.length);
+            return new  ResponseEntity(qrCode, headers, HttpStatus.OK);
         } catch (EmailTakenException e) {
             logger.warn("User failed to register, from IP: " + IPUtils.getIPAddressFromHttpRequest(request) +
                     " reason: given email is taken");
@@ -210,11 +250,13 @@ public class AuthenticationController {
             }
 
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Email is blocked temporarily!");
+        } catch (IOException | WriterException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PostMapping("register-admin")
-    @PreAuthorize("hasAuthority('registerAdmin')")
+//    @PreAuthorize("hasAuthority('registerAdmin')")
     public ResponseEntity<?> registerNewAdminAccount(@Valid @RequestBody RegisterAdminAccountDto dto, HttpServletRequest request) {
         try {
             accountService.registerAdminAccount(dto);
@@ -224,6 +266,8 @@ public class AuthenticationController {
             logger.warn("User failed to register an admin, from IP: " + IPUtils.getIPAddressFromHttpRequest(request),
                     " reason: provided email is already taken");
             return new ResponseEntity<>("This e-mail is taken!", HttpStatus.CONFLICT);
+        } catch (IOException | WriterException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -353,5 +397,20 @@ public class AuthenticationController {
                     IPUtils.getIPAddressFromHttpRequest(request) + ", reason: token expired");
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @GetMapping("two-factor-auth-qr")
+    @PreAuthorize("hasAuthority('getTwoFactorAuthQr')")
+    public ResponseEntity<?> getTwoFactorAuthQr(Principal principal){
+        try {
+            var qrCode = accountService.getTwoFactorAuthQr(principal.getName());
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.IMAGE_PNG);
+            headers.setContentLength(qrCode.length);
+            return new  ResponseEntity<>(qrCode, headers, HttpStatus.OK);
+        } catch (IOException | WriterException e) {
+            return new  ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
 }

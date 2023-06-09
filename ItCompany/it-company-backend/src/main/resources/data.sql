@@ -41,7 +41,8 @@ values ('fc784caa-1a09-459f-9fef-d2ce4b1b89e6', 'changeAccStatusAccept'),
        ('a8bc9435-22b3-45d0-8d74-a28f64f388da', 'getAllSkillSwEngineer'),
        ('37667806-a976-43ab-bd1f-76b194a925be', 'getAllLogs'),
        ('e8ef411d-cb88-43eb-8860-6bbf939e09c8', 'uploadCv'),
-       ('32f43732-3b5b-4731-aac2-08274efd8eaf', 'readCv');
+       ('32f43732-3b5b-4731-aac2-08274efd8eaf', 'readCv'),
+       ('3cd5a5f9-dad6-42a0-bcfa-cf2bf787be30', 'getTwoFactorAuthQr');
 
 
 INSERT INTO public.roles_privileges
@@ -71,6 +72,7 @@ values
 ('037bbd08-1f2c-4f9d-80af-1710d90efb01', 'b3adb8f2-4ea3-41c2-a3e1-709b9e7ba7a8'),
 ('037bbd08-1f2c-4f9d-80af-1710d90efb01', '9f82f05e-1e85-4c4b-b112-6701c8993929'),
 ('037bbd08-1f2c-4f9d-80af-1710d90efb01', '37667806-a976-43ab-bd1f-76b194a925be'),
+('037bbd08-1f2c-4f9d-80af-1710d90efb01', '3cd5a5f9-dad6-42a0-bcfa-cf2bf787be30'),
 -- PR MANAGER
 ('2cdfba8e-78a3-46a9-b414-96a41d1a5c62', 'f60d3289-526a-4aae-b720-5409f472cd2b'),
 ('2cdfba8e-78a3-46a9-b414-96a41d1a5c62', 'c4640c3d-e9fe-40b3-9158-004fb119b8f6'),
@@ -82,6 +84,7 @@ values
 ('2cdfba8e-78a3-46a9-b414-96a41d1a5c62', 'ab494841-f5aa-4e4e-b6e2-5d8c1085eb3f'),
 ('2cdfba8e-78a3-46a9-b414-96a41d1a5c62', 'f7fe6f68-08d4-42f0-804f-d49107dfd9ba'),
 ('2cdfba8e-78a3-46a9-b414-96a41d1a5c62', '32f43732-3b5b-4731-aac2-08274efd8eaf'),
+('2cdfba8e-78a3-46a9-b414-96a41d1a5c62', '3cd5a5f9-dad6-42a0-bcfa-cf2bf787be30'),
 -- SOFTWARE ENGINEER
 ('79113e08-0b50-41ee-a8ea-42559259d44e', '9c571498-c945-4089-a529-8e3746d0a4b3'),
 ('79113e08-0b50-41ee-a8ea-42559259d44e', 'c7133aa4-d7e9-4f2f-839d-e4524ebd3bb4'),
@@ -93,6 +96,7 @@ values
 ('79113e08-0b50-41ee-a8ea-42559259d44e', 'ab494841-f5aa-4e4e-b6e2-5d8c1085eb3f'),
 ('79113e08-0b50-41ee-a8ea-42559259d44e', 'e8ef411d-cb88-43eb-8860-6bbf939e09c8'),
 ('79113e08-0b50-41ee-a8ea-42559259d44e', '32f43732-3b5b-4731-aac2-08274efd8eaf'),
+('79113e08-0b50-41ee-a8ea-42559259d44e', '3cd5a5f9-dad6-42a0-bcfa-cf2bf787be30'),
 -- HR MANAGER
 ('407d5496-2b68-4052-9219-f87ed4126fc9', '85deb19a-6bbb-4a97-93f1-7d118f17c014'),
 ('407d5496-2b68-4052-9219-f87ed4126fc9', 'ab494841-f5aa-4e4e-b6e2-5d8c1085eb3f'),
@@ -101,6 +105,7 @@ values
 ('407d5496-2b68-4052-9219-f87ed4126fc9', '437bfba6-7add-4e5c-8354-d3bee0d09e0c'),
 ('407d5496-2b68-4052-9219-f87ed4126fc9', '44c764a7-fa8e-4820-8c31-5d882514f65c'),
 ('407d5496-2b68-4052-9219-f87ed4126fc9', '32f43732-3b5b-4731-aac2-08274efd8eaf'),
+('407d5496-2b68-4052-9219-f87ed4126fc9', '3cd5a5f9-dad6-42a0-bcfa-cf2bf787be30'),
 -- ADMIN_PASSWORD_CHANGE
 ('153c2366-eb2d-4ce2-b55e-42c83609da8a', 'd270db68-12fb-4dce-a9f0-7ef64d091731');
 

@@ -1,5 +1,6 @@
 package jass.security.service.interfaces;
 
+import com.google.zxing.WriterException;
 import jass.security.dto.*;
 import jass.security.exception.*;
 import jass.security.model.Account;
@@ -7,6 +8,7 @@ import jass.security.model.PasswordlessLoginToken;
 import jass.security.model.RegistrationRequestStatus;
 import jass.security.model.Role;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -14,9 +16,9 @@ import java.util.UUID;
 public interface IAccountService extends ICrudService<Account> {
     Account findByEmail(String email) throws NotFoundException;
 
-    UUID registerAccount(RegisterAccountDto dto) throws EmailTakenException, NotFoundException, EmailRejectedException;
+    byte[] registerAccount(RegisterAccountDto dto) throws EmailTakenException, NotFoundException, EmailRejectedException, IOException, WriterException;
 
-    UUID registerAdminAccount(RegisterAdminAccountDto dto) throws EmailTakenException;
+    UUID registerAdminAccount(RegisterAdminAccountDto dto) throws EmailTakenException, IOException, WriterException;
 
     void approveAccount(String email, Boolean approve) throws NotFoundException;
 
@@ -35,4 +37,5 @@ public interface IAccountService extends ICrudService<Account> {
     void blockUnblockAccount(String email) throws NotFoundException;
 
     void changePassword(ChangePasswordDto dto) throws NotFoundException, PasswordsDontMatchException;
+    byte[] getTwoFactorAuthQr(String email) throws IOException, WriterException;
 }

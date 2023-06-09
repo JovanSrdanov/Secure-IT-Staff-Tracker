@@ -168,8 +168,22 @@
 			<version>1.0.0</version>
 			<scope>compile</scope>
 		</dependency>
-	</dependencies>
 
+		<!--2FA-->
+		<dependency>
+			<groupId>de.taimos</groupId>
+			<artifactId>totp</artifactId>
+			<version>1.0</version>
+		</dependency>
+
+		<!--QR code-->
+		<dependency>
+			<groupId>com.google.zxing</groupId>
+			<artifactId>javase</artifactId>
+			<version>3.2.1</version>
+		</dependency>
+
+	</dependencies>
 	<build>
 		<plugins>
 			<plugin>
