@@ -36,7 +36,7 @@ const StyledTableRow = styled(TableRow)(({theme}) => ({
 
 function EmployeesInfo(props) {
     const [allEmployees, setAllEmployees] = useState(null);
-    const [selectedEmployee, setSelectedEmployee] = useState(null);
+
 
     const [viewSkillsDialog, setViewSkillsDialog] = useState(false);
     const [skills, setSkills] = useState(null);
@@ -66,11 +66,8 @@ function EmployeesInfo(props) {
     const handleCloseSkillsDialog = () => {
         setViewSkillsDialog(false)
         setSkills(null);
-        setSelectedEmployee(null);
-
     };
     const handleViewSkills = (item) => {
-        setSelectedEmployee(item)
         interceptor.get("sw-engineer/skill/" + item.employeeId).then((res) => {
             setSkills(res.data)
             setViewSkillsDialog(true)
