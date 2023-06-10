@@ -9,5 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CvAesDto {
     private byte[] encryptedCv;
+    private byte[] secretKey;
     private byte[] aesInitVector;
 }

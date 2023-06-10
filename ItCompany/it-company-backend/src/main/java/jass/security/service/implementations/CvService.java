@@ -16,31 +16,38 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import java.security.*;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.util.UUID;
 
 @Service
 @Primary
 public class CvService implements ICvService {
-    private final SecretKey secretKey;
     private final int blockSize;
+    //In bytes
+    private final int keySize;
     private final String algorithm;
     private final ISwEngineerRepository swEngineerRepository;
     private final ICvRepository cvRepository;
-public CvService(@Value("${cvAesKey}") String secretKeyStr, ICvRepository cvRepository, ISwEngineerRepository swEngineerRepository, ICvRepository cvRepository1){
 
-    this.secretKey = stringToSecretKey(secretKeyStr);
+    @Value("${cvKeyStoreName}")
+    private   String keyStoreName;
+    @Value("${cvKeyStorePassword}")
+    private String keyStorePassword;
+    @Value("${cvCertificateAlias}")
+    private String certAlias;
+    @Value("${cvPrivateKeyPassword}")
+    private String cvPrivateKeyPassword;
+public CvService(ICvRepository cvRepository, ISwEngineerRepository swEngineerRepository, ICvRepository cvRepository1){
+    this.keyStorePassword = keyStorePassword;
+    this.keySize = 16;
         this.swEngineerRepository = swEngineerRepository;
-    this.cvRepository = cvRepository1;
-    this.blockSize = 16;
+        this.cvRepository = cvRepository1;
+        this.blockSize = 16;
         this.algorithm = "AES/CBC/PKCS5Padding";
     }
 
@@ -56,6 +63,10 @@ public CvService(@Value("${cvAesKey}") String secretKeyStr, ICvRepository cvRepo
         return new SecretKeySpec(secretKeyByte, 0, secretKeyByte.length, "AES");
     }
 
+    private SecretKey bytesToSecretKey(byte[] bytes){
+        return new SecretKeySpec(bytes, 0, bytes.length, "AES");
+    }
+
     private String getCvDir() {
         String runtimeDir = new File(getClass().getResource("").getPath()).getPath();
         String rootDir = runtimeDir.substring(0, runtimeDir.indexOf("target" + File.separator + "classes"));
@@ -64,7 +75,7 @@ public CvService(@Value("${cvAesKey}") String secretKeyStr, ICvRepository cvRepo
 
     @Override
     public void save(MultipartFile file, UUID engineerId) throws IOException, NotFoundException {
-        CvAesDto dto = encrypt(file.getBytes());
+        CvAesDto dto = encryptAes(file.getBytes());
         String filePath = getCvDir() + "cv_" + engineerId.toString();
 
         try(FileOutputStream fos = new FileOutputStream(filePath)){
@@ -74,8 +85,8 @@ public CvService(@Value("${cvAesKey}") String secretKeyStr, ICvRepository cvRepo
         catch (IOException e){
            throw new RuntimeException(e.getMessage());
         }
-
-        Cv cv = new Cv(UUID.randomUUID(), dto.getAesInitVector());
+        byte[] encryptedSecretKey = encryptRsa(dto.getSecretKey());
+        Cv cv = new Cv(UUID.randomUUID(), encryptedSecretKey, dto.getAesInitVector());
         cvRepository.save(cv);
 
         //Linking cv to engineer
@@ -94,23 +105,37 @@ public CvService(@Value("${cvAesKey}") String secretKeyStr, ICvRepository cvRepo
         if(engineerResult.isEmpty()){
             throw new NotFoundException("Engineer not found");
         }
+        byte[] encryptedSecretKey = engineerResult.get().getCv().getSecretKey();
+        byte[] secretKey = decryptRsa(encryptedSecretKey);
+
         byte[] aesInitVector = engineerResult.get().getCv().getAesInitVector();
 
         String filePath = getCvDir() + "cv_" + engineerId.toString();
         byte[] encryptedCv =  Files.readAllBytes(Path.of(filePath));
 
-        return decrypt(new CvAesDto(encryptedCv, aesInitVector));
+        return decryptAes(new CvAesDto(encryptedCv, secretKey, aesInitVector));
+    }
+
+    private SecretKey generateSecretKey(){
+        try {
+            KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+            keyGenerator.init(keySize * 8);
+            return  keyGenerator.generateKey();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
-    public CvAesDto encrypt(byte[] cv) {
+    public CvAesDto encryptAes(byte[] cv) {
         try {
+            SecretKey secretKey = generateSecretKey();
             IvParameterSpec iv = generateIv();
             Cipher cipher = null;
             cipher = Cipher.getInstance(algorithm);
             cipher.init(Cipher.ENCRYPT_MODE, secretKey, iv);
             byte[] encryptedCv = cipher.doFinal(cv);
-            return new CvAesDto(encryptedCv, iv.getIV());
+            return new CvAesDto(encryptedCv,secretKey.getEncoded(),iv.getIV());
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidAlgorithmParameterException |
                  IllegalBlockSizeException | BadPaddingException | InvalidKeyException e) {
             throw new RuntimeException(e);
@@ -118,12 +143,12 @@ public CvService(@Value("${cvAesKey}") String secretKeyStr, ICvRepository cvRepo
     }
 
     @Override
-    public byte[] decrypt(CvAesDto dto) {
+    public byte[] decryptAes(CvAesDto dto) {
         try{
         IvParameterSpec iv = new IvParameterSpec(dto.getAesInitVector());
         Cipher cipher = null;
         cipher = Cipher.getInstance(algorithm);
-        cipher.init(Cipher.DECRYPT_MODE, secretKey, iv);
+        cipher.init(Cipher.DECRYPT_MODE, bytesToSecretKey(dto.getSecretKey()), iv);
         return cipher.doFinal(dto.getEncryptedCv());
         } catch (InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException |
                  NoSuchAlgorithmException | BadPaddingException | InvalidKeyException e) {
@@ -137,4 +162,75 @@ public CvService(@Value("${cvAesKey}") String secretKeyStr, ICvRepository cvRepo
         return new IvParameterSpec(iv);
     }
 
+    private byte[] encryptRsa(byte[] data){
+        try {
+
+            PublicKey publicKey = loadPublicKey();
+            Cipher cipher = Cipher.getInstance("RSA");
+            cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+            return cipher.doFinal(data);
+
+        } catch (InvalidKeyException | NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException |
+                 BadPaddingException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    private byte[] decryptRsa(byte[] data){
+        try {
+
+            PrivateKey privateKey =  loadPrivateKey();
+            Cipher cipher = Cipher.getInstance("RSA");
+            cipher.init(Cipher.DECRYPT_MODE, privateKey);
+            return cipher.doFinal(data);
+
+        } catch (InvalidKeyException | NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException |
+                 BadPaddingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private KeyStore loadKeystore() throws Exception{
+        KeyStore keyStore = KeyStore.getInstance("PKCS12", "SunJSSE");
+
+        String runtimeDir = new File(getClass().getResource("").getPath()).getPath();
+        String rootDir = runtimeDir.substring(0, runtimeDir.indexOf("target" + File.separator + "classes"));
+        String keystorePath = rootDir + "src" + File.separator + "main" + File.separator + "resources" + File.separator +
+                "cv" + File.separator + keyStoreName;
+        BufferedInputStream in = new BufferedInputStream(new FileInputStream(keystorePath));
+        keyStore.load(in, keyStorePassword.toCharArray());
+        return keyStore;
+    }
+
+    private PublicKey loadPublicKey() {
+        try {
+            KeyStore keyStore = loadKeystore();
+
+            if (keyStore.isKeyEntry(certAlias)) {
+                Certificate cert = keyStore.getCertificate(certAlias);
+                return cert.getPublicKey();
+            } else{
+                return null;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    private PrivateKey loadPrivateKey() {
+        try {
+            KeyStore keyStore = loadKeystore();
+
+            if (keyStore.isKeyEntry(certAlias)) {
+                return (PrivateKey) keyStore.getKey(certAlias, cvPrivateKeyPassword.toCharArray());
+            } else{
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

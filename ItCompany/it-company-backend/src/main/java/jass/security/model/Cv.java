@@ -21,5 +21,7 @@ public class Cv {
     @Id
     private UUID id;
     @Column(nullable = false)
+    private byte[] secretKey;
+    @Column(nullable = false)
     private byte[] aesInitVector;
 }
