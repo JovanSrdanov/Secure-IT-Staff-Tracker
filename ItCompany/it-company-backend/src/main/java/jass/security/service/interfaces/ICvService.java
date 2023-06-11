@@ -10,6 +10,6 @@ import java.util.UUID;
 public interface ICvService {
     void save(MultipartFile file, UUID swEngineerId) throws IOException, NotFoundException;
     byte[] read(UUID engineerId) throws IOException, NotFoundException;
-    CvAesDto encrypt(byte[] cv);
-    byte[] decrypt(CvAesDto dto);
+    CvAesDto encryptAes(byte[] cv);
+    byte[] decryptAes(CvAesDto dto);
 }
