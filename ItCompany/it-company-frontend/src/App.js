@@ -1,7 +1,7 @@
 import ParticlesBg from 'particles-bg'
 import "./particles.css"
 import {AppBar, Box, Button, Snackbar, Toolbar, Tooltip} from "@mui/material";
-import React, {useState} from "react";
+import React, { useState, useEffect, useContext } from "react";
 import LoginIcon from '@mui/icons-material/Login';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import ComputerIcon from '@mui/icons-material/Computer';
@@ -38,6 +38,8 @@ import ViewLogsPage from "./pages/admin-pages/view-logs-page";
 import MuiAlert from '@mui/material/Alert';
 import SockJS from "sockjs-client";
 import {Stomp} from "@stomp/stompjs";
+import { KeycloakContext } from './Providers/KeycloakProvider';
+import { useKeycloak } from '@react-keycloak/web';
 
 const Alert = React.forwardRef(function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -55,6 +57,18 @@ function App() {
         setOpen(false);
     };
 
+    // Keycloak
+    const { keycloak, initialized } = useKeycloak();
+    // console.log("Access token: " + keycloak.token + "\nRefresh token: " + keycloak.refreshToken + 
+    // "\nIs authenticated: " + keycloak.authenticated + "\nIs initialized: " + initialized)
+    // if (isAuthenticatedUsingKeycloak()) {
+    //   console.log(jwt_decode(keycloak.token).realm_access.roles);
+    // }
+
+    function isAuthenticatedUsingKeycloak() {
+        return keycloak && keycloak?.token;
+    }
+
     function getCookieValue(name) {
         const cookies = document.cookie.split(';');
         for (let i = 0; i < cookies.length; i++) {
@@ -67,8 +81,13 @@ function App() {
     }
 
     const handleLogout = () => {
-        removeTokens()
-        window.location.href = '/login';
+        if (isAuthenticatedUsingKeycloak()) {
+            keycloak.logout();
+        }
+        else {
+            removeTokens();
+            window.location.href = "/login";
+        }
     };
 
     function removeTokens() {
@@ -99,27 +118,49 @@ function App() {
     };
 
     function getRoleFromToken() {
-        const token = getCookieValue('accessToken');
+      if (isAuthenticatedUsingKeycloak()) {
+        console.log("KOLACIC: " + getCookieValue("accessToken"))
+
+        const decodedKeycloakAccessToken = jwt_decode(keycloak?.token);
+        const currentTime = Date.now() / 1000;
+
+        const refreshToken = jwt_decode(keycloak?.refreshToken);
+        if (refreshToken.exp < currentTime) {
+          //removeTokens();
+          return null;
+        }
+
+        const role = decodedKeycloakAccessToken.realm_access.roles.filter(
+          (item) => item.startsWith("ROLE")
+        )[0];
+        openWebSocket(role);
+        return role;
+      }
+      else {
+        const token = getCookieValue("accessToken");
         if (!token) {
-            removeTokens();
-            return null;
+          removeTokens();
+          return null;
         }
         const currentTime = Date.now() / 1000;
-        const refreshToken = getCookieValue('accessToken');
+        const refreshToken = getCookieValue("accessToken");
         if (!refreshToken) {
-            removeTokens();
-            return null;
+          removeTokens();
+          return null;
         }
         if (jwt_decode(refreshToken).exp < currentTime) {
-            removeTokens();
-            return null;
+          removeTokens();
+          return null;
         }
         const decodedToken = jwt_decode(token);
-        openWebSocket(decodedToken.role)
+
+        openWebSocket(decodedToken.role);
         return decodedToken.role;
+      }
     }
 
     const ROLE = getRoleFromToken();
+    //console.log(ROLE)
     return (
         <div>
             <Snackbar
