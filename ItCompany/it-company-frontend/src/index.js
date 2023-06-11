@@ -3,8 +3,6 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import {BrowserRouter} from 'react-router-dom';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
-import KeycloakProvider from './Providers/KeycloakProvider';
-import KeycloakService from './Providers/KeycloakService';
 import { ReactKeycloakProvider } from '@react-keycloak/web';
 import keycloakConfing from './Config/keycloakConfing';
 

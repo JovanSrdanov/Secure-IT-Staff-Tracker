@@ -38,7 +38,6 @@ import ViewLogsPage from "./pages/admin-pages/view-logs-page";
 import MuiAlert from '@mui/material/Alert';
 import SockJS from "sockjs-client";
 import {Stomp} from "@stomp/stompjs";
-import { KeycloakContext } from './Providers/KeycloakProvider';
 import { useKeycloak } from '@react-keycloak/web';
 
 const Alert = React.forwardRef(function Alert(props, ref) {
@@ -80,8 +79,13 @@ function App() {
         return null;
     }
 
+    keycloak.onTokenExpired = () => {
+        window.location.href = "/login";
+    };
+
     const handleLogout = () => {
         if (isAuthenticatedUsingKeycloak()) {
+            removeTokens();
             keycloak.logout();
         }
         else {
@@ -117,14 +121,16 @@ function App() {
 
     function getRoleFromToken() {
       if (isAuthenticatedUsingKeycloak()) {
-        console.log("KOLACIC: " + getCookieValue("accessToken"))
+        // console.log("ACCESS KOLACIC: " + getCookieValue("accessToken"))
+        // console.log("REFRESH KOLACIC" + getCookieValue("refreshToken"))
+        // console.log("REFRESH TOKEN: " + keycloak?.refreshToken)
 
         const decodedKeycloakAccessToken = jwt_decode(keycloak?.token);
         const currentTime = Date.now() / 1000;
 
         const refreshToken = jwt_decode(keycloak?.refreshToken);
         if (refreshToken.exp < currentTime) {
-          //removeTokens();
+          removeTokens();
           return null;
         }
 
@@ -141,7 +147,7 @@ function App() {
           return null;
         }
         const currentTime = Date.now() / 1000;
-        const refreshToken = getCookieValue("accessToken");
+        const refreshToken = getCookieValue("refreshToken");
         if (!refreshToken) {
           removeTokens();
           return null;
