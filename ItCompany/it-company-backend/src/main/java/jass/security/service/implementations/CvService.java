@@ -21,7 +21,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.*;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.util.UUID;
 
 @Service
@@ -105,10 +104,16 @@ public CvService(ICvRepository cvRepository, ISwEngineerRepository swEngineerRep
         if(engineerResult.isEmpty()){
             throw new NotFoundException("Engineer not found");
         }
-        byte[] encryptedSecretKey = engineerResult.get().getCv().getSecretKey();
+
+        Cv cv = engineerResult.get().getCv();
+        if (cv == null){
+            throw new NotFoundException("There is currently no available cv");
+        }
+
+        byte[] encryptedSecretKey = cv.getSecretKey();
         byte[] secretKey = decryptRsa(encryptedSecretKey);
 
-        byte[] aesInitVector = engineerResult.get().getCv().getAesInitVector();
+        byte[] aesInitVector = cv.getAesInitVector();
 
         String filePath = getCvDir() + "cv_" + engineerId.toString();
         byte[] encryptedCv =  Files.readAllBytes(Path.of(filePath));

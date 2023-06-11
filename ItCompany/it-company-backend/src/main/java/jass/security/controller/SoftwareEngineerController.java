@@ -195,7 +195,7 @@ public class SoftwareEngineerController {
 
         }
         catch (NotFoundException e) {
-            return new ResponseEntity("Cv not found", HttpStatus.NOT_FOUND);
+            return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (IOException e) {
             return new ResponseEntity( HttpStatus.INTERNAL_SERVER_ERROR);
         }
