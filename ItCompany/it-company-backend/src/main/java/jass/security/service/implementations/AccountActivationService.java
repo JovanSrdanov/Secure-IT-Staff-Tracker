@@ -92,6 +92,9 @@ public class AccountActivationService implements IAccountActivationService {
         account.setIsActivated(true);
         accountService.save(account);
 
+
+
+
         logger.info("Account with an ID: " + account.getId() +
                 ", successfully activated");
         deleteById(accountActivation.getId());
