@@ -256,7 +256,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("register-admin")
-//    @PreAuthorize("hasAuthority('registerAdmin')")
+    @PreAuthorize("hasAuthority('registerAdmin')")
     public ResponseEntity<?> registerNewAdminAccount(@Valid @RequestBody RegisterAdminAccountDto dto, HttpServletRequest request) {
         try {
             accountService.registerAdminAccount(dto);
@@ -271,8 +271,7 @@ public class AuthenticationController {
         }
     }
 
-
-//    @PreAuthorize("hasAuthority('changeAccStatusAccept')")
+        @PreAuthorize("hasAuthority('changeAccStatusAccept')")
     @GetMapping("/accept-registration/{mail}")
     public ResponseEntity<?> acceptRegistration(@PathVariable String mail) {
         try {
