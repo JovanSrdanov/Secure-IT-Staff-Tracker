@@ -5,10 +5,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class CvAesDto {
-    private byte[] encryptedCv;
-    private byte[] secretKey;
-    private byte[] aesInitVector;
+@AllArgsConstructor
+public class ConfirmTotpDto {
+    private String code;
+    private String twoPhaseAuthConfirmationToken;
 }
