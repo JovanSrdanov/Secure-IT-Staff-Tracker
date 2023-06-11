@@ -76,9 +76,7 @@ public class WebSecurityConfig {
         http.exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint);
         http.authorizeRequests()
                 .requestMatchers("/auth/**").permitAll()
-                .requestMatchers("/h2-console/**").permitAll()
-                .requestMatchers("/socket/**").permitAll() // /api/foo
-
+                .requestMatchers("/socket/**").permitAll()
                 .anyRequest().authenticated().and()
                 .cors().and()
                 .addFilterBefore(new TokenAuthenticationFilter(tokenUtils, userDetailsService()), BasicAuthenticationFilter.class);
@@ -94,7 +92,7 @@ public class WebSecurityConfig {
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
                 .requestMatchers(HttpMethod.POST, "/auth/login", "auth/register", "/account/recover/**")
-                .requestMatchers(HttpMethod.GET, "/auth/activate/**", "account/reqest-recovery/**","/socket/**");
+                .requestMatchers(HttpMethod.GET, "/auth/activate/**", "account/reqest-recovery/**");
     }
 
 }

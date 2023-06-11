@@ -99,6 +99,8 @@ function App() {
         if (role === "ROLE_ADMIN") {
             const socket = new SockJS('https://localhost:4430/socket');
             const stompClient = Stomp.over(socket);
+            stompClient.debug = () => {
+            };
             stompClient.connect({}, () => {
                 stompClient.subscribe('/socket-publisher', (message) => {
                     const receivedMessage = message.body;

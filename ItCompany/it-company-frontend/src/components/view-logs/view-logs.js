@@ -1,15 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {
-    Box,
-    Paper,
-    styled,
-    Table,
-    TableBody,
-    TableCell,
-    tableCellClasses,
-    TableContainer,
-    TableRow
-} from "@mui/material";
+import {Paper, styled, Table, TableBody, TableCell, tableCellClasses, TableContainer, TableRow} from "@mui/material";
 import interceptor from "../../interceptor/interceptor";
 
 const StyledTableCell = styled(TableCell)(({theme}) => ({
@@ -59,8 +49,6 @@ function ViewLogs(props) {
                         <Table>
                             <TableBody>
                                 {logs.map((item) => {
-
-
                                     let color = 'red';
                                     if (item.includes('| INFO  |')) {
                                         color = 'lightblue';
@@ -76,11 +64,7 @@ function ViewLogs(props) {
                                         <React.Fragment key={`${item}-row`}>
                                             <StyledTableRow>
                                                 <StyledTableCell>
-                                                    <Box m={1} sx={{overflowX: 'auto', overflowY: 'auto'}}>
-                                                        <li>
-                                                            <span style={{color}}>{item}</span>
-                                                        </li>
-                                                    </Box>
+                                                    <span style={{color}}>{item}</span>
                                                 </StyledTableCell>
                                             </StyledTableRow>
                                         </React.Fragment>

@@ -56,14 +56,7 @@ function Projects(props) {
     useEffect(() => {
         getAllProjects();
     }, []);
-
-    const createNewProject = () => {
-        interceptor.post("project", newProject).then(res => {
-            getAllProjects();
-        }).catch(err => {
-            console.log(err)
-        })
-    }
+    
 
     const [showCreateNewProjectDialog, setShowCreateNewProjectDialog] = React.useState(false);
     const [newProject, setNewProject] = React.useState({

@@ -11,19 +11,17 @@
     "@mui/x-date-pickers": "^6.5.0",
     "@react-keycloak/web": "^3.4.0",
     "@stomp/stompjs": "^7.0.0",
-    "@testing-library/jest-dom": "^5.16.5",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
     "axios": "^1.4.0",
     "dayjs": "^1.11.7",
     "jwt-decode": "^3.1.2",
+    "npm-audit-html": "^2.0.0-beta.2",
     "keycloak-js": "^21.1.1",
     "particles-bg": "^2.5.5",
     "prop-types": "^15.8.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.11.1",
-    "react-scripts": "5.0.1",
+    "react-scripts": "^5.0.1",
     "react-swipeable-views": "^0.14.0",
     "reflexbox": "^4.0.6",
     "sockjs": "^0.3.24",
@@ -33,9 +31,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "build": "react-scripts build"
   },
   "eslintConfig": {
     "extends": [
@@ -54,5 +50,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
   }
 }
