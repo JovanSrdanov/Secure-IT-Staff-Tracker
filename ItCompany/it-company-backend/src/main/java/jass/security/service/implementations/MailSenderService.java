@@ -53,7 +53,7 @@ public class MailSenderService {
             Logger.getLogger(MailSenderService.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
+    @Async
     public void sendHtmlMailWithImage(String to, String subject, String msg,byte[] image) {
         try {
 
