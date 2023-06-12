@@ -19,8 +19,8 @@ function Login() {
     const [showAlert, setShowAlert] = React.useState(false);
     const [twoPhaseAuthConfirmationDialog, setTwoPhaseAuthConfirmationDialog] = React.useState(false);
 
-    // Keycloak test
-    const {keycloak, initialized} = useKeycloak();
+    // Keycloak
+    const { keycloak, initialized } = useKeycloak();
 
     keycloak.onAuthSuccess = () => {
         const accessToken = keycloak.token;
@@ -33,7 +33,7 @@ function Login() {
             refreshToken
         )}; Secure; SameSite=Strict;`;
 
-        console.log("USPESNO DODAO KOLACICE");
+      //console.log("USPESNO DODAO KOLACICE");
     }
 
     const handleKeycloakLogin = () => {
