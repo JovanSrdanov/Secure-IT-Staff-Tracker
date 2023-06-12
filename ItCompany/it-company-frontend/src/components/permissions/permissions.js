@@ -49,10 +49,7 @@ function a11yProps(index) {
 }
 
 function Permissions(props) {
-    const [tabValue, setTabValue] = React.useState(0);
-    const handleChangeTab = (event, newValue) => {
-        setTabValue(newValue);
-    };
+
 
     function not(a, b) {
         return a.filter((value) => b.indexOf(value) === -1);
@@ -330,7 +327,7 @@ function Permissions(props) {
 
     const getAndSetAllData = async () => {
         try {
-            
+
             const res1 = await interceptor.get("/privilege/all");
             const names = res1.data.map((item) => item.name);
 

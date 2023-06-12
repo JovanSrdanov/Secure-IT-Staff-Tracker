@@ -10,7 +10,6 @@ const interceptor = axios.create({
 interceptor.interceptors.request.use(
     async (config) => {
         const accessToken = getAccessToken();
-        const refreshToken = getRefreshToken();
         if (accessToken) {
             config.headers.Authorization = `Bearer ${accessToken}`;
         }

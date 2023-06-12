@@ -151,6 +151,7 @@ public class AccountService implements IAccountService {
         roles.add(role);
         newAcc.setRoles(roles);
         role.getUsers().add(newAcc);
+        newAcc.setIsBlocked(false);
 
         save(newAcc);
         _roleRespository.save(role);

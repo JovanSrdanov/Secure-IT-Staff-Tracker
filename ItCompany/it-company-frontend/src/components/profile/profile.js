@@ -3,6 +3,7 @@ import {Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextFiel
 import {Flex} from 'reflexbox'
 import PublishedWithChangesIcon from '@mui/icons-material/PublishedWithChanges';
 import interceptor from "../../interceptor/interceptor";
+import QrCode2Icon from '@mui/icons-material/QrCode2';
 
 function Profile() {
     const [user, setUser] = useState({
@@ -124,8 +125,47 @@ function Profile() {
         setSuccessDialogShow(false)
     };
 
+
+    const [QRCodeDialog, setQRCodeDialog] = useState(false);
+    const [QRCode, setQRCode] = useState(false);
+
+
+    const handleCloseQRcodeDialog = () => {
+
+        setQRCodeDialog(false)
+    };
+
+    const viewQrCode = () => {
+        interceptor.get("auth/two-factor-auth-qr", {responseType: 'arraybuffer'}).then((res) => {
+            const base64Image = btoa(
+                new Uint8Array(res.data).reduce(
+                    (data, byte) => data + String.fromCharCode(byte),
+                    ''
+                )
+            );
+            setQRCode(`data:image/png;base64,${base64Image}`);
+            setQRCodeDialog(true)
+        }).catch((err) => {
+            console.log(err)
+        })
+    };
     return (
         <>
+
+            <Dialog onClose={handleCloseQRcodeDialog} open={QRCodeDialog}>
+                <DialogTitle>QR code for two factor authentication </DialogTitle>
+                <DialogContent style={{display: 'flex', justifyContent: 'center'}}>
+                    <img src={QRCode} alt="mjau"/>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseQRcodeDialog}
+                            variant="contained"
+                    >
+                        Close
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
             <Dialog open={passwordDialogShow} onClose={() => setPasswordDialogShow(false)}>
                 <DialogTitle>Change password</DialogTitle>
                 <DialogContent>
@@ -301,13 +341,22 @@ function Profile() {
                         <Box>
                             <p>All fields must be filled for update and phone number must be valid</p>
                         </Box>
-                        <Box m={1}>
-                            <Button variant="contained" color="success" endIcon={<PublishedWithChangesIcon/>}
-                                    disabled={isDisabled}
-                                    onClick={handleUpdate}
-                            >
-                                Update</Button>
-                        </Box>
+                        <Flex flexDirection="row">
+                            <Box m={1}>
+                                <Button variant="contained" color="success" endIcon={<PublishedWithChangesIcon/>}
+                                        disabled={isDisabled}
+                                        onClick={handleUpdate}
+                                >
+                                    Update</Button>
+                            </Box>
+                            <Box m={1}>
+                                <Button variant="outlined" color="info" endIcon={<QrCode2Icon/>}
+                                        disabled={isDisabled}
+                                        onClick={viewQrCode}
+                                >
+                                    View you QR code</Button>
+                            </Box>
+                        </Flex>
                     </Flex>
                     <hr
                         style={{
