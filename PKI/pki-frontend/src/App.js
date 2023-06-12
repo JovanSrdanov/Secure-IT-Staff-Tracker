@@ -36,6 +36,8 @@ function App() {
     }
 
     keycloak.onTokenExpired = () => {
+        localStorage.removeItem("jwt");
+        setJwt(null);
         window.location.href = "/login";
     };
 
@@ -75,9 +77,6 @@ function App() {
 
     function getRoleFromToken() {
         if (isAuthenticatedUsingKeycloak()) {
-            console.log(
-                "Is initialized: " + initialized + "\nAccess token: "
-            );
             const decoded = JSON.parse(
                 atob(keycloak?.token.split(".")[1])
             );
@@ -85,15 +84,16 @@ function App() {
                 item.startsWith("ROLE")
             )[0];
             //setRole(role);
-            console.log(decoded)
-            console.log(role);
+            console.log("DEKODIRAN KEYCLOAK TOKEN: " + decoded)
+            console.log("KEYCLOAK ROLA: " + role);
             //setRole("ROLE_PKI_ADMIN");
+            localStorage.setItem("jwt", keycloak?.token);
             return "ROLE_PKI_ADMIN";
         }
         else {
             console.log("Nije preko keycloak-a")
             const token = localStorage.getItem("jwt");
-            console.log(token);
+            console.log("OBICAN TOKEN: " + token);
             if (!token) {
               //navigate("/login");
               //setRole(null);
@@ -111,7 +111,14 @@ function App() {
                 return null;
               }
               //setRole(decoded.role);
-              console.log(decoded.role)
+              console.log("OBICNA ROLA: " + decoded.role)
+              // ovo se desi ako se izlogujem preko keycloaka sa druge aplikacije, ostane keycloak jwt u local
+              // storage-u
+              if (decoded.role === undefined) {
+                localStorage.removeItem("jwt");
+                setJwt(null);
+                return null;
+              }
               return decoded.role;
             } catch (error) {
               localStorage.removeItem("jwt");

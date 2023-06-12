@@ -80,6 +80,7 @@ function App() {
     }
 
     keycloak.onTokenExpired = () => {
+        removeTokens();
         window.location.href = "/login";
     };
 
@@ -163,7 +164,14 @@ function App() {
           return null;
         }
         const decodedToken = jwt_decode(token);
-
+        console.log("OBICNA ROLA: " + decodedToken.role);
+        // ovo se desi ako se izlogujem preko keycloaka sa druge aplikacije, ostane keycloak jwt u local
+        // storage-u
+        if (decodedToken.role === undefined) {
+            removeTokens();
+            return null;
+        }
+        
         openWebSocket(decodedToken.role);
         return decodedToken.role;
       }

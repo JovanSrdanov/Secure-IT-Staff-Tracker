@@ -15,7 +15,7 @@ function Login() {
     const [password, setPassword] = React.useState("");
     const [showAlert, setShowAlert] = React.useState(false);
 
-    // Keycloak test
+    // Keycloak
     const { keycloak, initialized } = useKeycloak();
 
     keycloak.onAuthSuccess = () => {
