@@ -120,10 +120,16 @@ function App() {
     };
 
     function getRoleFromToken() {
+        // console.log(
+        //     "Is initialized: " +
+        //     initialized +
+        //     "\nAccess token: " +
+        //     keycloak?.token
+        // );
       if (isAuthenticatedUsingKeycloak()) {
-        // console.log("ACCESS KOLACIC: " + getCookieValue("accessToken"))
-        // console.log("REFRESH KOLACIC" + getCookieValue("refreshToken"))
-        // console.log("REFRESH TOKEN: " + keycloak?.refreshToken)
+        console.log("ACCESS KOLACIC: " + getCookieValue("accessToken"))
+        console.log("REFRESH KOLACIC" + getCookieValue("refreshToken"))
+        console.log("REFRESH TOKEN: " + keycloak?.refreshToken)
 
         const decodedKeycloakAccessToken = jwt_decode(keycloak?.token);
         const currentTime = Date.now() / 1000;
