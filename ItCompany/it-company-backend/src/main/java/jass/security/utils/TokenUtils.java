@@ -12,6 +12,12 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 
@@ -25,6 +31,10 @@ public class TokenUtils {
     // Tajna koju samo backend aplikacija treba da zna kako bi mogla da generise i proveri JWT https://jwt.io/
     @Value("${tokenSecretKey}")
     public String SECRET;
+    // Public key used in token keycloak token validations
+    @Value("${keycloakRealmPublicKey}")
+    public String KEYCLOAK_REALM_PUBLIC_KEY;
+
     // Izdavac tokena
     @Value("spring-security-example")
     private String APP_NAME;
@@ -147,6 +157,9 @@ public class TokenUtils {
         try {
             final Claims claims = this.getAllClaimsFromToken(token);
             username = claims.getSubject();
+            if (!isEmail(username)) {
+                username = claims.get("preferred_username", String.class);
+            }
         } catch (ExpiredJwtException ex) {
             throw ex;
         } catch (Exception e) {
@@ -154,6 +167,11 @@ public class TokenUtils {
         }
 
         return username;
+    }
+
+    private Boolean isEmail(String username) {
+        String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
+        return username.matches(emailRegex);
     }
 
     /**
@@ -230,12 +248,33 @@ public class TokenUtils {
         } catch (ExpiredJwtException ex) {
             throw ex;
         } catch (Exception e) {
-            claims = null;
+            //claims = null;
+            return parseKeycloakToken(token);
         }
 
         // Preuzimanje proizvoljnih podataka je moguce pozivom funkcije claims.get(key)
 
         return claims;
+    }
+
+    private Claims parseKeycloakToken(String token) {
+        try {
+            PublicKey keycloakKey = getPublicKeyFromString(KEYCLOAK_REALM_PUBLIC_KEY);
+
+            return Jwts.parser()
+                    .setSigningKey(keycloakKey)
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private PublicKey getPublicKeyFromString(String keyString) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        byte[] publicKeyBytes = Base64.getDecoder().decode(keyString);
+        KeyFactory factory = KeyFactory.getInstance("RSA");
+        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicKeyBytes);
+        return factory.generatePublic(keySpec);
     }
 
     // =================================================================
@@ -253,35 +292,66 @@ public class TokenUtils {
         final String username = getUsernameFromToken(token);
         final Date created = getIssuedAtDateFromToken(token);
 
-
-        var claims = Jwts.parser()
-                .setSigningKey(SECRET)
-                .parseClaimsJws(token)
-                .getBody();
-
-
-        // Token je validan kada:
-        return (
-                username != null // korisnicko ime nije null
-                        && username.equals(userDetails.getUsername())
-                        && !claims.get("isRefresh", Boolean.class)
-        ); //isto u bazi
+        Claims claims;
+        try {
+            claims = Jwts.parser()
+                    .setSigningKey(SECRET)
+                    .parseClaimsJws(token)
+                    .getBody();
+            return (
+                    username != null // korisnicko ime nije null
+                            && username.equals(userDetails.getUsername())
+                            && !claims.get("isRefresh", Boolean.class)
+            );
+        } catch (Exception e) {
+            // If regular jwt token parsing fails, tries to parse a keycloak token
+            try {
+                PublicKey keycloakKey = getPublicKeyFromString(KEYCLOAK_REALM_PUBLIC_KEY);
+                claims = Jwts.parser()
+                        .setSigningKey(keycloakKey)
+                        .parseClaimsJws(token)
+                        .getBody();
+                return (
+                        username != null // korisnicko ime nije null
+                                && username.equals(userDetails.getUsername())
+                        && !claims.get("typ").equals("Refresh")
+                );
+            }
+            catch (Exception e1) {
+                throw new RuntimeException(e1);
+            }
+        }
     }
 
     public Boolean validateRefreshToken(String token) throws TokenExpiredException {
         final String username = getUsernameFromToken(token);
         final Date created = getIssuedAtDateFromToken(token);
 
-
-        var claims = Jwts.parser()
+        Claims claims;
+        try {
+            claims = Jwts.parser()
                 .setSigningKey(SECRET)
                 .parseClaimsJws(token)
                 .getBody();
-
-        return (
-                username != null // korisnicko ime nije null
-                        && claims.get("isRefresh", Boolean.class)
-        );
+            return (
+                    username != null // korisnicko ime nije null
+                            && claims.get("isRefresh", Boolean.class)
+            );
+        } catch (Exception e) {
+            try {
+                // TODO Stefan: ovo ovako ne treba, keycloak razlicito tretira access i refresh tokene,
+                // access tokene potipiuje sa RSA algoritmom, dok refresh sa HS256, ali sa invalidnim kljucem,
+                // jer je klijent public posto je frotnend aplikacija pa nema secret
+                // resenje je implementirati PKSE, ali bi to zahtevalo da se menja spring security konfiguracija
+                return (
+//                        username != null // korisnicko ime nije null
+//                                && !jwtClaims.get("typ").equals("Bearer")
+                        false
+                );
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        }
     }
 
     /**
