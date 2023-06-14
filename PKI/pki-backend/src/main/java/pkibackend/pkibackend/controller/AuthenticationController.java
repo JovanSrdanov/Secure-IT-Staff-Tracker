@@ -1,6 +1,7 @@
 package pkibackend.pkibackend.controller;
 
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -20,8 +21,6 @@ import pkibackend.pkibackend.dto.Auth.Jwt;
 import pkibackend.pkibackend.dto.Auth.JwtAuthenticationRequest;
 import pkibackend.pkibackend.model.Account;
 import pkibackend.pkibackend.service.interfaces.IAccountService;
-
-import javax.servlet.http.HttpServletResponse;
 
 
 @RestController
