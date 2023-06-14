@@ -46,9 +46,14 @@ AccountController {
 
     @PreAuthorize("hasRole('ROLE_CERTIFICATE_USER')")
     @GetMapping("allExceptLoggindIn")
-    public ResponseEntity<Iterable<AccountInfoDto>> findAllAdmin(Principal principal) {
-        Account a = _accountService.findAccountByEmail(principal.getName());
-        return new ResponseEntity<>(ObjectMapperUtils.mapAll(_accountService.findAllByIdIsNot(a.getId()), AccountInfoDto.class), HttpStatus.OK);
+    public ResponseEntity<?> findAllAdmin(Principal principal) {
+        try {
+            Account a = null;
+            a = _accountService.findAccountByEmail(principal.getName());
+            return new ResponseEntity<>(ObjectMapperUtils.mapAll(_accountService.findAllByIdIsNot(a.getId()), AccountInfoDto.class), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PreAuthorize("hasRole('ROLE_PKI_ADMIN')")

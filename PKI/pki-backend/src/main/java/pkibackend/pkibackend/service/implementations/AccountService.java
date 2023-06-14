@@ -5,9 +5,9 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.webjars.NotFoundException;
 import pkibackend.pkibackend.dto.UpdatePasswordDto;
 import pkibackend.pkibackend.exceptions.BadRequestException;
+import pkibackend.pkibackend.exceptions.NotFoundException;
 import pkibackend.pkibackend.model.Account;
 import pkibackend.pkibackend.model.Role;
 import pkibackend.pkibackend.repository.AccountRepository;
@@ -65,7 +65,7 @@ public class AccountService implements IAccountService {
     }
 
     @Override
-    public Account findById(UUID id) {
+    public Account findById(UUID id) throws NotFoundException {
         if (_accountRepository.findById(id).isPresent()) {
             return _accountRepository.findById(id).get();
         }
@@ -73,7 +73,7 @@ public class AccountService implements IAccountService {
     }
 
     @Override
-    public Account findByEmail(String email) {
+    public Account findByEmail(String email) throws NotFoundException {
         if (_accountRepository.findByEmail(email).isPresent()) {
             return _accountRepository.findByEmail(email).get();
         }
@@ -95,7 +95,7 @@ public class AccountService implements IAccountService {
     }
 
     @Override
-    public Account updateAccount(Account updatedAccount, UUID accountId) throws BadRequestException {
+    public Account updateAccount(Account updatedAccount, UUID accountId) throws BadRequestException, NotFoundException {
         Account oldAccount = this.findById(accountId);
 
         oldAccount.update(updatedAccount);
@@ -109,7 +109,7 @@ public class AccountService implements IAccountService {
     }
 
     @Override
-    public Account findAccountByEmail(String email) {
+    public Account findAccountByEmail(String email) throws NotFoundException {
         if (_accountRepository.findByEmail(email).isPresent()) {
 
             return _accountRepository.findByEmail(email).get();

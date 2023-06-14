@@ -1,7 +1,5 @@
 package pkibackend.pkibackend;
 
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
-import io.swagger.v3.oas.annotations.info.Info;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
@@ -17,8 +15,6 @@ import javax.validation.ValidatorFactory;
 @EnableAsync
 @EnableScheduling
 @EnableCaching
-@OpenAPIDefinition(info = @Info(title = "PKI", version = "0.1", description = "PKI FOR BUSEP 22/23"))
-
 public class PkiBackendApplication {
 
     public static void main(String[] args) {
