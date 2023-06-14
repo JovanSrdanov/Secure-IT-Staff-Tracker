@@ -1,12 +1,16 @@
 package pkibackend.pkibackend.model;
 
-import lombok.*;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import pkibackend.pkibackend.Utilities.AESUtilities;
 import pkibackend.pkibackend.dto.AESPasswordDto;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
 import java.math.BigInteger;
 import java.util.UUID;
 
@@ -56,8 +60,8 @@ public class KeystoreRowInfo {
         this.aesInitVector = aesPasswordDto.getIv();
     }
 
-    public String getPassword(){
+    public String getPassword() {
         AESUtilities aes = new AESUtilities();
-       return aes.decrypt(new AESPasswordDto(password, this.aesInitVector));
+        return aes.decrypt(new AESPasswordDto(password, this.aesInitVector));
     }
 }

@@ -1,5 +1,6 @@
 package pkibackend.pkibackend.model;
 
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -7,7 +8,6 @@ import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import javax.persistence.*;
 import java.util.*;
 
 @Getter
@@ -75,6 +75,7 @@ public class Account implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
     public void update(Account updatedAccount) {
         this.email = updatedAccount.getEmail();
         this.password = updatedAccount.getPassword();

@@ -4,11 +4,11 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpServletRequest;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -78,6 +78,7 @@ public class TokenUtils {
 
         return username;
     }
+
     private Boolean isEmail(String username) {
         String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
         return username.matches(emailRegex);
@@ -98,6 +99,7 @@ public class TokenUtils {
         }
         return claims;
     }
+
     private Claims parseKeycloakToken(String token) {
         try {
             PublicKey keycloakKey = getPublicKeyFromString(KEYCLOAK_REALM_PUBLIC_KEY);
@@ -110,6 +112,7 @@ public class TokenUtils {
             throw new RuntimeException(e);
         }
     }
+
     private PublicKey getPublicKeyFromString(String keyString) throws NoSuchAlgorithmException, InvalidKeySpecException {
         byte[] publicKeyBytes = Base64.getDecoder().decode(keyString);
         KeyFactory factory = KeyFactory.getInstance("RSA");

@@ -351,7 +351,7 @@ function Profile() {
                             </Box>
                             <Box m={1}>
                                 <Button variant="outlined" color="info" endIcon={<QrCode2Icon/>}
-                                        disabled={isDisabled}
+                                    
                                         onClick={viewQrCode}
                                 >
                                     View you QR code</Button>
