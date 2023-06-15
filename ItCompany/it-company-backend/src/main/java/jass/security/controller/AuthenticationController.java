@@ -97,14 +97,6 @@ public class AuthenticationController {
         // Ukoliko kredencijali nisu ispravni, logovanje nece biti uspesno, desice se
         // AuthenticationException
 
-        // SMS sending test
-        //TWILIO
-//        var sid = TWILIO_ACCOUNT_SID;
-//        var token = TWILIO_AUTH_TOKEN;
-//        Twilio.init(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
-//
-//        Message.creator(new PhoneNumber("0628387347"),
-//                        new PhoneNumber(TWILIO_PHONE_NUMBER), "Test").create();
         Account acc;
         try {
             acc = accountService.findByEmail(authenticationRequest.getEmail());
