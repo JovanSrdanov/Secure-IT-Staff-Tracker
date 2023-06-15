@@ -10,7 +10,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SMSDto {
-    private String source;
-    private String body;
-    private String recipient;
+    private String TWILIO_ACCOUNT_SID;
+    private String TWILIO_AUTH_TOKEN;
+    private String TWILIO_PHONE_NUMBER;
+    private String message;
+    private String phoneNumber;
 }
