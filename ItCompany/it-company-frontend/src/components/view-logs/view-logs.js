@@ -48,7 +48,7 @@ function ViewLogs(props) {
                     <TableContainer component={Paper} sx={{maxHeight: 700, height: 700, overflowY: 'scroll'}}>
                         <Table>
                             <TableBody>
-                                {logs.map((item) => {
+                                {logs.map((item, idx) => {
                                     let color = 'red';
                                     if (item.includes('| INFO  |')) {
                                         color = 'lightblue';
@@ -61,7 +61,7 @@ function ViewLogs(props) {
                                     }
 
                                     return (
-                                        <React.Fragment key={`${item}-row`}>
+                                        <React.Fragment key={`${idx}-row`}>
                                             <StyledTableRow>
                                                 <StyledTableCell>
                                                     <span style={{color}}>{item}</span>

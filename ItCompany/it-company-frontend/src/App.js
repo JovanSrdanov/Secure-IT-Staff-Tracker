@@ -1,7 +1,7 @@
 import ParticlesBg from 'particles-bg'
 import "./particles.css"
 import {AppBar, Box, Button, Snackbar, Toolbar, Tooltip} from "@mui/material";
-import React, { useState, useEffect, useContext } from "react";
+import React, {useState} from "react";
 import LoginIcon from '@mui/icons-material/Login';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import ComputerIcon from '@mui/icons-material/Computer';
@@ -38,7 +38,7 @@ import ViewLogsPage from "./pages/admin-pages/view-logs-page";
 import MuiAlert from '@mui/material/Alert';
 import SockJS from "sockjs-client";
 import {Stomp} from "@stomp/stompjs";
-import { useKeycloak } from '@react-keycloak/web';
+import {useKeycloak} from '@react-keycloak/web';
 
 const Alert = React.forwardRef(function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -57,7 +57,7 @@ function App() {
     };
 
     // Keycloak
-    const { keycloak, initialized } = useKeycloak();
+    const {keycloak, initialized} = useKeycloak();
     // console.log("Access token: " + keycloak.token + "\nRefresh token: " + keycloak.refreshToken + 
     // "\nIs authenticated: " + keycloak.authenticated + "\nIs initialized: " + initialized)
     // if (isAuthenticatedUsingKeycloak()) {
@@ -88,8 +88,7 @@ function App() {
         if (isAuthenticatedUsingKeycloak()) {
             removeTokens();
             keycloak.logout();
-        }
-        else {
+        } else {
             removeTokens();
             window.location.href = "/login";
         }
@@ -109,6 +108,7 @@ function App() {
             stompClient.connect({}, () => {
                 stompClient.subscribe('/socket-publisher', (message) => {
                     const receivedMessage = message.body;
+                    console.log(message.body)
                     setMessage(receivedMessage);
                     setOpen(true);
                     setTimeout(() => {
@@ -129,54 +129,53 @@ function App() {
         //     "\nAccess token: " +
         //     keycloak?.token
         // );
-      if (isAuthenticatedUsingKeycloak()) {
-        console.log("ACCESS KOLACIC: " + getCookieValue("accessToken"))
-        console.log("REFRESH KOLACIC" + getCookieValue("refreshToken"))
-        console.log("REFRESH TOKEN: " + keycloak?.refreshToken)
+        if (isAuthenticatedUsingKeycloak()) {
+            console.log("ACCESS KOLACIC: " + getCookieValue("accessToken"))
+            console.log("REFRESH KOLACIC" + getCookieValue("refreshToken"))
+            console.log("REFRESH TOKEN: " + keycloak?.refreshToken)
 
-        const decodedKeycloakAccessToken = jwt_decode(keycloak?.token);
-        const currentTime = Date.now() / 1000;
+            const decodedKeycloakAccessToken = jwt_decode(keycloak?.token);
+            const currentTime = Date.now() / 1000;
 
-        const refreshToken = jwt_decode(keycloak?.refreshToken);
-        if (refreshToken.exp < currentTime) {
-          removeTokens();
-          return null;
-        }
+            const refreshToken = jwt_decode(keycloak?.refreshToken);
+            if (refreshToken.exp < currentTime) {
+                removeTokens();
+                return null;
+            }
 
-        const role = decodedKeycloakAccessToken.realm_access.roles.filter(
-          (item) => item.startsWith("ROLE")
-        )[0];
-        openWebSocket(role);
-        return role;
-      }
-      else {
-        const token = getCookieValue("accessToken");
-        if (!token) {
-          removeTokens();
-          return null;
+            const role = decodedKeycloakAccessToken.realm_access.roles.filter(
+                (item) => item.startsWith("ROLE")
+            )[0];
+            openWebSocket(role);
+            return role;
+        } else {
+            const token = getCookieValue("accessToken");
+            if (!token) {
+                removeTokens();
+                return null;
+            }
+            const currentTime = Date.now() / 1000;
+            const refreshToken = getCookieValue("refreshToken");
+            if (!refreshToken) {
+                removeTokens();
+                return null;
+            }
+            if (jwt_decode(refreshToken).exp < currentTime) {
+                removeTokens();
+                return null;
+            }
+            const decodedToken = jwt_decode(token);
+            console.log("OBICNA ROLA: " + decodedToken.role);
+            // ovo se desi ako se izlogujem preko keycloaka sa druge aplikacije, ostane keycloak jwt u local
+            // storage-u
+            if (decodedToken.role === undefined) {
+                removeTokens();
+                return null;
+            }
+
+            openWebSocket(decodedToken.role);
+            return decodedToken.role;
         }
-        const currentTime = Date.now() / 1000;
-        const refreshToken = getCookieValue("refreshToken");
-        if (!refreshToken) {
-          removeTokens();
-          return null;
-        }
-        if (jwt_decode(refreshToken).exp < currentTime) {
-          removeTokens();
-          return null;
-        }
-        const decodedToken = jwt_decode(token);
-        console.log("OBICNA ROLA: " + decodedToken.role);
-        // ovo se desi ako se izlogujem preko keycloaka sa druge aplikacije, ostane keycloak jwt u local
-        // storage-u
-        if (decodedToken.role === undefined) {
-            removeTokens();
-            return null;
-        }
-        
-        openWebSocket(decodedToken.role);
-        return decodedToken.role;
-      }
     }
 
     const ROLE = getRoleFromToken();
