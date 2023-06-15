@@ -49,10 +49,10 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
                 SMSDto smsDto = new SMSDto(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER,
                         "Unauthorized access attempt from IP: " + request.getRemoteAddr(),
                         admin.getPhoneNumber());
-                //SMSUtils.sendSMS(logger, smsDto);
+                SMSUtils.sendSMS(logger, smsDto);
             }
         }
-        
+
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
     }
 }
