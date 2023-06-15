@@ -1,6 +1,5 @@
 package jass.security.controller;
 
-import ClickSend.ApiClient;
 import com.google.zxing.WriterException;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,7 +22,7 @@ import jass.security.utils.TokenUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -39,7 +38,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -52,17 +50,13 @@ import java.util.UUID;
 @RequestMapping(value = "/auth", produces = MediaType.APPLICATION_JSON_VALUE)
 public class AuthenticationController {
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
-    //Twilio
-//    @Value("${twilioAccountSid}")
-//    private String TWILIO_ACCOUNT_SID;
-//    @Value("${twilioAuthToken}")
-//    private String TWILIO_AUTH_TOKEN;
-//    @Value("${twilioPhoneNumber}")
-//    private String TWILIO_PHONE_NUMBER;
 
-    //Clicksend
-    @Autowired
-    private ApiClient clickSendConfig;
+    @Value("${twilioAccountSid}")
+    private String TWILIO_ACCOUNT_SID;
+    @Value("${twilioAuthToken}")
+    private String TWILIO_AUTH_TOKEN;
+    @Value("${twilioPhoneNumber}")
+    private String TWILIO_PHONE_NUMBER;
 
     @Autowired
     private TokenUtils tokenUtils;
@@ -97,14 +91,6 @@ public class AuthenticationController {
         // Ukoliko kredencijali nisu ispravni, logovanje nece biti uspesno, desice se
         // AuthenticationException
 
-        // SMS sending test
-        //TWILIO
-//        var sid = TWILIO_ACCOUNT_SID;
-//        var token = TWILIO_AUTH_TOKEN;
-//        Twilio.init(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
-//
-//        Message.creator(new PhoneNumber("0628387347"),
-//                        new PhoneNumber(TWILIO_PHONE_NUMBER), "Test").create();
         Account acc;
         try {
             acc = accountService.findByEmail(authenticationRequest.getEmail());
@@ -233,7 +219,7 @@ public class AuthenticationController {
             logger.warn("User failed to register, from IP: " + IPUtils.getIPAddressFromHttpRequest(request) +
                     " reason: given email is temporarily blocked");
 
-            //Clicksend
+            //Twilio
 
             this.simpMessagingTemplate.convertAndSend("/socket-publisher", "User with an IP: " +
                     IPUtils.getIPAddressFromHttpRequest(request)
@@ -242,10 +228,12 @@ public class AuthenticationController {
             var admins = administratorService.findAll();
             if (admins != null) {
                 for (var admin : admins) {
-                    SMSDto smsDto = new SMSDto("IT Company", "User with an IP: " +
-                            IPUtils.getIPAddressFromHttpRequest(request)
-                            + " tried to register with a blocked email: " + dto.getEmail(), admin.getPhoneNumber());
-                    SMSUtils.sendSMS(logger, clickSendConfig, smsDto);
+                    SMSDto smsDto = new SMSDto(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER,
+                            "User with an IP: " +
+                                    IPUtils.getIPAddressFromHttpRequest(request)
+                                    + " tried to register with a blocked email: " + dto.getEmail(),
+                            admin.getPhoneNumber());
+                    SMSUtils.sendSMS(logger, smsDto);
                 }
             }
 

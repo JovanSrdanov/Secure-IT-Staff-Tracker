@@ -1,8 +1,5 @@
 package jass.security;
 
-import ClickSend.ApiClient;
-import jass.security.controller.AuthenticationController;
-import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,11 +13,6 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @SpringBootApplication
 @EnableAsync
 public class SecurityApplication {
-    //Clicksend
-    @Value("${clicksendUsername}")
-    private String clickSendUsername;
-    @Value("${clicksendApiKey}")
-    private String clickSendApiKey;
     private static final Logger logger = LoggerFactory.getLogger(SecurityApplication.class);
     public static void main(String[] args) {
         SpringApplication.run(SecurityApplication.class, args);
@@ -28,14 +20,5 @@ public class SecurityApplication {
         logger.info("ZNATNO BOLJE NEGO MIRKOSERVISI I GOLANG I DOCKER");
         logger.error("ERROR ERROR ERROR ERROR ERROR ERROR ERROR ");
         System.out.println("JSSA");
-    }
-
-    @Bean
-    @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
-    public ApiClient clickSendConfig(){
-        ApiClient clickSendApiClient = new ApiClient();
-        clickSendApiClient.setUsername(clickSendUsername);
-        clickSendApiClient.setPassword(clickSendApiKey);
-        return clickSendApiClient;
     }
 }

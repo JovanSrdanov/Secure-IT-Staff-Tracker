@@ -1,6 +1,5 @@
 package jass.security.controller;
 
-import ClickSend.ApiClient;
 import jass.security.dto.PermissionUpdateRequest;
 import jass.security.dto.PrivilegeInfoDto;
 import jass.security.dto.RoleInfoDto;
@@ -13,6 +12,7 @@ import jass.security.utils.SMSUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,9 +29,12 @@ public class PrivilegeController {
     @Autowired
     private SimpMessagingTemplate simpMessagingTemplate;
 
-    //Clicksend
-    @Autowired
-    private ApiClient clickSendConfig;
+    @Value("${twilioAccountSid}")
+    private String TWILIO_ACCOUNT_SID;
+    @Value("${twilioAuthToken}")
+    private String TWILIO_AUTH_TOKEN;
+    @Value("${twilioPhoneNumber}")
+    private String TWILIO_PHONE_NUMBER;
 
     @Autowired
     public PrivilegeController(IPrivilegeService privilegeService, IRoleService roleService, IAdministratorService administratorService) {
@@ -46,13 +49,14 @@ public class PrivilegeController {
         roleService.updatePrivileges(dto);
         logger.info("Privileges for the role: " + dto.getRoleName() + " changed");
         this.simpMessagingTemplate.convertAndSend("/socket-publisher", "Privileges for the role: " + dto.getRoleName() + " changed");
-        //Clicksend
+
+        //Twilio
         var admins = administratorService.findAll();
         if (admins != null) {
             for (var admin : admins) {
-                SMSDto smsDto = new SMSDto("IT Company",
+                SMSDto smsDto = new SMSDto(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER,
                         "Privileges for the role: " + dto.getRoleName() + " changed", admin.getPhoneNumber());
-                SMSUtils.sendSMS(logger, clickSendConfig, smsDto);
+                SMSUtils.sendSMS(logger, smsDto);
             }
         }
 

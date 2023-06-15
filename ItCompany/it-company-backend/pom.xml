@@ -111,13 +111,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.github.clicksend</groupId>
-			<artifactId>clicksend-java-client</artifactId>
-			<version>1.0.0</version>
-			<scope>compile</scope>
-		</dependency>
-
-		<dependency>
 			<groupId>de.taimos</groupId>
 			<artifactId>totp</artifactId>
 			<version>1.0</version>
