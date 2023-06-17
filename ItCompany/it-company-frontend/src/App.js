@@ -130,10 +130,10 @@ function App() {
         //     keycloak?.token
         // );
         if (isAuthenticatedUsingKeycloak()) {
-            // console.log("ACCESS KOLACIC: " + getCookieValue("accessToken"))
-            // console.log("REFRESH KOLACIC" + getCookieValue("refreshToken"))
-            // console.log("ACCESS TOKEN: " + keycloak?.token);
-            // console.log("REFRESH TOKEN: " + keycloak?.refreshToken)
+             console.log("ACCESS KOLACIC: " + getCookieValue("accessToken"))
+             console.log("REFRESH KOLACIC" + getCookieValue("refreshToken"))
+             console.log("ACCESS TOKEN: " + keycloak?.token);
+             console.log("REFRESH TOKEN: " + keycloak?.refreshToken)
             document.cookie = `accessToken=${encodeURIComponent(
               keycloak?.token
             )}; Secure; SameSite=Strict;`;
