@@ -381,7 +381,7 @@ function Profile() {
                                     setPasswordDialogShow(true)
                                 }}
                             >
-                                Change Password TBA
+                                Change Password
 
                             </Button>
                         </Box>
