@@ -23,8 +23,8 @@ function Login() {
     const { keycloak, initialized } = useKeycloak();
 
     keycloak.onAuthSuccess = () => {
-        const accessToken = keycloak.token;
-        const refreshToken = keycloak.refreshToken;
+        const accessToken = keycloak?.token;
+        const refreshToken = keycloak?.refreshToken;
 
         document.cookie = `accessToken=${encodeURIComponent(
             accessToken
@@ -33,7 +33,8 @@ function Login() {
             refreshToken
         )}; Secure; SameSite=Strict;`;
 
-      //console.log("USPESNO DODAO KOLACICE");
+      console.log("USPESNO DODAO KOLACICE");
+      console.log("KOLACICI: " + accessToken + ", " + refreshToken);
     }
 
     const handleKeycloakLogin = () => {
