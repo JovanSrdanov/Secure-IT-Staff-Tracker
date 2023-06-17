@@ -17,9 +17,9 @@ public class SMSUtils {
     private static String TWILIO_PHONE_NUMBER;
 
     public static void sendSMS(Logger logger, SMSDto smsDto) {
-        Twilio.init(smsDto.getTWILIO_ACCOUNT_SID(), smsDto.getTWILIO_AUTH_TOKEN());
-        Message.creator(new PhoneNumber(smsDto.getPhoneNumber()),
-                        new PhoneNumber(smsDto.getTWILIO_PHONE_NUMBER()), smsDto.getMessage()).create();
+//        Twilio.init(smsDto.getTWILIO_ACCOUNT_SID(), smsDto.getTWILIO_AUTH_TOKEN());
+//        Message.creator(new PhoneNumber(smsDto.getPhoneNumber()),
+//                        new PhoneNumber(smsDto.getTWILIO_PHONE_NUMBER()), smsDto.getMessage()).create();
 
         logger.info("SMS sent successfully to a recipient with a phone number: " + smsDto.getPhoneNumber());
     }

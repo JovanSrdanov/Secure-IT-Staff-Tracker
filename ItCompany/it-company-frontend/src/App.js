@@ -130,11 +130,19 @@ function App() {
         //     keycloak?.token
         // );
         if (isAuthenticatedUsingKeycloak()) {
-            console.log("ACCESS KOLACIC: " + getCookieValue("accessToken"))
-            console.log("REFRESH KOLACIC" + getCookieValue("refreshToken"))
-            console.log("REFRESH TOKEN: " + keycloak?.refreshToken)
+            // console.log("ACCESS KOLACIC: " + getCookieValue("accessToken"))
+            // console.log("REFRESH KOLACIC" + getCookieValue("refreshToken"))
+            // console.log("ACCESS TOKEN: " + keycloak?.token);
+            // console.log("REFRESH TOKEN: " + keycloak?.refreshToken)
+            document.cookie = `accessToken=${encodeURIComponent(
+              keycloak?.token
+            )}; Secure; SameSite=Strict;`;
+            document.cookie = `refreshToken=${encodeURIComponent(
+              keycloak?.refreshToken
+            )}; Secure; SameSite=Strict;`;
 
             const decodedKeycloakAccessToken = jwt_decode(keycloak?.token);
+            console.log("DECODED ACCESS TOKEN: " + decodedKeycloakAccessToken);
             const currentTime = Date.now() / 1000;
 
             const refreshToken = jwt_decode(keycloak?.refreshToken);
@@ -146,6 +154,9 @@ function App() {
             const role = decodedKeycloakAccessToken.realm_access.roles.filter(
                 (item) => item.startsWith("ROLE")
             )[0];
+            
+            console.log("ROLE: " + role) 
+
             openWebSocket(role);
             return role;
         } else {
@@ -299,7 +310,7 @@ function App() {
                                             navigate("/skills");
                                         }}
                                     >
-                                        Skils
+                                        Skills
                                     </Button>
                                 </Tooltip>
 
