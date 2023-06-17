@@ -1,22 +1,16 @@
 package pkibackend.pkibackend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.Extension;
-import org.bouncycastle.asn1.x509.Extensions;
-import org.bouncycastle.cert.X509CertificateHolder;
 
-import javax.persistence.Transient;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -66,7 +60,7 @@ public class Certificate {
     private X509Certificate x509Certificate;
 
     //Initializes only things available from certificate
-    public Certificate(java.security.cert.Certificate rawCertificate){
+    public Certificate(java.security.cert.Certificate rawCertificate) {
         this.x509Certificate = (X509Certificate) rawCertificate;
 
         this.serialNumber = this.x509Certificate.getSerialNumber();
@@ -80,9 +74,9 @@ public class Certificate {
     }
 
     //Objasnjenje: https://stackoverflow.com/questions/16197253/retrieve-full-extension-value-from-certificate
-    public static BigInteger GetIssuerSerialNumber(X509Certificate certificate){
+    public static BigInteger GetIssuerSerialNumber(X509Certificate certificate) {
         String oid = Extension.authorityKeyIdentifier.getId();
-        byte[] extensionValue =  certificate.getExtensionValue(oid);
+        byte[] extensionValue = certificate.getExtensionValue(oid);
         if (extensionValue == null) {
             throw new IllegalArgumentException("Authority Key Identifier extension not found");
         }
@@ -96,7 +90,7 @@ public class Certificate {
 
     // Source: https://stackoverflow.com/questions/12092457/how-to-check-if-x509certificate-is-ca-certificate
     // 2nd answer
-    public static boolean CheckCA(X509Certificate certificate){
-        return  certificate.getBasicConstraints() != -1;
+    public static boolean CheckCA(X509Certificate certificate) {
+        return certificate.getBasicConstraints() != -1;
     }
 }

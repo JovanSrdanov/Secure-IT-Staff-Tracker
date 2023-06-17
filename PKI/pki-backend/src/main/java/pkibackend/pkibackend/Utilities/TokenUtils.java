@@ -4,11 +4,17 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpServletRequest;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 import java.util.Date;
 
 
@@ -18,6 +24,8 @@ public class TokenUtils {
     private final SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS512;
     @Value("${jwtKey}")
     public String SECRET;
+    @Value("${keycloakRealmPublicKey}")
+    public String KEYCLOAK_REALM_PUBLIC_KEY;
     @Value("PKI_BUSEP")
     private String APP_NAME;
     //Todo jovan, ovo smanjiti pre odbrane
@@ -59,6 +67,9 @@ public class TokenUtils {
         try {
             final Claims claims = this.getAllClaimsFromToken(token);
             username = claims.getSubject();
+            if (!isEmail(username)) {
+                username = claims.get("preferred_username", String.class);
+            }
         } catch (ExpiredJwtException ex) {
             throw ex;
         } catch (Exception e) {
@@ -66,6 +77,11 @@ public class TokenUtils {
         }
 
         return username;
+    }
+
+    private Boolean isEmail(String username) {
+        String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
+        return username.matches(emailRegex);
     }
 
     private Claims getAllClaimsFromToken(String token) {
@@ -78,9 +94,30 @@ public class TokenUtils {
         } catch (ExpiredJwtException ex) {
             throw ex;
         } catch (Exception e) {
-            claims = null;
+            //claims = null;
+            return parseKeycloakToken(token);
         }
         return claims;
+    }
+
+    private Claims parseKeycloakToken(String token) {
+        try {
+            PublicKey keycloakKey = getPublicKeyFromString(KEYCLOAK_REALM_PUBLIC_KEY);
+
+            return Jwts.parser()
+                    .setSigningKey(keycloakKey)
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private PublicKey getPublicKeyFromString(String keyString) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        byte[] publicKeyBytes = Base64.getDecoder().decode(keyString);
+        KeyFactory factory = KeyFactory.getInstance("RSA");
+        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicKeyBytes);
+        return factory.generatePublic(keySpec);
     }
 
     public Date getExpirationDateFromToken(String token) {
@@ -96,7 +133,6 @@ public class TokenUtils {
 
         return expiration;
     }
-
 
     public Boolean validateToken(String token, UserDetails userDetails) {
         Date expirationDate = getExpirationDateFromToken(token);

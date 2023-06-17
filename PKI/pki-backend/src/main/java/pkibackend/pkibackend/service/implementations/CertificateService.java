@@ -27,6 +27,7 @@ import pkibackend.pkibackend.dto.CreateCertificateInfo;
 import pkibackend.pkibackend.dto.EntityInfo;
 import pkibackend.pkibackend.exceptions.BadRequestException;
 import pkibackend.pkibackend.exceptions.InternalServerErrorException;
+import pkibackend.pkibackend.exceptions.NotFoundException;
 import pkibackend.pkibackend.model.Certificate;
 import pkibackend.pkibackend.model.*;
 import pkibackend.pkibackend.repository.CertificateRepository;
@@ -106,14 +107,14 @@ public class CertificateService implements ICertificateService {
     }
 
     @Override
-    public Iterable<CertificateInfoDto> findAllForLoggedIn(UUID accountId) throws BadRequestException {
+    public Iterable<CertificateInfoDto> findAllForLoggedIn(UUID accountId) throws BadRequestException, NotFoundException {
         Account account = _accountService.findById(accountId);
         List<KeystoreRowInfo> keystoreRowInfos = new ArrayList<>(account.getKeyStoreRowsInfo());
         return findAllFromRowsWithCondition(keystoreRowInfos, false, false);
     }
 
     @Override
-    public Iterable<CertificateInfoDto> findAllValidCaForLoggedIn(UUID accountId) throws BadRequestException {
+    public Iterable<CertificateInfoDto> findAllValidCaForLoggedIn(UUID accountId) throws BadRequestException, NotFoundException {
         Account account = _accountService.findById(accountId);
         List<KeystoreRowInfo> keystoreRowInfos = new ArrayList<>(account.getKeyStoreRowsInfo());
         return findAllFromRowsWithCondition(keystoreRowInfos, true, true);
@@ -189,7 +190,7 @@ public class CertificateService implements ICertificateService {
 
     @Override
     public Certificate generateCertificate(CreateCertificateInfo info)
-            throws RuntimeException, BadRequestException, CertificateEncodingException, InternalServerErrorException {
+            throws RuntimeException, BadRequestException, CertificateEncodingException, InternalServerErrorException, NotFoundException {
 
         Account issuer = new Account();
         Account subject = new Account();
@@ -341,7 +342,7 @@ public class CertificateService implements ICertificateService {
         return !basicConstraints.isCA();
     }
 
-    private boolean isIssuerSameAsSubject(CreateCertificateInfo info, String issuerId) {
+    private boolean isIssuerSameAsSubject(CreateCertificateInfo info, String issuerId) throws NotFoundException {
         Account issuer = _accountService.findById(UUID.fromString(issuerId));
         return info.getSubjectInfo().getEmail().equals(issuer.getEmail());
     }
@@ -430,7 +431,7 @@ public class CertificateService implements ICertificateService {
         return newIssuer;
     }
 
-    private Account buildSubject(EntityInfo info, Certificate newCertificate, String keyStoreName, String keyStorePassword) throws BadRequestException, CertificateEncodingException {
+    private Account buildSubject(EntityInfo info, Certificate newCertificate, String keyStoreName, String keyStorePassword) throws BadRequestException, CertificateEncodingException, NotFoundException {
         KeyPair kp = Keys.generateKeyPair();
         newCertificate.setSubjectPublicKey(kp.getPublic());
         newCertificate.setSubjectPrivateKey(kp.getPrivate());
@@ -470,7 +471,7 @@ public class CertificateService implements ICertificateService {
     }
 
     private Account buildIssuer(UUID issuerId, BigInteger serialNumber, Certificate newCertificate, String keyStoreName, String keyStorePassword)
-            throws BadRequestException, CertificateEncodingException {
+            throws BadRequestException, CertificateEncodingException, NotFoundException {
         String issuerCertificateAlias = _certificateRepository.GetCertificateAliasBySerialNumber(keyStoreName, keyStorePassword, serialNumber);
 
         if (issuerCertificateAlias == null) {

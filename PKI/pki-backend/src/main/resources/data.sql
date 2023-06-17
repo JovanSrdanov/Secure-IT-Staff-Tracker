@@ -5,7 +5,8 @@ VALUES ('ROLE_PKI_ADMIN'),
 
 
 INSERT INTO public.account (id, email, "password", salt)
-VALUES ('20d0dad6-bd22-4898-917f-935c080bab76', 'admin@gmail.com',
+--bilo je admin@gmail.com, promenjeno zbog SSO-a
+VALUES ('20d0dad6-bd22-4898-917f-935c080bab76', 'busep2023+4@gmail.com',
         '$2a$10$SdVFUY0Ev0vJVqWNE6GRwuJLhbYWFjUmqIMJ7xcU9myNm6ObGsX5S', 'salt');
 
 

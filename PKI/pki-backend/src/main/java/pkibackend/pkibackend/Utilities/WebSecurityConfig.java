@@ -63,7 +63,7 @@ public class WebSecurityConfig {
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         http.exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint);
-        http.authorizeRequests().antMatchers("/auth/**").permitAll()
+        http.authorizeRequests().requestMatchers("/auth/**").permitAll()
                 .anyRequest().authenticated().and()
                 .cors().and()
                 .addFilterBefore(new TokenAuthenticationFilter(tokenUtils, userDetailsService()), BasicAuthenticationFilter.class);
@@ -74,10 +74,10 @@ public class WebSecurityConfig {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring().antMatchers(HttpMethod.POST, "/auth/login")
-                .antMatchers(HttpMethod.GET, "/", "/address", "/webjars/**", "/*.html", "favicon.ico",
-                        "/**/*.html", "/**/*.css", "/**/*.js", "/blood-center/sort", "/blood-center/all-basic-info",
-                        "/swagger-ui/**", "/v3/**", "/socket/**", "/no-auth-test");
+        return (web) -> web.ignoring().requestMatchers(HttpMethod.POST, "/auth/login")
+                .requestMatchers(HttpMethod.GET, "/", "/address",
+                        "/blood-center/sort", "/blood-center/all-basic-info",
+                        "/socket/**", "/no-auth-test");
     }
 
 }
