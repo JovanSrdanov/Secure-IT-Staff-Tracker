@@ -1,0 +1,59 @@
+PS C:\Program Files (x86)\Nmap> nmap -sV --script vuln localhost -p 4430
+Starting Nmap 7.94 ( https://nmap.org ) at 2023-06-19 00:08 Central Europe Daylight Time
+Pre-scan script results:
+| broadcast-avahi-dos:
+|   Discovered hosts:
+|     224.0.0.251
+|   After NULL UDP avahi packet DoS (CVE-2011-1002).
+|_  Hosts are all up (not vulnerable).
+Nmap scan report for localhost (127.0.0.1)
+Host is up (0.00s latency).
+Other addresses for localhost (not scanned): ::1
+rDNS record for 127.0.0.1: www.sumatools.com
+
+PORT     STATE SERVICE         VERSION
+4430/tcp open  ssl/rsqlserver?
+| fingerprint-strings:
+|   GetRequest, HTTPOptions:
+|     HTTP/1.1 401
+|     Vary: Origin
+|     Vary: Access-Control-Request-Method
+|     Vary: Access-Control-Request-Headers
+|     X-Content-Type-Options: nosniff
+|     X-XSS-Protection: 0
+|     Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+|     Pragma: no-cache
+|     Expires: 0
+|     Strict-Transport-Security: max-age=31536000 ; includeSubDomains
+|     X-Frame-Options: DENY
+|     Content-Length: 0
+|     Date: Sun, 18 Jun 2023 22:09:42 GMT
+|     Connection: close
+|   RPCCheck, RTSPRequest:
+|     HTTP/1.1 400
+|     Content-Type: text/html;charset=utf-8
+|     Content-Language: en
+|     Content-Length: 435
+|     Date: Sun, 18 Jun 2023 22:09:42 GMT
+|     Connection: close
+|     <!doctype html><html lang="en"><head><title>HTTP Status 400
+|     Request</title><style type="text/css">body {font-family:Tahoma,Arial,sans-serif;} h1, h2, h3, b {color:white;background-color:#525D76;} h1 {font-size:22px;} h2 {font-size:16px;} h3 {font-size:14px;} p {font-size:12px;} a {color:black;} .line {height:1px;background-color:#525D76;border:none;}</style></head><body><h1>HTTP Status 400
+|_    Request</h1></body></html>
+| ssl-dh-params:
+|   VULNERABLE:
+|   Diffie-Hellman Key Exchange Insufficient Group Strength
+|     State: VULNERABLE
+|       Transport Layer Security (TLS) services that use Diffie-Hellman groups
+|       of insufficient strength, especially those using one of a few commonly
+|       shared groups, may be susceptible to passive eavesdropping attacks.
+|     Check results:
+|       WEAK DH GROUP 1
+|             Cipher Suite: TLS_DHE_RSA_WITH_AES_128_CBC_SHA256
+|             Modulus Type: Safe prime
+|             Modulus Source: RFC2409/Oakley Group 2
+|             Modulus Length: 1024
+|             Generator Length: 8
+|             Public Key Length: 1024
+|     References:
+|_      https://weakdh.org
+1 service unrecognized despite returning data. If you know the service/version, please submit the following fingerprint
