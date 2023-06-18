@@ -1,0 +1,34 @@
+nmap -sV -oX D:\FAKS\BUSEP\Izvestaj\backend.xml --stylesheet nmap.xsl --script vuln localhost -p 4444
+Starting Nmap 7.94 ( https://nmap.org ) at 2023-06-19 00:12 Central Europe Daylight Time
+Pre-scan script results:
+| broadcast-avahi-dos:
+|   Discovered hosts:
+|     224.0.0.251
+|   After NULL UDP avahi packet DoS (CVE-2011-1002).
+|_  Hosts are all up (not vulnerable).
+Nmap scan report for localhost (127.0.0.1)
+Host is up (0.00s latency).
+Other addresses for localhost (not scanned): ::1
+rDNS record for 127.0.0.1: www.sumatools.com
+
+PORT     STATE SERVICE  VERSION
+4444/tcp open  ssl/http Node.js Express framework
+|_http-stored-xss: Couldn't find any stored XSS vulnerabilities.
+|_http-csrf: Couldn't find any CSRF vulnerabilities.
+| http-vuln-cve2011-3192:
+|   VULNERABLE:
+|   Apache byterange filter DoS
+|     State: VULNERABLE
+|     IDs:  BID:49303  CVE:CVE-2011-3192
+|       The Apache web server is vulnerable to a denial of service attack when numerous
+|       overlapping byte ranges are requested.
+|     Disclosure date: 2011-08-19
+|     References:
+|       https://www.tenable.com/plugins/nessus/55976
+|       https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2011-3192
+|       https://www.securityfocus.com/bid/49303
+|_      https://seclists.org/fulldisclosure/2011/Aug/175
+|_http-dombased-xss: Couldn't find any DOM based XSS.
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 151.55 seconds

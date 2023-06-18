@@ -1,0 +1,181 @@
+DirBuster 0.12 - Report
+http://www.owasp.org/index.php/Category:OWASP_DirBuster_Project
+Report produced on Sun Jun 18 23:08:24 CEST 2023
+--------------------------------
+
+https://localhost:4444
+--------------------------------
+Directories found during testing:
+
+Dirs found with a 200 response:
+
+/
+
+
+--------------------------------
+Files found during testing:
+
+Files found with a 200 responce:
+
+/index.html
+/Index.html
+/INDEX.html
+
+
+--------------------------------
+Errors encountered during testing:
+
+/strona_5/ : IOException Connection refused: no further information
+/strona_12/ : IOException Connection refused: no further information
+/strona_15/ : IOException Connection refused: no further information
+/strona_10/ : IOException Connection refused: no further information
+/strona_13/ : IOException Connection refused: no further information
+/strona_7/ : IOException Connection refused: no further information
+/glossary/ : IOException Connection refused: no further information
+/kontakt/ : IOException Connection refused: no further information
+/mailman/ : IOException Connection refused: no further information
+/cnt/ : IOException Connection refused: no further information
+/showthread/ : IOException Connection refused: no further information
+/strona_19/ : IOException Connection refused: no further information
+/registration/ : IOException Connection refused: no further information
+/strona_20/ : IOException Connection refused: no further information
+/strona_21/ : IOException Connection refused: no further information
+/whitepapers/ : IOException Connection refused: no further information
+/network/ : IOException Connection refused: no further information
+/order/ : IOException Connection refused: no further information
+/r/ : IOException Connection refused: no further information
+/40/ : IOException Connection refused: no further information
+/tutorials/ : IOException Connection refused: no further information
+/35/ : IOException Connection refused: no further information
+/audio/ : IOException Connection refused: no further information
+/footer/ : IOException Connection refused: no further information
+/33/ : IOException Connection refused: no further information
+/eng/ : IOException Connection refused: no further information
+/37/ : IOException Connection refused: no further information
+/listinfo/ : IOException Connection refused: no further information
+/d/ : IOException Connection refused: no further information
+/post/ : IOException Connection refused: no further information
+/privacy_policy/ : IOException Connection refused: no further information
+/podcasts/ : IOException Connection refused: no further information
+/nl/ : IOException Connection refused: no further information
+/chat/ : IOException Connection refused: no further information
+/php/ : IOException Connection refused: no further information
+/science/ : IOException Connection refused: no further information
+/politics/ : IOException Connection refused: no further information
+/intro/ : IOException Connection refused: no further information
+/adview/ : IOException Connection refused: no further information
+/it/ : IOException Connection refused: no further information
+/account/ : IOException Connection refused: no further information
+/FAQ/ : IOException Connection refused: no further information
+/39/ : IOException Connection refused: no further information
+/comment/ : IOException Connection refused: no further information
+/text/ : IOException Connection refused: no further information
+/42/ : IOException Connection refused: no further information
+/privacypolicy/ : IOException Connection refused: no further information
+/sponsors/ : IOException Connection refused: no further information
+/affiliates/ : IOException Connection refused: no further information
+/dot/ : IOException Connection refused: no further information
+/forms/ : IOException Connection refused: no further information
+/testimonials/ : IOException Connection refused: no further information
+/viewforum/ : IOException Connection refused: no further information
+/34/ : IOException Connection refused: no further information
+/uk/ : IOException Connection refused: no further information
+/x/ : IOException Connection refused: no further information
+/donate/ : IOException Connection refused: no further information
+/41/ : IOException Connection refused: no further information
+/48/ : IOException Connection refused: no further information
+/design/ : IOException Connection refused: no further information
+/bullet/ : IOException Connection refused: no further information
+/node/ : IOException Connection refused: no further information
+/corporate/ : IOException Connection refused: no further information
+/flash/ : IOException Connection refused: no further information
+/service/ : IOException Connection refused: no further information
+/about_us/ : IOException Connection refused: no further information
+/portal/ : IOException Connection refused: no further information
+/tn/ : IOException Connection refused: no further information
+/google/ : IOException Connection refused: no further information
+/faculty/ : IOException Connection refused: no further information
+/folder/ : IOException Connection refused: no further information
+/50/ : IOException Connection refused: no further information
+/world/ : IOException Connection refused: no further information
+/report/ : IOException Connection refused: no further information
+/special/ : IOException Connection refused: no further information
+/guide/ : IOException Connection refused: no further information
+/e/ : IOException Connection refused: no further information
+/upload/ : IOException Connection refused: no further information
+/servlet/ : IOException Connection refused: no further information
+/book/ : IOException Connection refused: no further information
+/java/ : IOException Connection refused: no further information
+/microsoft/ : IOException Connection refused: no further information
+/f/ : IOException Connection refused: no further information
+/issues/ : IOException Connection refused: no further information
+/38/ : IOException Connection refused: no further information
+/show/ : IOException Connection refused: no further information
+/47/ : IOException Connection refused: no further information
+/pubs/ : IOException Connection refused: no further information
+/section/ : IOException Connection refused: no further information
+/buy/ : IOException Connection refused: no further information
+/m/ : IOException Connection refused: no further information
+/memberlist/ : IOException Connection refused: no further information
+/es/ : IOException Connection refused: no further information
+/lg/ : IOException Connection refused: no further information
+/international/ : IOException Connection refused: no further information
+/trans/ : IOException Connection refused: no further information
+/demo/ : IOException Connection refused: no further information
+/art/ : IOException Connection refused: no further information
+/gfx/ : IOException Connection refused: no further information
+/tv/ : IOException Connection refused: no further information
+/cart/ : IOException Connection refused: no further information
+/employment/ : IOException Connection refused: no further information
+/43/ : IOException Connection refused: no further information
+/photo/ : IOException Connection refused: no further information
+/45/ : IOException Connection refused: no further information
+/partner/ : IOException Connection refused: no further information
+/local/ : IOException Connection refused: no further information
+/documentation/ : IOException Connection refused: no further information
+/images01/ : IOException Connection refused: no further information
+/44/ : IOException Connection refused: no further information
+/51/ : IOException Connection refused: no further information
+/flags/ : IOException Connection refused: no further information
+/perl/ : IOException Connection refused: no further information
+/podcast/ : IOException Connection refused: no further information
+/board/ : IOException Connection refused: no further information
+/posts/ : IOException Connection refused: no further information
+/videos/ : IOException Connection refused: no further information
+/start/ : IOException Connection refused: no further information
+/46/ : IOException Connection refused: no further information
+/g/ : IOException Connection refused: no further information
+/multimedia/ : IOException Connection refused: no further information
+/lists/ : IOException Connection refused: no further information
+/promo/ : IOException Connection refused: no further information
+/cs/ : IOException Connection refused: no further information
+/site_map/ : IOException Connection refused: no further information
+/cgi/ : IOException Connection refused: no further information
+/49/ : IOException Connection refused: no further information
+/55/ : IOException Connection refused: no further information
+/title/ : IOException Connection refused: no further information
+/opinion/ : IOException Connection refused: no further information
+/current/ : IOException Connection refused: no further information
+/shopping/ : IOException Connection refused: no further information
+/management/ : IOException Connection refused: no further information
+/topic/ : IOException Connection refused: no further information
+/icon/ : IOException Connection refused: no further information
+/all/ : IOException Connection refused: no further information
+/59/ : IOException Connection refused: no further information
+/results/ : IOException Connection refused: no further information
+/tag/ : IOException Connection refused: no further information
+/add/ : IOException Connection refused: no further information
+/enterprise/ : IOException Connection refused: no further information
+/60/ : IOException Connection refused: no further information
+/authors/ : IOException Connection refused: no further information
+/54/ : IOException Connection refused: no further information
+/pl/ : IOException Connection refused: no further information
+/consumer/ : IOException Connection refused: no further information
+/53/ : IOException Connection refused: no further information
+/61/ : IOException Connection refused: no further information
+/pix/ : IOException Connection refused: no further information
+/redirect/ : IOException Connection refused: no further information
+/static/ : IOException Connection refused: no further information
+/static/js/ : IOException Connection refused: no further information
+/static/js/bundle.js : IOException Connection refused: no further information
+
