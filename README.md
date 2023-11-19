@@ -2,10 +2,10 @@
 
 ## BSEP BUSEP Year 2022-2023 FTN E2 PRNII
 ### Security System
-Project for the subject Business Security Systems
-Faculty of Technical Sciences
-Computer Science and Automation
-Applied Computer Science and Informatics
+Project for the subject Business Security Systems  
+Faculty of Technical Sciences  
+Computer Science and Automation  
+Applied Computer Science and Informatics  
 
 Within the project task, it is necessary to implement an information system that
 keeps track of employees in an IT company. The information system should
