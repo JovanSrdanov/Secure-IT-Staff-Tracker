@@ -7,6 +7,11 @@ Faculty of Technical Sciences
 Computer Science and Automation  
 Applied Computer Science and Informatics  
 
+Technologies:  
+Front-end: React - JavaScript (npm)  
+Back-end: Spring Boot - Java (Maven)  
+Database: PostgreSQL  
+
 Within the project task, it is necessary to implement an information system that
 keeps track of employees in an IT company. The information system should
 include services for working with employees, a service for monitoring events in the system,
